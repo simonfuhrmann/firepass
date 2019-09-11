@@ -1,0 +1,25 @@
+{
+  "short_name": "Firepass",
+  "name": "Firepass - Password Manager",
+  "start_url": "/",
+  "display": "browser",
+  "icons": [
+    {
+      "src": "images/favicon-128.png",
+      "type": "image/png",
+      "sizes": "128x128"
+    },
+    {
+      "src": "images/favicon-256.png",
+      "type": "image/png",
+      "sizes": "256x256"
+    },
+    {
+      "src": "images/favicon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "background_color": "#1c1c1c",
+  "theme_color": "#cccccc"
+}

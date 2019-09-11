@@ -1,0 +1,21 @@
+{
+  "name": "firepass",
+  "version": "0.1.0",
+  "description": "Firepass - Password manager",
+  "main": "index.html",
+  "author": "Simon Fuhrmann",
+  "license": "BSD-3-Clause",
+  "repository": "github:simonfuhrmann/firepass",
+  "scripts": {
+    "start": "parcel index.html --no-cache"
+  },
+  "dependencies": {
+    "@webcomponents/webcomponentsjs": "^2.2.10",
+    "firebase": "^6.4.0",
+    "lit-element": "^2.2.1"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.3",
+    "typescript": "^3.5.3"
+  }
+}
