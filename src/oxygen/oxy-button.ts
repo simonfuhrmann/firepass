@@ -25,12 +25,11 @@ export class OxyButton extends LitElement {
         user-select: none;
       }
       :host::before {
+        position: absolute;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
-        position: absolute;
-        background-color: var(--oxy-button-text-color, currentcolor);
+        bottom: 0;
+        right: 0;
         pointer-events: none;
         border-radius: inherit;
         content: "";
@@ -38,13 +37,19 @@ export class OxyButton extends LitElement {
         transition: opacity 25ms;
       }
       :host(:hover)::before {
+        background-color: var(--oxy-button-hover-color,
+                          var(--oxy-button-text-color, currentcolor));
         opacity: 0.1;
       }
       /* Use :focus-visible once supported. */
       :host(:focus)::before {
+        background-color: var(--oxy-button-focus-color,
+                          var(--oxy-button-text-color, currentcolor));
         opacity: 0.15;
       }
       :host(:active)::before {
+        background-color: var(--oxy-button-active-color,
+                          var(--oxy-button-text-color, currentcolor));
         opacity: 0.2;
       }
       :host([disabled]) {
@@ -65,9 +70,24 @@ export class OxyButton extends LitElement {
   firstUpdated() {
     this.setAttribute('tabindex', '0');
     this.setAttribute('role', 'button');
+    this.updateAriaDisabled();
+  }
+
+  updated(changedProps: Map<string, any>) {
+    if (changedProps.has('disabled')) {
+      this.updateAriaDisabled();
+    }
   }
 
   render() {
     return html`<slot></slot>`;
+  }
+
+  private updateAriaDisabled() {
+    if (this.disabled) {
+      this.setAttribute('aria-disabled', 'true');
+    } else {
+      this.removeAttribute('aria-disabled');
+    }
   }
 }
