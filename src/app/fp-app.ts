@@ -15,6 +15,9 @@ export class FpApp extends LitElement {
         flex-direction: column;
         height: 100vh;
       }
+      fp-database {
+        flex-grow: 1;
+      }
     `;
   }
 
