@@ -58,7 +58,8 @@ export class OxyInput extends LitElement {
       }
       [hidden] {
         display: none !important;
-      }`;
+      }
+    `;
   }
 
   private input_: HTMLInputElement|null = null;
@@ -91,9 +92,9 @@ export class OxyInput extends LitElement {
             maxlength="${this.maxlength}"
             placeholder="${this.placeholder}"
             spellcheck="false"
-            @input=${this.onValueChanged_}
-            @focus=${this.onFocus_}
-            @blur=${this.onBlur_}>
+            @input=${this.onValueChanged}
+            @focus=${this.onFocus}
+            @blur=${this.onBlur}>
       </div>
     `;
   }
@@ -122,19 +123,20 @@ export class OxyInput extends LitElement {
     this.value = '';
   }
 
-  onValueChanged_() {
+  private onValueChanged() {
     if (!this.input_) return;
     this.value = this.input_.value;
+    this.dispatchEvent(new CustomEvent('change', {detail: this.value}));
   }
 
-  onFocus_() {
+  private onFocus() {
     this.focused = true;
     if (this.selectOnFocus) {
       this.select();
     }
   }
 
-  onBlur_() {
+  private onBlur() {
     this.focused = false;
   }
 }
