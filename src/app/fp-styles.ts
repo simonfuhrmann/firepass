@@ -25,4 +25,20 @@ export const sharedStyles = css`
     --oxy-input-box-shadow: 0 2px 7px black inset;
     --oxy-input-box-shadow-focused: var(--oxy-input-box-shadow),
                                     0 0 5px var(--theme-color-accent2);
+
+    --oxy-textarea-text-color: white;
+    --oxy-textarea-background-color: rgba(0, 0, 0, 0.2);
+    --oxy-textarea-background-color-focused: rgba(0, 0, 0, 0.3);
+    --oxy-textarea-border-color: var(--separator-color);
+    --oxy-textarea-border-color-focused: var(--theme-color-accent3);
+    --oxy-textarea-box-shadow: 0 2px 7px black inset;
+    --oxy-textarea-box-shadow-focused: var(--oxy-input-box-shadow),
+                                    0 0 5px var(--theme-color-accent2);
+
+    --oxy-scrollbar-width: 12px;
+    --oxy-scrollbar-track-color: #090909;
+    --oxy-scrollbar-track-border-radius: 0;
+    --oxy-scrollbar-thumb-color: var(--separator-color);
+    --oxy-scrollbar-thumb-hover-color: var(--tertiary-text-color);
+    --oxy-scrollbar-thumb-border-radius: 3px;
   }`;
