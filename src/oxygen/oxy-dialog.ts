@@ -23,9 +23,10 @@ export class OxyDialog extends LitElement {
         left: 50%;
         transform: translate(-50%,-50%);
         outline: none;
+        box-shadow: 0 0 64px 8px rgba(0, 0, 0, 0.5)
       }
       :host(:not([opened])) {
-        display: none;
+        visibility: hidden;
       }
     `;
   }
