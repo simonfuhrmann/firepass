@@ -1,0 +1,11 @@
+import './oxy-icons-av';
+import './oxy-icons-base';
+import './oxy-icons-communication';
+import './oxy-icons-device';
+import './oxy-icons-editor';
+import './oxy-icons-hardware';
+import './oxy-icons-image';
+import './oxy-icons-maps';
+import './oxy-icons-notification';
+import './oxy-icons-places';
+import './oxy-icons-social';
