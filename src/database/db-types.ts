@@ -6,8 +6,8 @@ export interface DbEntry {
   name: string,
   icon: string,
   url: string,
-  login: string,
   email: string,
+  login: string,
   aesIv: string,  // Base64 encoded AES IV for below fields.
   password: string,  // Encrypted, even in the unencrypted DB.
   notes: string,  // Encrypted, even in the unencrypted DB.
@@ -32,6 +32,7 @@ export interface DbSettings {
   aesIv: ArrayBuffer,
 }
 
+// Same as DbSettings, but uses primitive types only.
 export interface DbSettingsEncoded {
   passSalt: string,  // Base64 encoded.
   aesIv: string,  // Base64 encoded.

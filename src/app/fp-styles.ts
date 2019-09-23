@@ -29,6 +29,10 @@ export const sharedStyles = css`
     --oxy-input-box-shadow-focused: var(--oxy-input-box-shadow),
                                     0 0 5px var(--theme-color-fire2);
 
+    --oxy-tab-indicator-color: var(--theme-color-fire3);
+    --oxy-tab-animation-duration: 200ms;
+    --oxy-tabs-border-color: var(--separator-color);
+
     --oxy-textarea-text-color: white;
     --oxy-textarea-background-color: rgba(0, 0, 0, 0.2);
     --oxy-textarea-background-color-focused: rgba(0, 0, 0, 0.3);
