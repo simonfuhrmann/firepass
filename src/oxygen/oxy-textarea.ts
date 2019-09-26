@@ -79,6 +79,7 @@ export class OxyTextarea extends LitElement {
           ?disabled=${this.disabled}
           ?readonly=${this.readonly}
           placeholder="${this.placeholder}"
+          spellcheck="false"
           @input=${this.onValueChanged}
           @focus=${this.onFocus}
           @blur=${this.onBlur}></textarea></div>
@@ -116,5 +117,4 @@ export class OxyTextarea extends LitElement {
   private onBlur() {
     this.focused = false;
   }
-
 }

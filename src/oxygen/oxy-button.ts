@@ -34,8 +34,8 @@ export class OxyButton extends LitElement {
         border-radius: inherit;
         content: "";
         opacity: 0;
-        /* Transitions causes flicker in dialogs. 0_o */
-        /* transition: opacity 25ms; */
+        /* Transitions can cause flicker in dialogs. 0_o */
+        transition: all 50ms;
       }
       :host(:hover)::before {
         background-color: var(--oxy-button-hover-color,
