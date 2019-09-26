@@ -2,7 +2,7 @@ import {Base64} from './base64';
 import {DbCrypto} from './db-crypto';
 import {DbData} from './db-data';
 import {DbStorage} from './db-storage';
-import {DbDocument, DbModel, DbEntry} from './db-types';
+import {DbDocument, DbModel, DbGroup, DbEntry} from './db-types';
 
 export enum DbState {
   INITIAL,  // Initial state before fetching for the first time.
@@ -81,7 +81,7 @@ export class Database {
   lock(): Promise<void> {
     return new Promise((resolve, /*reject*/) => {
       console.log('Database.lock()');
-      this.dbData.clear();
+      this.dbData.clearModel();
       this.dbCrypto.clear();
       this.setState(DbState.LOCKED);
       resolve();
@@ -134,6 +134,18 @@ export class Database {
     });
   }
 
+  deleteEntry(group: DbGroup, entry: DbEntry) {
+    this.dbData.updateEntry(group, entry, null);
+  }
+
+  addEntry(group: DbGroup, entry: DbEntry) {
+    this.dbData.updateEntry(group, null, entry);
+  }
+
+  updateEntry(group: DbGroup, oldEntry: DbEntry, newEntry: DbEntry) {
+    this.dbData.updateEntry(group, oldEntry, newEntry);
+  }
+
   private assignDocument(doc: DbDocument): Promise<void> {
     console.log('Database.assignDocument()');
     return new Promise((resolve, reject) => {
@@ -178,7 +190,7 @@ export class Database {
     console.log('Database.uploadDatabase()');
     return new Promise((resolve, reject) => {
       const model = this.dbData.getModel();
-      const settings = this.dbData.getSettings();
+      const settings = this.dbData.getEncodedSettings();
       this.dbCrypto.encrypt(model, iv)
           .then(buffer => {
             const payload = Base64.encode(buffer);
@@ -227,11 +239,11 @@ export class Database {
       login: '', aesIv: '', password: '', notes: '',
     };
 
-    this.dbData.addGroup('Shopping');
-    this.dbData.addEntry('Shopping', amazon);
-    this.dbData.addEntry('Shopping', ebay);
-    this.dbData.addGroup('Email');
-    this.dbData.addEntry('Email', gmail);
+    let group = this.dbData.addGroup('Shopping');
+    this.addEntry(group, amazon);
+    this.addEntry(group, ebay);
+    group = this.dbData.addGroup('Email');
+    this.addEntry(group, gmail);
   }
 
   private setState(state: DbState) {
