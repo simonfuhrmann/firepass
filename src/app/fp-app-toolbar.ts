@@ -33,6 +33,13 @@ export class FpAppToolbar extends EventsMixin(LitElement) {
         padding: 12px;
         border-radius: 0;
       }
+      oxy-input [slot="before"] {
+        color: var(--secondary-text-color);
+        margin: 2px 0 2px 6px;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+      }
       [hidden] {
         display: none !important;
       }
@@ -44,11 +51,12 @@ export class FpAppToolbar extends EventsMixin(LitElement) {
   render() {
     return html`
       <div id="toolbar">
-        <oxy-input
-            class="flex"
-            ?hidden=${!this.dbUnlocked}
-            icon="icons:search">
+        <!-- Search input. -->
+        <oxy-input ?hidden=${!this.dbUnlocked}>
+          <oxy-icon slot="before" icon="icons:search"></oxy-icon>
         </oxy-input>
+
+        <!-- Buttons. -->
         <oxy-button
             title="Generate Password"
             @click=${this.onGenerator_}>
