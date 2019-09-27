@@ -1,8 +1,6 @@
 import {LitElement, html, css} from 'lit-element';
 import {property, customElement} from 'lit-element';
 
-import './oxy-icon';
-
 // A simple input element with various opportunities for styling. Most notably,
 // an icon can be specified which focuses the input when clicked.
 @customElement('oxy-input')
@@ -16,12 +14,12 @@ export class OxyInput extends LitElement {
       }
       #container {
         display: flex;
+        align-items: center;
         flex-shrink: 0;
         background-color: var(--oxy-input-background-color, white);
         border: var(--oxy-input-border-width, 1px) solid
                 var(--oxy-input-border-color, #ddd);
         border-radius: var(--oxy-input-border-radius, 2px);
-        padding: var(--oxy-input-text-padding, 6px);
         box-shadow: var(--oxy-input-box-shadow, 0 0 0 white);
         transition: all 25ms;
       }
@@ -36,7 +34,7 @@ export class OxyInput extends LitElement {
         color: var(--oxy-input-text-color, black);
         font: inherit;
         padding: 0;
-        margin: 0;
+        margin: var(--oxy-input-text-padding, 6px);
         border: none;
         box-shadow: none;
         outline: none;
@@ -45,19 +43,6 @@ export class OxyInput extends LitElement {
       }
       input::placeholder {
         color: var(--oxy-input-placeholder-color);
-      }
-      oxy-icon {
-        color: var(--oxy-input-icon-color, inherit);
-        width: var(--oxy-input-icon-size, 20px);
-        height: var(--oxy-input-icon-size, 20px);
-        margin-right: 8px;
-        cursor: pointer;
-      }
-      :host([focused]) oxy-icon {
-        cursor: initial;
-      }
-      [hidden] {
-        display: none !important;
       }
     `;
   }
@@ -72,17 +57,11 @@ export class OxyInput extends LitElement {
   @property({type: Boolean}) disabled = false;
   @property({type: Boolean, reflect: true}) focused = false;
   @property({type: Boolean}) selectOnFocus = false;
-  @property({type: String}) icon = '';
 
   render() {
     return html`
-      <div id="container">
-        <oxy-icon
-            .icon=${this.icon}
-            ?hidden=${!this.icon}
-            role="button"
-            @click=${this.focus}>
-        </oxy-icon>
+      <div id="container" @click=${this.focus}>
+        <slot name="before"></slot>
         <input
             id="input"
             .type=${this.type}
@@ -95,6 +74,7 @@ export class OxyInput extends LitElement {
             @input=${this.onValueChanged}
             @focus=${this.onFocus}
             @blur=${this.onBlur}>
+        <slot name="after"></slot>
       </div>
     `;
   }
