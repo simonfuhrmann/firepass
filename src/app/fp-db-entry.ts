@@ -56,6 +56,10 @@ export class FpDbEntry extends LitElement {
         font-size: 1.2em;
         flex-grow: 1;
       }
+      #header oxy-input[readonly] {
+        --oxy-input-border-color: transparent;
+        --oxy-input-border-color-focused: transparent;
+      }
 
       #button-bar {
         display: flex;
@@ -97,9 +101,6 @@ export class FpDbEntry extends LitElement {
         margin: 32px 8px;
       }
 
-      a {
-        color: inherit;
-      }
       table {
         border-collapse: separate;
         border-spacing: 0 2px;
@@ -112,32 +113,35 @@ export class FpDbEntry extends LitElement {
         padding: 2px 8px;
         color: var(--tertiary-text-color);
       }
-      table td.buttons {
-        width: 1px;
-        white-space: nowrap;
-        color: var(--tertiary-text-color);
-      }
-      table td.buttons oxy-button {
-        color: inherit;
-        padding: 4px;
-        margin: 2px;
-      }
       oxy-input[readonly] {
-        --oxy-input-background-color: rgba(0, 0, 0, 0.2);
-        --oxy-input-background-color-focused: rgba(0, 0, 0, 0.2);
-        --oxy-input-border-color: transparent;
-        --oxy-input-border-color-focused: transparent;
+        --oxy-input-background-color: transparent;
+        --oxy-input-background-color-focused: transparent;
+        --oxy-input-border-color: var(--separator-color-faint);
+        --oxy-input-border-color-focused: var(--separator-color-faint);
         --oxy-input-box-shadow: none;
         --oxy-input-box-shadow-focused: none;
       }
+      oxy-input [slot="after"] {
+        margin-right: 4px;
+      }
+      oxy-input oxy-button {
+        color: var(--tertiary-text-color);
+        padding: 4px;
+      }
+      oxy-input oxy-button oxy-icon {
+        width: 16px;
+        height: 16px;
+      }
+
       oxy-textarea {
         min-height: 8em;
+        margin: 4px 0;
       }
       oxy-textarea[readonly] {
-        --oxy-textarea-background-color: rgba(0, 0, 0, 0.2);
-        --oxy-textarea-background-color-focused: rgba(0, 0, 0, 0.2);
-        --oxy-textarea-border-color: transparent;
-        --oxy-textarea-border-color-focused: transparent;
+        --oxy-textarea-background-color: transparent;
+        --oxy-textarea-background-color-focused: transparent;
+        --oxy-textarea-border-color: var(--separator-color-faint);
+        --oxy-textarea-border-color-focused: var(--separator-color-faint);
         --oxy-textarea-box-shadow: none;
         --oxy-textarea-box-shadow-focused: none;
       }
@@ -199,44 +203,47 @@ export class FpDbEntry extends LitElement {
 
       <table>
         <tr>
-          <th>Website</th>
+          <th>URL</th>
           <td>
             <oxy-input id="url" ?readonly=${!this.editing}>
+              <div flex-row slot="after">
+                <oxy-button
+                    ?disabled=${!this.entry.url}
+                    ?hidden=${this.editing}
+                    @click=${this.onOpenUrl}>
+                  <oxy-icon icon="icons:open-in-new"></oxy-icon>
+                </oxy-button>
+                <oxy-button @click=${this.onCopyUrl}>
+                  <oxy-icon icon="icons:content-copy"></oxy-icon>
+                </oxy-button>
+              </div>
             </oxy-input>
-          </td>
-          <td class="buttons">
-            <oxy-button>
-              <oxy-icon icon="icons:content-copy"></oxy-icon>
-            </oxy-button>
-            <a href="${this.entry.url}" target="_blank">
-              <oxy-button .disabled=${!this.entry.url}>
-                <oxy-icon icon="icons:open-in-new"></oxy-icon>
-              </oxy-button>
-            </a>
           </td>
         </tr>
 
         <tr>
           <th>Email</th>
           <td>
-            <oxy-input id="email" ?readonly=${!this.editing}></oxy-input>
-          </td>
-          <td class="buttons">
-            <oxy-button>
-              <oxy-icon icon="icons:content-copy"></oxy-icon>
-            </oxy-button>
+            <oxy-input id="email" ?readonly=${!this.editing}>
+              <div flex-row slot="after">
+                <oxy-button @click=${this.onCopyEmail}>
+                  <oxy-icon icon="icons:content-copy"></oxy-icon>
+                </oxy-button>
+              </div>
+            </oxy-input>
           </td>
         </tr>
 
         <tr>
           <th>Login</th>
           <td>
-            <oxy-input id="login" ?readonly=${!this.editing}></oxy-input>
-          </td>
-          <td class="buttons">
-            <oxy-button>
-              <oxy-icon icon="icons:content-copy"></oxy-icon>
-            </oxy-button>
+            <oxy-input id="login" ?readonly=${!this.editing}>
+              <div flex-row slot="after">
+                <oxy-button @click=${this.onCopyLogin}>
+                  <oxy-icon icon="icons:content-copy"></oxy-icon>
+                </oxy-button>
+              </div>
+            </oxy-input>
           </td>
         </tr>
 
@@ -247,28 +254,33 @@ export class FpDbEntry extends LitElement {
                 id="password"
                 ?readonly=${!this.editing}
                 .type=${this.showPassword ? 'text' : 'password'}>
+              <div flex-row slot="after">
+                <oxy-button @click=${this.onToggleShowPasswordClick}>
+                  <oxy-icon icon="icons:visibility"></oxy-icon>
+                </oxy-button>
+                <oxy-button
+                    ?hidden=${!this.editing}
+                    @click=${this.onGeneratePassword}>
+                  <oxy-icon icon="communication:vpn-key"></oxy-icon>
+                </oxy-button>
+                <oxy-button
+                    ?hidden=${this.editing}
+                    @click=${this.onCopyPassword}>
+                  <oxy-icon icon="icons:content-copy"></oxy-icon>
+                </oxy-button>
+              </div>
             </oxy-input>
-          </td>
-          <td class="buttons">
-            <oxy-button>
-              <oxy-icon icon="icons:content-copy"></oxy-icon>
-            </oxy-button>
-            <oxy-button>
-              <oxy-icon icon="communication:vpn-key"></oxy-icon>
-            </oxy-button>
-            <oxy-button @click=${this.onToggleShowPasswordClick}>
-              <oxy-icon icon="icons:visibility"></oxy-icon>
-            </oxy-button>
           </td>
         </tr>
 
         <tr>
-          <th>Notes</th>
-        </tr>
-        <tr>
-          <th colspan="3">
-            <oxy-textarea id="notes" ?readonly=${!this.editing}></oxy-textarea>
-          </th>
+          <td colspan="3">
+            <oxy-textarea
+                id="notes"
+                placeholder="Notes"
+                ?readonly=${!this.editing}>
+            </oxy-textarea>
+          </td>
         </tr>
       </table>
 
@@ -372,6 +384,36 @@ export class FpDbEntry extends LitElement {
   private onRevertClick() {
     this.copyEntryToInputs();
     this.editing = false;
+  }
+
+  private onOpenUrl() {
+    if (!this.entry) return;
+    window.open(this.entry.url, '_blank');
+  }
+
+  private onGeneratePassword() {
+  }
+
+  private onCopyUrl() {
+    this.copyToClipboard('url');
+  }
+
+  private onCopyEmail() {
+    this.copyToClipboard('email');
+  }
+
+  private onCopyLogin() {
+    this.copyToClipboard('login');
+  }
+
+  private onCopyPassword() {
+    this.copyToClipboard('password');
+  }
+
+  private copyToClipboard(inputId: string) {
+    if (!this.shadowRoot) return;
+    const input = <OxyInput>this.shadowRoot.getElementById(inputId);
+    input.copyToClipboard();
   }
 
   private onSelectIcon() {

@@ -31,6 +31,7 @@ export class FpDbView extends LitElement {
       }
       oxy-tab > oxy-icon {
         margin-right: 8px;
+        flex-shrink: 0;
       }
       oxy-tab.group[open] {
         background-image: linear-gradient(to right, rgba(31, 175, 219, 0.2), transparent);
