@@ -62,10 +62,10 @@ export class OxyInput extends LitElement {
     `;
   }
 
-  private input_: HTMLInputElement|null = null;
+  private input: HTMLInputElement|null = null;
 
   @property({type: String}) value = '';
-  @property({type: String}) type = '';
+  @property({type: String}) type = 'text';
   @property({type: String}) maxlength = '';
   @property({type: String}) placeholder = '';
   @property({type: Boolean}) readonly = false;
@@ -101,31 +101,51 @@ export class OxyInput extends LitElement {
 
   firstUpdated() {
     if (!this.shadowRoot) return;
-    this.input_ = <HTMLInputElement>this.shadowRoot.getElementById('input');
+    this.input = <HTMLInputElement>this.shadowRoot.getElementById('input');
   }
 
   focus() {
-    if (!this.input_) return;
-    this.input_.focus();
+    if (!this.input) return;
+    this.input.focus();
   }
 
   select() {
-    if (!this.input_) return;
-    this.input_.setSelectionRange(0, this.input_.value.length);
+    if (!this.input) return;
+    this.input.setSelectionRange(0, this.input.value.length);
   }
 
   deselect() {
-    if (!this.input_) return;
-    this.input_.setSelectionRange(0, 0);
+    if (!this.input) return;
+    this.input.setSelectionRange(0, 0);
   }
 
   clear() {
     this.value = '';
   }
 
+  copyToClipboard() {
+    if (this.type === 'password') {
+      this.copyPasswordToClipboard();
+      return;
+    }
+    this.focus();
+    this.select();
+    document.execCommand('copy');
+    this.deselect();
+  }
+
+  private copyPasswordToClipboard() {
+    this.type = 'text';
+    this.requestUpdate('type')
+        .then(() => {
+          this.copyToClipboard();
+          this.type = 'password';
+        });
+  }
+
   private onValueChanged() {
-    if (!this.input_) return;
-    this.value = this.input_.value;
+    if (!this.input) return;
+    this.value = this.input.value;
     this.dispatchEvent(new CustomEvent('change', {detail: this.value}));
   }
 
