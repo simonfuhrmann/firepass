@@ -32,37 +32,57 @@ export class OxyToast extends LitElement {
     `;
   }
 
+  private timeoutId: number = -1;
+
   @property({type: Boolean, reflect: true}) opened = false;
+  @property({type: String}) message = '';
 
   render() {
     return html`
       <div id="container">
+        <div id="message" ?hidden=${!this.message}>${this.message}</div>
         <slot></slot>
       </div>
     `;
   }
 
-  /** Opens a toast for 2 seconds. */
-  openShort() {
-    this.open(2000);
+  /** Opens the toast for 2 seconds. */
+  openShort(message: string = '') {
+    this.open(2000, message);
   }
 
-  /** Opens a toast for 3.5 seconds. */
-  openNormal() {
-    this.open(3500);
+  /** Opens the toast for 3.5 seconds. */
+  openNormal(message: string = '') {
+    this.open(3500, message);
   }
 
-  /** Opens a toast for 6 seconds. */
-  openLong() {
-    this.open(6000);
+  /** Opens the toast for 6 seconds. */
+  openLong(message: string = '') {
+    this.open(6000, message);
   }
 
-  open(durationMs: number) {
+  /** Opens the toast, and auto-closes the toast if duration is set > 0. */
+  open(durationMs: number, message: string) {
+    this.message = message;
     this.opened = true;
-    setTimeout(() => this.close(), durationMs);
+    this.setTimeout(durationMs);
   }
 
+  /** Closes the toast. */
   close() {
     this.opened = false;
+    this.setTimeout(0);
+  }
+
+  private setTimeout(durationMs: number) {
+    if (this.timeoutId >= 0) {
+      window.clearTimeout(this.timeoutId);
+    }
+    if (durationMs > 0) {
+      this.timeoutId = window.setTimeout(() => {
+        this.timeoutId = -1;
+        this.close();
+      }, durationMs);
+    }
   }
 }
