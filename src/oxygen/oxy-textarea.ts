@@ -52,11 +52,14 @@ export class OxyTextarea extends LitElement {
       }
       textarea::-webkit-scrollbar-thumb {
         background: var(--oxy-scrollbar-thumb-color, #888);
-        border: 1px solid var(--oxy-scrollbar-track-color, #eee);
+        border: var(--oxy-scrollbar-thumb-border,
+            1px solid var(--oxy-scrollbar-track-color, #eee));
         border-radius: var(--oxy-scrollbar-thumb-border-radius, 0);
+        box-shadow: var(--oxy-scrollbar-thumb-box-shadow, none);
       }
       textarea::-webkit-scrollbar-thumb:hover {
         background: var(--oxy-scrollbar-thumb-hover-color, #555);
+        box-shadow: var(--oxy-scrollbar-thumb-hover-box-shadow, none);
       }
     `;
   }
