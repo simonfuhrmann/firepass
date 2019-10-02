@@ -7,11 +7,13 @@ import {OxyDialog} from '../oxygen/oxy-dialog';
 import {OxyInput} from '../oxygen/oxy-input';
 import {OxyTextarea} from '../oxygen/oxy-textarea';
 import {sharedStyles} from './fp-styles'
+import {OxyToast} from '../oxygen/oxy-toast';
 import './fp-db-entry-icons';
 import '../oxygen/oxy-button';
+import '../oxygen/oxy-dialog';
 import '../oxygen/oxy-input';
 import '../oxygen/oxy-textarea';
-import '../oxygen/oxy-dialog';
+import '../oxygen/oxy-toast';
 
 @customElement('fp-db-entry')
 export class FpDbEntry extends LitElement {
@@ -146,6 +148,9 @@ export class FpDbEntry extends LitElement {
         --oxy-textarea-box-shadow-focused: none;
       }
 
+      [show-password] {
+        color: var(--theme-color-fire3);
+      }
       [flex-row] {
         display: flex;
         flex-direction: row;
@@ -160,10 +165,23 @@ export class FpDbEntry extends LitElement {
     `;
   }
 
+  private iconSelector: FpDbEntryIcons|null = null;
+  private deleteDialog: OxyDialog|null = null;
+  private toast: OxyToast|null = null;
+
   @property({type: Object}) entry: DbEntry|null = null;
   @property({type: Boolean}) editing: boolean = false;
   @property({type: Boolean}) showPassword: boolean = false;
   @property({type: String}) entryIcon: string = '';
+
+  firstUpdated() {
+    if (!this.shadowRoot) return;
+    this.iconSelector =
+        <FpDbEntryIcons>this.shadowRoot.getElementById('icon-selector');
+    this.deleteDialog =
+        <OxyDialog>this.shadowRoot.getElementById('delete-dialog');
+    this.toast = <OxyToast>this.shadowRoot.getElementById('toast');
+  }
 
   updated(changedProps: Map<string, any>) {
     if (changedProps.has('entry')) {
@@ -174,7 +192,38 @@ export class FpDbEntry extends LitElement {
   }
 
   render() {
-    return !this.entry ? this.renderEmpty() : this.renderView();
+    return html`
+      ${!this.entry ? this.renderEmpty() : this.renderView()}
+
+      <fp-db-entry-icons
+          id="icon-selector"
+          @changed=${this.onIconSelected}>
+      </fp-db-entry-icons>
+
+      <oxy-dialog id="delete-dialog" backdrop>
+        <h1>Delete entry?</h1>
+        <div flex-row>
+          <oxy-icon icon=${this.entryIcon}></oxy-icon>
+          <div>${this.entry ? this.entry.name : ''}</div>
+        </div>
+        <div class="dialog-buttons">
+          <oxy-button
+              id="delete-cancel-button"
+              raised
+              @click=${this.closeDeleteDialog}>
+            Cancel
+          </oxy-button>
+          <oxy-button
+              id="delete-confirm-button"
+              raised
+              @click=${this.confirmDeleteDialog}>
+            Delete
+          </oxy-button>
+        </div>
+      </oxy-dialog>
+
+      <oxy-toast id="toast"></oxy-toast>
+    `;
   }
 
   private renderEmpty() {
@@ -213,7 +262,9 @@ export class FpDbEntry extends LitElement {
                     @click=${this.onOpenUrl}>
                   <oxy-icon icon="icons:open-in-new"></oxy-icon>
                 </oxy-button>
-                <oxy-button @click=${this.onCopyUrl}>
+                <oxy-button
+                    ?disabled=${!this.entry.url}
+                    @click=${this.onCopyUrl}>
                   <oxy-icon icon="icons:content-copy"></oxy-icon>
                 </oxy-button>
               </div>
@@ -226,7 +277,9 @@ export class FpDbEntry extends LitElement {
           <td>
             <oxy-input id="email" ?readonly=${!this.editing}>
               <div flex-row slot="after">
-                <oxy-button @click=${this.onCopyEmail}>
+                <oxy-button
+                    ?disabled=${!this.entry.email}
+                    @click=${this.onCopyEmail}>
                   <oxy-icon icon="icons:content-copy"></oxy-icon>
                 </oxy-button>
               </div>
@@ -239,7 +292,9 @@ export class FpDbEntry extends LitElement {
           <td>
             <oxy-input id="login" ?readonly=${!this.editing}>
               <div flex-row slot="after">
-                <oxy-button @click=${this.onCopyLogin}>
+                <oxy-button
+                    ?disabled=${!this.entry.login}
+                    @click=${this.onCopyLogin}>
                   <oxy-icon icon="icons:content-copy"></oxy-icon>
                 </oxy-button>
               </div>
@@ -255,7 +310,9 @@ export class FpDbEntry extends LitElement {
                 ?readonly=${!this.editing}
                 .type=${this.showPassword ? 'text' : 'password'}>
               <div flex-row slot="after">
-                <oxy-button @click=${this.onToggleShowPasswordClick}>
+                <oxy-button
+                    ?show-password=${this.showPassword}
+                    @click=${this.onToggleShowPasswordClick}>
                   <oxy-icon icon="icons:visibility"></oxy-icon>
                 </oxy-button>
                 <oxy-button
@@ -265,6 +322,7 @@ export class FpDbEntry extends LitElement {
                 </oxy-button>
                 <oxy-button
                     ?hidden=${this.editing}
+                    ?disabled=${!this.entry.password}
                     @click=${this.onCopyPassword}>
                   <oxy-icon icon="icons:content-copy"></oxy-icon>
                 </oxy-button>
@@ -324,33 +382,6 @@ export class FpDbEntry extends LitElement {
           Save
         </oxy-button>
       </div>
-
-      <fp-db-entry-icons
-          id="icon-selector"
-          @changed=${this.onIconSelected}>
-      </fp-db-entry-icons>
-
-      <oxy-dialog id="delete-dialog" backdrop>
-        <h1>Delete entry?</h1>
-        <div flex-row>
-          <oxy-icon icon=${this.entryIcon}></oxy-icon>
-          <div>${this.entry.name}</div>
-        </div>
-        <div class="dialog-buttons">
-          <oxy-button
-              id="delete-cancel-button"
-              raised
-              @click=${this.closeDeleteDialog}>
-            Cancel
-          </oxy-button>
-          <oxy-button
-              id="delete-confirm-button"
-              raised
-              @click=${this.confirmDeleteDialog}>
-            Delete
-          </oxy-button>
-        </div>
-      </oxy-dialog>
     `;
   }
 
@@ -359,15 +390,13 @@ export class FpDbEntry extends LitElement {
   }
 
   private openDeleteDialog() {
-    if (!this.shadowRoot) return;
-    const dialog = <OxyDialog>this.shadowRoot.getElementById('delete-dialog');
-    dialog.open();
+    if (!this.deleteDialog) return;
+    this.deleteDialog.open();
   }
 
   private closeDeleteDialog() {
-    if (!this.shadowRoot) return;
-    const dialog = <OxyDialog>this.shadowRoot.getElementById('delete-dialog');
-    dialog.close();
+    if (!this.deleteDialog) return;
+    this.deleteDialog.close();
   }
 
   private confirmDeleteDialog() {
@@ -396,18 +425,22 @@ export class FpDbEntry extends LitElement {
 
   private onCopyUrl() {
     this.copyToClipboard('url');
+    this.openToast('URL copied to clipboard');
   }
 
   private onCopyEmail() {
     this.copyToClipboard('email');
+    this.openToast('Email copied to clipboard');
   }
 
   private onCopyLogin() {
     this.copyToClipboard('login');
+    this.openToast('Login copied to clipboard');
   }
 
   private onCopyPassword() {
     this.copyToClipboard('password');
+    this.openToast('Password copied to clipboard');
   }
 
   private copyToClipboard(inputId: string) {
@@ -416,11 +449,14 @@ export class FpDbEntry extends LitElement {
     input.copyToClipboard();
   }
 
+  private openToast(message: string) {
+    if (!this.toast) return;
+    this.toast.openNormal(message);
+  }
+
   private onSelectIcon() {
-    if (!this.shadowRoot) return;
-    const iconSelector =
-        <FpDbEntryIcons>this.shadowRoot.getElementById('icon-selector');
-    iconSelector.open();
+    if (!this.iconSelector) return;
+    this.iconSelector.open();
   }
 
   private onIconSelected(event: CustomEvent<string>) {
