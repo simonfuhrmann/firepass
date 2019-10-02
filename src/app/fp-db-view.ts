@@ -22,6 +22,18 @@ export class FpDbView extends LitElement {
       #items {
         width: 256px;
         border-right: 1px solid var(--separator-color);
+        overflow-y: auto;
+      }
+      #items::-webkit-scrollbar {
+        width: var(--oxy-scrollbar-width);
+      }
+      #items::-webkit-scrollbar-thumb {
+        box-shadow: var(--oxy-scrollbar-thumb-box-shadow);
+        border: var(--oxy-scrollbar-thumb-border);
+        border-radius: var(--oxy-scrollbar-thumb-border-radius);
+      }
+      #items::-webkit-scrollbar-thumb:hover {
+        box-shadow: var(--oxy-scrollbar-thumb-hover-box-shadow);
       }
       oxy-tab {
         padding: 8px;

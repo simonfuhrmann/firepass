@@ -26,8 +26,8 @@ export const sharedStyles = css`
     --oxy-input-border-color: var(--separator-color);
     --oxy-input-border-color-focused: var(--theme-color-fire3);
     --oxy-input-box-shadow: 0 2px 7px black inset;
-    --oxy-input-box-shadow-focused: var(--oxy-input-box-shadow),
-                                    0 0 5px var(--theme-color-fire2);
+    --oxy-input-box-shadow-focused:
+        var(--oxy-input-box-shadow), 0 0 5px var(--theme-color-fire2);
 
     --oxy-tab-indicator-color: var(--theme-color-fire3);
     --oxy-tab-animation-duration: 200ms;
@@ -39,13 +39,18 @@ export const sharedStyles = css`
     --oxy-textarea-border-color: var(--separator-color);
     --oxy-textarea-border-color-focused: var(--theme-color-fire3);
     --oxy-textarea-box-shadow: 0 2px 7px black inset;
-    --oxy-textarea-box-shadow-focused: var(--oxy-input-box-shadow),
-                                       0 0 5px var(--theme-color-fire2);
+    --oxy-textarea-box-shadow-focused:
+        var(--oxy-input-box-shadow), 0 0 5px var(--theme-color-fire2);
 
     --oxy-scrollbar-width: 12px;
-    --oxy-scrollbar-track-color: #090909;
+    --oxy-scrollbar-track-color: transparent;
     --oxy-scrollbar-track-border-radius: 0;
-    --oxy-scrollbar-thumb-color: var(--separator-color);
-    --oxy-scrollbar-thumb-hover-color: var(--tertiary-text-color);
+    --oxy-scrollbar-thumb-color: transparent;
+    --oxy-scrollbar-thumb-hover-color: transparent;
+    --oxy-scrollbar-thumb-border: 1px solid transparent;
     --oxy-scrollbar-thumb-border-radius: 3px;
+    --oxy-scrollbar-thumb-box-shadow:
+        inset 0 0 0 var(--oxy-scrollbar-width) var(--separator-color);
+    --oxy-scrollbar-thumb-hover-box-shadow:
+        inset 0 0 0 var(--oxy-scrollbar-width) var(--tertiary-text-color);
   }`;
