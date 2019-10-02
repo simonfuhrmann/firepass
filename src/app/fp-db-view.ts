@@ -114,7 +114,7 @@ export class FpDbView extends LitElement {
           class="group"
           orientation="vertical"
           ?open=${isSelected}
-          @click=${() => this.onGroupClick(group)}>
+          @click=${(event: MouseEvent) => this.onGroupClick(event, group)}>
         <oxy-icon .icon=${iconName}></oxy-icon>
         <div class="entry-text">
           <div class="primary">${group.name}</div>
@@ -149,7 +149,8 @@ export class FpDbView extends LitElement {
     `;
   }
 
-  private onGroupClick(group: DbGroup) {
+  private onGroupClick(event: MouseEvent, group: DbGroup) {
+    if (event.defaultPrevented) return;
     if (group == this.selectedGroup) {
       this.selectedGroup = null;
       this.selectedEntry = null;
@@ -165,7 +166,7 @@ export class FpDbView extends LitElement {
 
   private onAddEntry(event: MouseEvent, group: DbGroup) {
     if (!this.database) return;
-    event.stopPropagation();
+    event.preventDefault();
     const entry: DbEntry = {
       name: 'Unnamed',
       icon: 'editor:insert-drive-file',
