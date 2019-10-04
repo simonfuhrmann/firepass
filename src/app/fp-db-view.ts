@@ -1,8 +1,8 @@
 import {LitElement, html, css} from 'lit-element';
-import {customElement, property} from 'lit-element';
+import {customElement, property, query} from 'lit-element';
 import {repeat} from 'lit-html/directives/repeat';
 
-import {Database} from '../database/database';
+import {Database, DatabaseError} from '../database/database';
 import {DbModel, DbGroup, DbEntry} from '../database/db-types';
 import {FpDbEntry} from './fp-db-entry';
 import {sharedStyles} from './fp-styles'
@@ -72,16 +72,39 @@ export class FpDbView extends LitElement {
         color: var(--tertiary-text-color);
         font-size: 0.8em;
       }
-      fp-db-entry {
+
+      #empty, #error, #entry {
         flex-grow: 1;
+      }
+      #empty {
+        font-size: 1.2em;
+        color: var(--separator-color);
+        text-align: center;
+        margin: 128px 32px;
+      }
+      #error {
+        text-align: center;
+        margin: 128px 32px;
+      }
+      #error .code {
+        color: var(--error-text-color);
+      }
+      #error .message {
+        color: var(--tertiary-text-color);
+        font-size: 0.8em;
+        margin: 8px;
       }
     `;
   }
 
+  @query('#entry') private entryElement: FpDbEntry|undefined;
+
   @property({type: Object}) database: Database|null = null;
+  @property({type: Object}) databaseError: DatabaseError|null = null;
   @property({type: Object}) model: DbModel|null = null;
-  @property({type: Object}) selectedEntry: DbEntry|null = null;
   @property({type: Object}) selectedGroup: DbGroup|null = null;
+  @property({type: Object}) selectedEntry: DbEntry|null = null;
+  @property({type: Object}) decryptedEntry: DbEntry|null = null;
 
   updated(changedProps: Map<string, any>) {
     if (changedProps.has('database')) {
@@ -97,9 +120,34 @@ export class FpDbView extends LitElement {
             group => group.name,
             group => this.renderGroup(group))}
       </div>
+
+      ${this.renderDatabaseError()}
+      ${this.renderSelectEntry()}
+      ${this.renderEntryView()}
+    `;
+  }
+
+  private renderDatabaseError() {
+    if (!this.databaseError) return;
+    return html`
+      <div id="error">
+        <div class="code">${this.databaseError.code}</div>
+        <div class="message">${this.databaseError.message}</div>
+      </div>
+    `;
+  }
+
+  private renderSelectEntry() {
+    if (!!this.databaseError || !!this.decryptedEntry) return;
+    return html`<div id="empty">Select an entry</div>`;
+  }
+
+  private renderEntryView() {
+    if (!!this.databaseError || !this.decryptedEntry) return;
+    return html`
       <fp-db-entry
           id="entry"
-          .entry=${this.selectedEntry}
+          .entry=${this.decryptedEntry}
           @delete=${this.onEntryDelete}
           @save=${this.onEntrySave}>
       </fp-db-entry>
@@ -151,22 +199,19 @@ export class FpDbView extends LitElement {
 
   private onGroupClick(event: MouseEvent, group: DbGroup) {
     if (event.defaultPrevented) return;
-    if (group == this.selectedGroup) {
-      this.selectedGroup = null;
-      this.selectedEntry = null;
-      return;
-    }
-    this.selectedGroup = group;
-    this.selectedEntry = null;
+    this.selectedGroup = group === this.selectedGroup ? null : group;
+    this.selectEntry(null);
   }
 
   private onEntryClick(entry: DbEntry) {
-    this.selectedEntry = entry;
+    this.selectEntry(entry);
   }
 
   private onAddEntry(event: MouseEvent, group: DbGroup) {
-    if (!this.database) return;
+    // Prevent clicks on the group the "Add" button is a child of.
     event.preventDefault();
+
+    if (!this.database) return;
     const entry: DbEntry = {
       name: 'Unnamed',
       icon: 'editor:insert-drive-file',
@@ -177,39 +222,78 @@ export class FpDbView extends LitElement {
       password: '',
       notes: '',
     };
-    this.selectedGroup = group;
-    this.database.addEntry(group, entry);
-    this.updateModel();
-    this.selectedEntry = entry;
 
-    // Editing mode is disabled in <fp-db-entry> after switching entries.
-    // This timeout re-enables editing mode immediately afterwards.
-    setTimeout(() => {
-      if (!this.shadowRoot) return;
-      const entryEditor = <FpDbEntry>this.shadowRoot.getElementById('entry');
-      entryEditor.editing = true;
-    }, 0);
+    this.database.encryptEntry(entry)
+        .then((encryptedEntry) => {
+          if (!this.database) {
+            const message = 'The database was invalidated';
+            throw {code: 'db/unavailable', message};
+          }
+          this.selectedGroup = group;
+          this.database.addEntry(group, encryptedEntry);
+          this.updateModel();
+          this.selectEntry(encryptedEntry);
+          this.startEditingEntry();
+        })
+        .catch(error => this.databaseError = error);
   }
 
   private onEntrySave(event: CustomEvent<DbEntry>) {
-    if (!this.database || !this.selectedGroup || !this.selectedEntry) return;
+    if (!this.database) return;
     const newEntry = event.detail;
-    this.database.updateEntry(this.selectedGroup, this.selectedEntry, newEntry);
-    this.selectedEntry = newEntry;
-    this.updateModel();
+    this.database.encryptEntry(newEntry)
+        .then(encryptedEntry => {
+          if (!this.database || !this.selectedGroup || !this.selectedEntry) {
+            const message = 'The database was invalidated';
+            throw {code: 'db/unavailable', message};
+          }
+          this.database.updateEntry(
+              this.selectedGroup, this.selectedEntry, encryptedEntry);
+          this.updateModel();
+          this.selectEntry(encryptedEntry);
+        })
+        .catch(error => this.databaseError = error);
   }
 
   private onEntryDelete(event: CustomEvent<DbEntry>) {
     if (!this.database || !this.selectedGroup || !this.selectedEntry) return;
     const entry = event.detail;
-    this.selectedEntry = null;
+    this.selectEntry(null);
     this.database.deleteEntry(this.selectedGroup, entry);
     this.updateModel();
   }
 
+  private selectEntry(entry: DbEntry|null) {
+    // Clear previous errors.
+    this.databaseError = null;
+
+    // Clear selection if argument is null.
+    if (!entry || !this.database) {
+      this.selectedEntry = null;
+      this.decryptedEntry = null;
+      return;
+    }
+
+    // Decrypt selected entry.
+    this.database.decryptEntry(entry)
+        .then(decryptedEntry => {
+          this.selectedEntry = entry;
+          this.decryptedEntry = decryptedEntry;
+        })
+        .catch(error => this.databaseError = error);
+  }
+
+  private startEditingEntry() {
+    // Editing mode gets disabled in <fp-db-entry> after switching entries.
+    // This timeout re-enables editing mode immediately afterwards.
+    setTimeout(() => {
+      const entryElement = this.entryElement;
+      if (entryElement) entryElement.editing = true;
+    }, 0);
+  }
+
   private updateModel() {
     if (!this.database) return;
-    console.log('updateModel()');
     this.model = this.database.getModel();
   }
 }

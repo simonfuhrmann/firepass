@@ -26,13 +26,6 @@ export class FpDbEntry extends LitElement {
         margin: 16px;
       }
 
-      #empty {
-        font-size: 1.2em;
-        color: var(--separator-color);
-        text-align: center;
-        margin: 128px 32px;
-      }
-
       #header {
         display: flex;
         flex-direction: row;
@@ -192,46 +185,8 @@ export class FpDbEntry extends LitElement {
   }
 
   render() {
-    return html`
-      ${!this.entry ? this.renderEmpty() : this.renderView()}
-
-      <fp-db-entry-icons
-          id="icon-selector"
-          @changed=${this.onIconSelected}>
-      </fp-db-entry-icons>
-
-      <oxy-dialog id="delete-dialog" backdrop>
-        <h1>Delete entry?</h1>
-        <div flex-row>
-          <oxy-icon icon=${this.entryIcon}></oxy-icon>
-          <div>${this.entry ? this.entry.name : ''}</div>
-        </div>
-        <div class="dialog-buttons">
-          <oxy-button
-              id="delete-cancel-button"
-              raised
-              @click=${this.closeDeleteDialog}>
-            Cancel
-          </oxy-button>
-          <oxy-button
-              id="delete-confirm-button"
-              raised
-              @click=${this.confirmDeleteDialog}>
-            Delete
-          </oxy-button>
-        </div>
-      </oxy-dialog>
-
-      <oxy-toast id="toast"></oxy-toast>
-    `;
-  }
-
-  private renderEmpty() {
-    return html`<div id="empty">Select an entry</div>`;
-  }
-
-  private renderView() {
     if (!this.entry) return html``;
+
     return html`
       <div id="header">
         <oxy-icon
@@ -346,10 +301,18 @@ export class FpDbEntry extends LitElement {
 
       <div id="button-bar">
         <oxy-button
+            id="revert-button"
+            title="Revert changes"
+            raised
+            ?hidden=${!this.editing}
+            @click=${this.onRevertClick}>
+          <oxy-icon icon="icons:settings-backup-restore"></oxy-icon>
+          Revert
+        </oxy-button>
+        <oxy-button
             id="delete-button"
             title="Delete entry"
             raised
-            ?hidden=${this.editing}
             @click=${this.openDeleteDialog}>
           <oxy-icon icon="icons:delete"></oxy-icon>
           Delete
@@ -364,15 +327,6 @@ export class FpDbEntry extends LitElement {
           Edit
         </oxy-button>
         <oxy-button
-            id="revert-button"
-            title="Revert changes"
-            raised
-            ?hidden=${!this.editing}
-            @click=${this.onRevertClick}>
-          <oxy-icon icon="icons:settings-backup-restore"></oxy-icon>
-          Revert
-        </oxy-button>
-        <oxy-button
             id="save-button"
             title="Save entry"
             raised
@@ -382,6 +336,35 @@ export class FpDbEntry extends LitElement {
           Save
         </oxy-button>
       </div>
+
+      <fp-db-entry-icons
+          id="icon-selector"
+          @changed=${this.onIconSelected}>
+      </fp-db-entry-icons>
+
+      <oxy-dialog id="delete-dialog" backdrop>
+        <h1>Delete entry?</h1>
+        <div flex-row>
+          <oxy-icon icon=${this.entryIcon}></oxy-icon>
+          <div>${this.entry ? this.entry.name : ''}</div>
+        </div>
+        <div class="dialog-buttons">
+          <oxy-button
+              id="delete-cancel-button"
+              raised
+              @click=${this.closeDeleteDialog}>
+            Cancel
+          </oxy-button>
+          <oxy-button
+              id="delete-confirm-button"
+              raised
+              @click=${this.confirmDeleteDialog}>
+            Delete
+          </oxy-button>
+        </div>
+      </oxy-dialog>
+
+      <oxy-toast id="toast"></oxy-toast>
     `;
   }
 
