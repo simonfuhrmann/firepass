@@ -118,13 +118,10 @@ export class Database {
       // Set master password.
       this.dbCrypto.setMasterPassword(password, salt)
           .then(() => {
-            this.createNewDatabase(salt, iv);
-            this.uploadDatabase(iv)
-                .then(() => {
-                  this.decryptDatabase()
-                      .then(() => resolve())
-                      .catch(error => reject(error));
-                })
+            this.createNewDatabase(salt, iv)
+                .then(() => this.uploadDatabase(iv))
+                .then(() => this.decryptDatabase())
+                .then(() => resolve())
                 .catch(error => reject(error));
           })
           .catch(code => {
@@ -144,6 +141,46 @@ export class Database {
 
   updateEntry(group: DbGroup, oldEntry: DbEntry, newEntry: DbEntry) {
     this.dbData.updateEntry(group, oldEntry, newEntry);
+  }
+
+  decryptEntry(entry: DbEntry): Promise<DbEntry> {
+    return new Promise((resolve, reject) => {
+      const iv = Base64.decode(entry.aesIv);
+      const encryptedPassword = Base64.decode(entry.password);
+      const encryptedNotes = Base64.decode(entry.notes);
+      Promise.all([
+        this.dbCrypto.decryptString(encryptedPassword, iv),
+        this.dbCrypto.decryptString(encryptedNotes, iv),
+      ]).then(([password, notes]) => {
+        const newEntry = Object.assign({}, entry) as DbEntry;
+        newEntry.password = password;
+        newEntry.notes = notes;
+        resolve(newEntry);
+      }).catch(code => {
+        const message = 'Decrypting entry failed';
+        reject({code, message});
+      });
+    });
+  }
+
+  encryptEntry(entry: DbEntry): Promise<DbEntry> {
+    return new Promise((resolve, reject) => {
+      const iv = new Uint8Array(16);
+      crypto.getRandomValues(iv);
+      Promise.all([
+        this.dbCrypto.encryptString(entry.password, iv),
+        this.dbCrypto.encryptString(entry.notes, iv),
+      ]).then(([encryptedPassword, encryptedNotes]) => {
+        const newEntry = Object.assign(entry) as DbEntry;
+        newEntry.aesIv = Base64.encode(iv);
+        newEntry.password = Base64.encode(encryptedPassword);
+        newEntry.notes = Base64.encode(encryptedNotes);
+        resolve(newEntry);
+      }).catch(code => {
+        const message = 'Encrypting entry failed';
+        reject({code, message});
+      });
+    });
   }
 
   private assignDocument(doc: DbDocument): Promise<void> {
@@ -212,7 +249,7 @@ export class Database {
     });
   }
 
-  private createNewDatabase(salt: ArrayBuffer, iv: ArrayBuffer) {
+  private createNewDatabase(salt: ArrayBuffer, iv: ArrayBuffer): Promise<void> {
     console.log('Database.createNewDatabase()');
     this.dbData.createNewDatabase(salt, iv);
 
@@ -221,7 +258,10 @@ export class Database {
       icon: 'icons:shopping-cart',
       url: 'https://amazon.com',
       email: 'test@tester.com',
-      login: '', aesIv: '', password: '', notes: '',
+      login: '',
+      aesIv: '',
+      password: 'pass123',
+      notes: '',
     };
     const ebay: DbEntry = {
       name: 'E-Bay',
@@ -229,21 +269,32 @@ export class Database {
       url: 'https://ebay.com',
       email: 'test@tester.com',
       login: 'tester',
-      aesIv: '', password: '', notes: '',
+      aesIv: '',
+      password: 'pass321',
+      notes: 'Never buy from user bigcheat16 again!',
     };
     const gmail: DbEntry = {
       name: 'Gmail',
       icon: 'communication:email',
       url: 'https://gmail.com',
       email: 'tester@gmail.com',
-      login: '', aesIv: '', password: '', notes: '',
+      login: '',
+      aesIv: '',
+      password: 'pass213',
+      notes: '',
     };
 
-    let group = this.dbData.addGroup('Shopping');
-    this.addEntry(group, amazon);
-    this.addEntry(group, ebay);
-    group = this.dbData.addGroup('Email');
-    this.addEntry(group, gmail);
+    const group1 = this.dbData.addGroup('Shopping');
+    const group2 = this.dbData.addGroup('Email');
+    return Promise.all([
+      this.encryptEntry(amazon),
+      this.encryptEntry(ebay),
+      this.encryptEntry(gmail),
+    ]).then(([encAmazon, encEbay, encGmail]) => {
+      this.addEntry(group1, encAmazon);
+      this.addEntry(group1, encEbay);
+      this.addEntry(group2, encGmail);
+    });
   }
 
   private setState(state: DbState) {

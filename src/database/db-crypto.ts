@@ -41,7 +41,17 @@ export class DbCrypto {
   // The initialization vector `iv` must be 16 bytes.
   encrypt(decrypted: object, iv: ArrayBuffer): Promise<ArrayBuffer> {
     const json = JSON.stringify(decrypted);
-    const encoded = new TextEncoder().encode(json);
+    return this.encryptString(json, iv);
+  }
+
+  // Encrypts the given string by encoding it to an ArrayBuffer first. If the
+  // string is empty, an ArrayBuffer of size 0 is returned.
+  // The initialization vector `iv` must be 16 bytes.
+  encryptString(decrypted: string, iv: ArrayBuffer): Promise<ArrayBuffer> {
+    if (decrypted === '') {
+      return Promise.resolve(new ArrayBuffer(0));
+    }
+    const encoded = new TextEncoder().encode(decrypted);
     return this.encryptRaw(encoded, iv);
   }
 
@@ -49,17 +59,32 @@ export class DbCrypto {
   // The initialization vector `iv` must be 16 bytes.
   decrypt(encrypted: ArrayBuffer, iv: ArrayBuffer): Promise<object> {
     return new Promise((resolve, reject) => {
-      this.decryptRaw(encrypted, iv)
-          .then(decrypted => {
+      this.decryptString(encrypted, iv)
+          .then(decoded => {
             try {
-              const json = new TextDecoder().decode(decrypted);
-              const database = JSON.parse(json);
+              const database = JSON.parse(decoded);
               resolve(database);
             } catch(syntaxError) {
               reject('crypto/wrong-password');
             }
-        })
-        .catch(() => reject('crypto/wrong-password'));
+          })
+          .catch(error => reject(error));
+    });
+  }
+
+  // Decrypts the given binary data to a string. If the ArrayBuffer is empty,
+  // an empty string is returned.
+  // The initialization vector `iv` must be 16 bytes.
+  decryptString(encrypted: ArrayBuffer, iv: ArrayBuffer): Promise<string> {
+    if (encrypted.byteLength === 0) {
+      return Promise.resolve('');
+    }
+    return new Promise((resolve, reject) => {
+      this.decryptRaw(encrypted, iv)
+          .then(decrypted => {
+            resolve(new TextDecoder().decode(decrypted));
+          })
+          .catch(() => reject('crypto/wrong-password'));
     });
   }
 
