@@ -1,13 +1,15 @@
 import {LitElement, html, css} from 'lit-element';
-import {property, customElement} from 'lit-element';
+import {property, query, customElement} from 'lit-element';
 
 import {EventsMixin} from '../mixins/events-mixin';
+import {FpPassGenerator} from './fp-pass-generator';
 import {sharedStyles} from './fp-styles'
 import '../oxygen/oxy-button';
 import '../oxygen/oxy-input';
 import '../oxygen/oxy-icon';
 import '../oxygen/oxy-icons-base';
 import '../oxygen/oxy-icons-communication';
+import './fp-pass-generator';
 
 @customElement('fp-app-toolbar')
 export class FpAppToolbar extends EventsMixin(LitElement) {
@@ -46,6 +48,8 @@ export class FpAppToolbar extends EventsMixin(LitElement) {
     `;
   }
 
+  @query('#generator') generator: FpPassGenerator|undefined;
+
   @property({type: Boolean}) dbUnlocked = false;
 
   render() {
@@ -79,11 +83,15 @@ export class FpAppToolbar extends EventsMixin(LitElement) {
           <oxy-icon icon="icons:lock"></oxy-icon>
         </oxy-button>
       </div>
+
+      <fp-pass-generator id="generator"></fp-pass-generator>
     `;
   }
 
   onGenerator_() {
-    // TODO
+    const generator = this.generator;
+    if (!generator) return;
+    generator.open();
   }
 
   onSettings_() {

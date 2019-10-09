@@ -122,7 +122,7 @@ export class FpDbEntryIcons extends LitElement {
   render() {
     return html`
       <oxy-dialog ?opened=${this.opened} backdrop @close=${this.onClose}>
-        <h1>Select icon</h1>
+        <h2>Select icon</h2>
         <div id="container">
           ${this.icons.map(icon => this.renderIcon(icon))}
         </div>

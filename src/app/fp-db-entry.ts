@@ -3,12 +3,14 @@ import {customElement, property} from 'lit-element';
 
 import {DbEntry} from '../database/db-types';
 import {FpDbEntryIcons} from './fp-db-entry-icons';
+import {FpPassGenerator} from './fp-pass-generator';
 import {OxyDialog} from '../oxygen/oxy-dialog';
 import {OxyInput} from '../oxygen/oxy-input';
 import {OxyTextarea} from '../oxygen/oxy-textarea';
 import {sharedStyles} from './fp-styles'
 import {OxyToast} from '../oxygen/oxy-toast';
 import './fp-db-entry-icons';
+import './fp-pass-generator';
 import '../oxygen/oxy-button';
 import '../oxygen/oxy-dialog';
 import '../oxygen/oxy-input';
@@ -159,6 +161,7 @@ export class FpDbEntry extends LitElement {
   }
 
   private iconSelector: FpDbEntryIcons|null = null;
+  private passGenerator: FpPassGenerator|null = null;
   private deleteDialog: OxyDialog|null = null;
   private toast: OxyToast|null = null;
 
@@ -170,10 +173,12 @@ export class FpDbEntry extends LitElement {
   firstUpdated() {
     if (!this.shadowRoot) return;
     this.iconSelector =
-        <FpDbEntryIcons>this.shadowRoot.getElementById('icon-selector');
+        this.shadowRoot.getElementById('icon-selector') as FpDbEntryIcons;
     this.deleteDialog =
-        <OxyDialog>this.shadowRoot.getElementById('delete-dialog');
-    this.toast = <OxyToast>this.shadowRoot.getElementById('toast');
+        this.shadowRoot.getElementById('delete-dialog') as OxyDialog;
+    this.passGenerator =
+        this.shadowRoot.getElementById('generator') as FpPassGenerator;
+    this.toast = this.shadowRoot.getElementById('toast') as OxyToast;
   }
 
   updated(changedProps: Map<string, any>) {
@@ -343,7 +348,7 @@ export class FpDbEntry extends LitElement {
       </fp-db-entry-icons>
 
       <oxy-dialog id="delete-dialog" backdrop>
-        <h1>Delete entry?</h1>
+        <h2>Delete entry?</h2>
         <div flex-row>
           <oxy-icon icon=${this.entryIcon}></oxy-icon>
           <div>${this.entry ? this.entry.name : ''}</div>
@@ -363,6 +368,12 @@ export class FpDbEntry extends LitElement {
           </oxy-button>
         </div>
       </oxy-dialog>
+
+      <fp-pass-generator
+          id="generator"
+          selectable
+          @change=${this.onPasswordGenerated}>
+      </fp-pass-generator>
 
       <oxy-toast id="toast"></oxy-toast>
     `;
@@ -404,6 +415,17 @@ export class FpDbEntry extends LitElement {
   }
 
   private onGeneratePassword() {
+    if (!this.passGenerator) return;
+    this.passGenerator.open();
+  }
+
+  private onPasswordGenerated(event: CustomEvent<string>) {
+    if (!this.shadowRoot) return;
+    const input = this.shadowRoot.getElementById('password') as OxyInput;
+    if (!input) return;
+    const password = event.detail;
+    input.value = password;
+    this.openToast('Password updated');
   }
 
   private onCopyUrl() {
@@ -428,7 +450,7 @@ export class FpDbEntry extends LitElement {
 
   private copyToClipboard(inputId: string) {
     if (!this.shadowRoot) return;
-    const input = <OxyInput>this.shadowRoot.getElementById(inputId);
+    const input = this.shadowRoot.getElementById(inputId) as OxyInput;
     input.copyToClipboard();
   }
 
