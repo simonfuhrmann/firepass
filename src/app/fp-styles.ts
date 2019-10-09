@@ -47,6 +47,11 @@ export const sharedStyles = css`
     --oxy-checkbox-checked-background: var(--theme-color-fire3);
     --oxy-checkbox-check-color: var(--primary-text-color);
 
+    --oxy-slider-track-color: var(--theme-color-ice2);
+    --oxy-slider-track-active-color: var(--theme-color-ice2);
+    --oxy-slider-thumb-color: var(--theme-color-ice3);
+    --oxy-slider-thumb-active-color: var(--theme-color-ice3);
+
     --oxy-scrollbar-width: 12px;
     --oxy-scrollbar-track-color: transparent;
     --oxy-scrollbar-track-border-radius: 0;
