@@ -78,7 +78,7 @@ export class DbData {
     if (!this.model) throw 'Model not initialized';
 
     // Check if group already exists.
-    const group = this.model.groups.find(group => group.name == name);
+    const group = this.model.groups.find(group => group.name === name);
     if (!!group) {
       throw `Group "${name}" already exists`;
     }
@@ -105,19 +105,19 @@ export class DbData {
     if (!this.model) throw 'Model not initialized';
     if (!oldEntry && !newEntry) throw 'Both old and new entry are null';
 
-    const groupIdx = this.model.groups.findIndex(elem => elem == group);
+    const groupIdx = this.model.groups.findIndex(elem => elem === group);
     if (groupIdx < 0) throw `Group "${group.name}" does not exist`;
     const groupEntries = this.model.groups[groupIdx].entries;
 
     // If the new entry is null, delete the old entry. If the old entry is null,
     // add a new entry. Otherwise update the existing entry.
     let entries = groupEntries.slice();
-    if (oldEntry == null) {
+    if (!oldEntry) {
       if (!newEntry) return;  // Just to prevent TS warnings.
       entries.push(newEntry);
     } else {
-      const entryIdx = groupEntries.findIndex(elem => elem == oldEntry);
-      if (newEntry == null) {
+      const entryIdx = groupEntries.findIndex(elem => elem === oldEntry);
+      if (!newEntry) {
         entries.splice(entryIdx, 1);
       } else {
         entries.splice(entryIdx, 1, newEntry);

@@ -59,7 +59,7 @@ export class OxyTabs extends LitElement {
     // Iterate the tree up to find direct child clicked on.
     let clickedChild: HTMLElement|null = <HTMLElement>event.target;
     while (clickedChild) {
-      if (clickedChild.parentElement == this) break;
+      if (clickedChild.parentElement === this) break;
       clickedChild = clickedChild.parentElement;
     }
     if (!clickedChild) return;
@@ -71,7 +71,7 @@ export class OxyTabs extends LitElement {
   private selectTabIndex(selectedIndex: number) {
     const children = this.getDirectChildren();
     children.forEach((child, index) => {
-      if (index == selectedIndex) {
+      if (index === selectedIndex) {
         child.setAttribute('selected', '');
       } else {
         child.removeAttribute('selected');

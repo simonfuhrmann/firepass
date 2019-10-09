@@ -58,7 +58,7 @@ export class Database {
     return new Promise((resolve, reject) => {
       this.dbStorage.download()
           .then(doc => {
-            if (doc == null) {
+            if (!doc) {
               this.setState(DbState.MISSING);
               resolve();
               return;

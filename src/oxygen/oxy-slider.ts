@@ -108,7 +108,7 @@ export class OxySlider extends LitElement {
   }
 
   private onMouseEnter(event: MouseEvent) {
-    if (event.buttons !== 0 && this.buttons == event.buttons) {
+    if (event.buttons !== 0 && this.buttons === event.buttons) {
       this.dragging = true;
     }
   }
