@@ -42,6 +42,11 @@ export const sharedStyles = css`
     --oxy-textarea-box-shadow-focused:
         var(--oxy-input-box-shadow), 0 0 5px var(--theme-color-fire2);
 
+    --oxy-checkbox-unchecked-background: var(--separator-color);
+    --oxy-checkbox-unchecked-border: 2px solid var(--disabled-text-color);
+    --oxy-checkbox-checked-background: var(--theme-color-fire3);
+    --oxy-checkbox-check-color: var(--primary-text-color);
+
     --oxy-scrollbar-width: 12px;
     --oxy-scrollbar-track-color: transparent;
     --oxy-scrollbar-track-border-radius: 0;
