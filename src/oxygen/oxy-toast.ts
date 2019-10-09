@@ -9,7 +9,7 @@ export class OxyToast extends LitElement {
         position: fixed;
         bottom: 16px;
         left: 16px;
-        z-index: 2;
+        z-index: 3;
 
         opacity: 0;
         transform: translateY(100px);

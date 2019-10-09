@@ -40,6 +40,7 @@ export class OxyInput extends LitElement {
         outline: none;
         background: transparent;
         text-align: inherit;
+        min-width: 1em;
       }
       input::placeholder {
         color: var(--oxy-input-placeholder-color);
