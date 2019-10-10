@@ -67,17 +67,19 @@ export class OxyCheckbox extends LitElement {
   firstUpdated() {
     this.setAttribute('role', 'checkbox');
     this.setAttribute('tabindex', '0');
-    this.updateAriaDisabled();
-    this.updateAriaChecked();
     this.addEventListener('click', () => this.onClick());
   }
 
   updated(changedProps: Map<string, any>) {
     if (changedProps.has('disabled')) {
-      this.updateAriaDisabled();
+      if (this.disabled) {
+        this.setAttribute('aria-disabled', 'true');
+      } else {
+        this.removeAttribute('aria-disabled');
+      }
     }
     if (changedProps.has('checked')) {
-      this.updateAriaChecked();
+      this.setAttribute('aria-checked', this.checked ? 'true' : 'false');
       this.dispatchEvent(new CustomEvent('change', {detail: this.checked}));
     }
   }
@@ -94,19 +96,6 @@ export class OxyCheckbox extends LitElement {
       </div>
     `;
   }
-
-  private updateAriaDisabled() {
-    if (this.disabled) {
-      this.setAttribute('aria-diabled', 'true');
-    } else {
-      this.removeAttribute('aria-disabled');
-    }
-  }
-
-  private updateAriaChecked() {
-    this.setAttribute('aria-checked', this.checked ? 'true' : 'false');
-  }
-
   private onClick() {
     if (this.disabled) return;
     if (this.indeterminate) {

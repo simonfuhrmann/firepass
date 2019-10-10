@@ -72,24 +72,19 @@ export class OxyButton extends LitElement {
   firstUpdated() {
     this.setAttribute('tabindex', '0');
     this.setAttribute('role', 'button');
-    this.updateAriaDisabled();
   }
 
   updated(changedProps: Map<string, any>) {
     if (changedProps.has('disabled')) {
-      this.updateAriaDisabled();
+      if (this.disabled) {
+        this.setAttribute('aria-disabled', 'true');
+      } else {
+        this.removeAttribute('aria-disabled');
+      }
     }
   }
 
   render() {
     return html`<slot></slot>`;
-  }
-
-  private updateAriaDisabled() {
-    if (this.disabled) {
-      this.setAttribute('aria-disabled', 'true');
-    } else {
-      this.removeAttribute('aria-disabled');
-    }
   }
 }
