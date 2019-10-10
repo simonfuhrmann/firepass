@@ -10,6 +10,7 @@ export const sharedStyles = css`
     --success-text-color: #00b31d;
     --separator-color: #333;
     --separator-color-faint: #222;
+    --separator-color-clear: #444;
 
     --theme-color-dark: #1a1a1a;
     --theme-color-gray: #4e4e50;

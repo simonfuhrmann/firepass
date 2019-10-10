@@ -29,13 +29,14 @@ export class FpPassGenerator extends LitElement {
         left: 25%;
         right: 25%;
         max-height: 60%;
+        min-width: 300px;
         background-color: #333;
         border-radius: 8px;
         transform: none;
       }
       oxy-input {
         align-self: stretch;
-        margin: 0 32px;
+        margin: 16px 32px 0 32px;
         font-size: 0.9em;
         --oxy-input-background-color: rgba(0, 0, 0, 0.1);
         --oxy-input-background-color-focused: rgba(0, 0, 0, 0.1);
@@ -59,10 +60,11 @@ export class FpPassGenerator extends LitElement {
         height: 16px;
       }
       #checkboxes {
-        margin: 0 16px;
+        padding: 0 32px;
+        border-right: 1px solid var(--separator-color-clear);
       }
-      #length-slider {
-        margin: 32px 32px 16px 32px;
+      #sliders {
+        padding: 0 32px;
       }
       #buttons {
         margin: 32px;
@@ -80,8 +82,8 @@ export class FpPassGenerator extends LitElement {
         display: flex;
         flex-direction: column;
       }
-      .layout.center {
-        align-items: center;
+      .layout.vertical.spaced > :not(:last-child) {
+        margin-bottom: 8px;
       }
       [hidden] {
         display: none !important;
@@ -98,7 +100,8 @@ export class FpPassGenerator extends LitElement {
   private special: OxyCheckbox|null = null;
 
   @property({type: Number}) passwordLength: number = 16;
-  @property({type: Boolean}) showPassword: boolean = false;
+  @property({type: Number}) blockLength: number = 0;
+  @property({type: Boolean}) showPassword: boolean = true;
   @property({type: Boolean}) selectable: boolean = false;
 
   firstUpdated() {
@@ -117,8 +120,8 @@ export class FpPassGenerator extends LitElement {
       <oxy-dialog id="dialog" backdrop>
         <h2>Password generator</h2>
 
-        <div id="checkboxes" class="layout horizontal">
-          <div class="layout vertical">
+        <div class="layout horizontal">
+          <div id="checkboxes" class="layout vertical">
             <oxy-checkbox
                 id="uppercase"
                 checked
@@ -131,8 +134,6 @@ export class FpPassGenerator extends LitElement {
                 @change=${this.onRegenerate}>
               abc
             </oxy-checkbox>
-          </div>
-          <div class="layout vertical">
             <oxy-checkbox
                 id="numbers"
                 checked
@@ -141,20 +142,30 @@ export class FpPassGenerator extends LitElement {
             </oxy-checkbox>
             <oxy-checkbox
                 id="special"
-                checked
                 @change=${this.onRegenerate}>
               !@#
             </oxy-checkbox>
           </div>
-        </div>
 
-        <div id="length-slider" class="layout vertical">
-          <div>Password length: ${this.passwordLength}</div>
-          <oxy-slider
-              min="3" max="64"
-              .value=${this.passwordLength}
-              @change=${this.onLengthChanged}>
-          </oxy-slider>
+          <div id="sliders" class="spaced layout vertical">
+            <div>
+              <div>Length of ${this.passwordLength}</div>
+              <oxy-slider
+                  min="3" max="64"
+                  .value=${this.passwordLength}
+                  @change=${this.onPassLengthChanged}>
+              </oxy-slider>
+            </div>
+
+            <div>
+              <div>Blocks of ${this.blockLength}</div>
+              <oxy-slider
+                  min="0" max="16"
+                  .value=${this.blockLength}
+                  @change=${this.onBlockLengthChanged}>
+              </oxy-slider>
+            </div>
+          </div>
         </div>
 
         <oxy-input
@@ -177,7 +188,7 @@ export class FpPassGenerator extends LitElement {
           </div>
         </oxy-input>
 
-        <div id="buttons" class="layout horizontal center">
+        <div id="buttons" class="layout horizontal">
           <oxy-button
               raised
               ?hidden=${this.selectable}
@@ -248,8 +259,13 @@ export class FpPassGenerator extends LitElement {
     this.input.value = pass;
   }
 
-  private onLengthChanged(event: CustomEvent<number>) {
+  private onPassLengthChanged(event: CustomEvent<number>) {
     this.passwordLength = event.detail;
+    this.onRegenerate();
+  }
+
+  private onBlockLengthChanged(event: CustomEvent<number>) {
+    this.blockLength = event.detail;
     this.onRegenerate();
   }
 
@@ -274,9 +290,12 @@ export class FpPassGenerator extends LitElement {
 
     const modulo = charset.length;
     let password = '';
-    random.forEach(value => {
-      password += charset.charAt(value % modulo);
-    });
+    for (let i = 0; i < random.length; ++i) {
+      if (i > 0 && i % this.blockLength === 0) {
+        password += '-';
+      }
+      password += charset.charAt(random[i] % modulo);
+    }
     return password;
   }
 }
