@@ -10,6 +10,7 @@ import '../oxygen/oxy-button';
 import '../oxygen/oxy-checkbox';
 import '../oxygen/oxy-icon';
 import '../oxygen/oxy-input';
+import '../oxygen/oxy-slider';
 
 // A password generator UI in a dialog window.
 // If the element has the `selected` attribute, the "Copy" button turns into
@@ -34,7 +35,7 @@ export class FpPassGenerator extends LitElement {
       }
       oxy-input {
         align-self: stretch;
-        margin: 16px 32px 0 32px;
+        margin: 0 32px;
         font-size: 0.9em;
         --oxy-input-background-color: rgba(0, 0, 0, 0.1);
         --oxy-input-background-color-focused: rgba(0, 0, 0, 0.1);
@@ -59,6 +60,9 @@ export class FpPassGenerator extends LitElement {
       }
       #checkboxes {
         margin: 0 16px;
+      }
+      #length-slider {
+        margin: 32px 32px 16px 32px;
       }
       #buttons {
         margin: 32px;
@@ -142,6 +146,15 @@ export class FpPassGenerator extends LitElement {
               !@#
             </oxy-checkbox>
           </div>
+        </div>
+
+        <div id="length-slider" class="layout vertical">
+          <div>Password length: ${this.passwordLength}</div>
+          <oxy-slider
+              min="3" max="64"
+              .value=${this.passwordLength}
+              @change=${this.onLengthChanged}>
+          </oxy-slider>
         </div>
 
         <oxy-input
@@ -233,6 +246,11 @@ export class FpPassGenerator extends LitElement {
     if (!this.input) return;
     const pass = this.generatePassword();
     this.input.value = pass;
+  }
+
+  private onLengthChanged(event: CustomEvent<number>) {
+    this.passwordLength = event.detail;
+    this.onRegenerate();
   }
 
   private generatePassword(): string {
