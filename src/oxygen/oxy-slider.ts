@@ -68,6 +68,7 @@ export class OxySlider extends LitElement {
       this.value = Math.max(this.min, Math.min(this.max, this.value));
       this.setAttribute('aria-valuenow', this.value.toString());
       this.updateSlider();
+      this.dispatchEvent(new CustomEvent('change', {detail: this.value}));
     }
     if (updatedProps.has('disabled')) {
       if (this.disabled) {
