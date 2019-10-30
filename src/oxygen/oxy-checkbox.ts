@@ -58,7 +58,7 @@ export class OxyCheckbox extends LitElement {
         background: var(--oxy-checkbox-check-color, white);
       }
       :host #label {
-        margin: 8px;
+        margin: 4px 8px;
         flex-grow: 1;
       }
     `;

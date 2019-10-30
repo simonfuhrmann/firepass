@@ -7,6 +7,7 @@ import {DbModel, DbGroup, DbEntry} from '../database/db-types';
 import {FpDbEntry} from './fp-db-entry';
 import {sharedStyles} from './fp-styles'
 import '../oxygen/oxy-button';
+import '../oxygen/oxy-icon';
 import '../oxygen/oxy-tab';
 import './fp-db-entry';
 

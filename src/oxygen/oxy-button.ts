@@ -2,11 +2,9 @@ import {LitElement, html, css} from 'lit-element';
 import {property, customElement} from 'lit-element';
 
 // A simple button element with some default styles. The button can be
-// customized using CSS variables:
-//   --button-background-color
-//   --button-text-color
-// Further, if the 'raised' attribute is set, the button obtains a shadow.
-// If the 'disabled' attribute is set, pointer events are ignored.
+// customized using CSS variables, see styles below. If the 'raised' attribute
+// is set, the button obtains a shadow. If the 'disabled' attribute is set,
+// the button becomes more transparent and pointer events are ignored.
 @customElement('oxy-button')
 export class OxyButton extends LitElement {
   static get styles() {
