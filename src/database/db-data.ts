@@ -97,6 +97,13 @@ export class DbData {
     return newGroup;
   }
 
+  // Deletes an existing group including all entries.
+  deleteGroup(group: DbGroup) {
+    if (!this.model) throw 'Model not initialized';
+    const groups = this.model.groups.filter(g => g !== group);
+    this.model = {groups};
+  }
+
   // Updates a database entry in a group. If the old entry is null, the new
   // entry is created. If the new entry is null, the old entry is deleted.
   // If both entries are null, an exception is thrown.

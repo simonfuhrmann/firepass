@@ -183,6 +183,14 @@ export class Database {
     });
   }
 
+  deleteGroup(group: DbGroup) {
+    this.dbData.deleteGroup(group);
+  }
+
+  addGroup(name: string): DbGroup {
+    return this.dbData.addGroup(name);
+  }
+
   sortGroupsAndEntries() {
     this.dbData.sortGroupsAndEntries();
   }
