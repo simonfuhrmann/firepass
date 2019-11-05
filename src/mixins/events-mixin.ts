@@ -1,9 +1,9 @@
 import {LitElement} from 'lit-element';
 
 interface EventReference {
-  name: string,
-  callback: EventListenerOrEventListenerObject,
-  options: AddEventListenerOptions|undefined,
+  name: string;
+  callback: EventListenerOrEventListenerObject;
+  options: AddEventListenerOptions|undefined;
 }
 
 type Constructor<T = LitElement> = new (...args: any[]) => T;

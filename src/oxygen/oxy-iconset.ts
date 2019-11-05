@@ -1,7 +1,7 @@
 import {svg, SVGTemplateResult} from 'lit-html';
 
 export interface OxyIconMap {
-  [key: string]: SVGTemplateResult
+  [key: string]: SVGTemplateResult;
 }
 
 // The global icon set registry.

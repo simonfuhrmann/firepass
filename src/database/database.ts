@@ -14,8 +14,8 @@ export enum DbState {
 
 // Error type for all rejected Promises in this class.
 export interface DatabaseError {
-  code: string,
-  message: string,
+  code: string;
+  message: string;
 }
 
 export type DbStateListener = (status: DbState) => void;

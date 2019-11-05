@@ -37,7 +37,9 @@ export class FpDatabase extends EventsMixin(LitElement) {
         font-size: 0.8em;
         margin: 8px;
       }
-      fp-db-view  {
+      fp-db-view,
+      fp-db-unlock,
+      #error  {
         flex-grow: 1;
       }
     `;
