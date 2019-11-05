@@ -123,7 +123,7 @@ export class FpDbView extends LitElement {
       </div>
 
       ${this.renderDatabaseError()}
-      ${this.renderSelectEntry()}
+      ${this.renderNoEntrySelected()}
       ${this.renderEntryView()}
     `;
   }
@@ -138,7 +138,7 @@ export class FpDbView extends LitElement {
     `;
   }
 
-  private renderSelectEntry() {
+  private renderNoEntrySelected() {
     if (!!this.databaseError || !!this.decryptedEntry) return;
     return html`<div id="empty">Select an entry</div>`;
   }
@@ -250,6 +250,7 @@ export class FpDbView extends LitElement {
           }
           this.database.updateEntry(
               this.selectedGroup, this.selectedEntry, encryptedEntry);
+          this.database.sortGroupsAndEntries();
           this.updateModel();
           this.selectEntry(encryptedEntry);
         })

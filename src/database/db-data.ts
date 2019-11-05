@@ -131,4 +131,12 @@ export class DbData {
     // Update model.
     this.model = {groups};
   }
+
+  sortGroupsAndEntries() {
+    if (!this.model) throw 'Model not initialized';
+    this.model.groups.sort((a, b) => a.name.localeCompare(b.name));
+    this.model.groups.forEach(group => {
+      group.entries.sort((a, b) => a.name.localeCompare(b.name));
+    });
+  }
 }

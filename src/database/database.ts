@@ -183,6 +183,10 @@ export class Database {
     });
   }
 
+  sortGroupsAndEntries() {
+    this.dbData.sortGroupsAndEntries();
+  }
+
   private assignDocument(doc: DbDocument): Promise<void> {
     console.log('Database.assignDocument()');
     return new Promise((resolve, reject) => {
