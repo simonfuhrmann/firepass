@@ -7,12 +7,13 @@ import {FpPassGenerator} from './fp-pass-generator';
 import {OxyDialog} from '../oxygen/oxy-dialog';
 import {OxyInput} from '../oxygen/oxy-input';
 import {OxyTextarea} from '../oxygen/oxy-textarea';
-import {sharedStyles} from './fp-styles'
 import {OxyToast} from '../oxygen/oxy-toast';
+import {sharedStyles} from './fp-styles'
 import './fp-db-entry-icons';
 import './fp-pass-generator';
 import '../oxygen/oxy-button';
 import '../oxygen/oxy-dialog';
+import '../oxygen/oxy-icon';
 import '../oxygen/oxy-input';
 import '../oxygen/oxy-textarea';
 import '../oxygen/oxy-toast';

@@ -20,9 +20,15 @@ export class FpDbView extends LitElement {
         display: flex;
         flex-direction: row;
       }
-      #items {
-        width: 256px;
+      #sidebar {
+        display: flex;
+        flex-direction: column;
         border-right: 1px solid var(--separator-color);
+        width: 256px;
+      }
+      #items {
+        display: flex;
+        flex-direction: column;
         overflow-y: auto;
       }
       #items::-webkit-scrollbar {
@@ -36,11 +42,26 @@ export class FpDbView extends LitElement {
       #items::-webkit-scrollbar-thumb:hover {
         box-shadow: var(--oxy-scrollbar-thumb-hover-box-shadow);
       }
+      #buttons {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        background-color: rgba(0, 0, 0, 0.25);
+      }
+      #new-group-button {
+        margin: 32px;
+        background-color: var(--theme-color-ice1);
+      }
+      #buttons oxy-button {
+        padding: 8px;
+        border-radius: 0;
+      }
       oxy-tab {
         padding: 8px;
         min-height: 48px;
         display: flex;
         align-items: center;
+        flex-shrink: 0;
       }
       oxy-tab > oxy-icon {
         margin-right: 8px;
@@ -95,6 +116,10 @@ export class FpDbView extends LitElement {
         font-size: 0.8em;
         margin: 8px;
       }
+
+      [hidden] {
+        display: none !important;
+      }
     `;
   }
 
@@ -115,11 +140,35 @@ export class FpDbView extends LitElement {
 
   render() {
     if (!this.model) return html``;
+    const groupSelected = !this.selectedEntry && !!this.selectedGroup;
+    const groupEmpty = !!this.selectedGroup &&
+        this.selectedGroup.entries.length === 0;
     return html`
-      <div id="items" role="listbox">
-        ${repeat(this.model.groups,
-            group => group.name,
-            group => this.renderGroup(group))}
+      <div id="sidebar">
+        <div id="buttons">
+          <oxy-button>
+            <oxy-icon icon="icons:create-new-folder"></oxy-icon>
+          </oxy-button>
+          <oxy-button
+              ?disabled=${!groupSelected || !groupEmpty}
+              @click=${() => this.onGroupDelete(this.selectedGroup)}>
+            <oxy-icon icon="icons:delete"></oxy-icon>
+          </oxy-button>
+          <oxy-button ?disabled=${!groupSelected}>
+            <oxy-icon icon="icons:create"></oxy-icon>
+          </oxy-button>
+        </div>
+
+        <div id="items">
+          ${repeat(this.model.groups,
+              group => group.name,
+              group => this.renderGroup(group))}
+        </div>
+
+        <oxy-button id="new-group-button" ?hidden=${!!this.model.groups.length}>
+          <oxy-icon icon="icons:create-new-folder"></oxy-icon>
+          New Group
+        </oxy-button>
       </div>
 
       ${this.renderDatabaseError()}
@@ -139,7 +188,7 @@ export class FpDbView extends LitElement {
   }
 
   private renderNoEntrySelected() {
-    if (!!this.databaseError || !!this.decryptedEntry) return;
+    if (!!this.databaseError || this.decryptedEntry) return;
     return html`<div id="empty">Select an entry</div>`;
   }
 
@@ -170,7 +219,7 @@ export class FpDbView extends LitElement {
           <div class="secondary">${group.entries.length} entries</div>
         </div>
         <oxy-button
-            @click=${(event: MouseEvent) => this.onAddEntry(event, group)}>
+            @click=${(event: MouseEvent) => this.onEntryAdd(event, group)}>
           <oxy-icon icon="icons:add"></oxy-icon>
         </oxy-button>
       </oxy-tab>
@@ -200,7 +249,7 @@ export class FpDbView extends LitElement {
 
   private onGroupClick(event: MouseEvent, group: DbGroup) {
     if (event.defaultPrevented) return;
-    this.selectedGroup = group === this.selectedGroup ? null : group;
+    this.selectedGroup = group;
     this.selectEntry(null);
   }
 
@@ -208,7 +257,7 @@ export class FpDbView extends LitElement {
     this.selectEntry(entry);
   }
 
-  private onAddEntry(event: MouseEvent, group: DbGroup) {
+  private onEntryAdd(event: MouseEvent, group: DbGroup) {
     // Prevent clicks on the group the "Add" button is a child of.
     event.preventDefault();
 
@@ -283,6 +332,21 @@ export class FpDbView extends LitElement {
           this.decryptedEntry = decryptedEntry;
         })
         .catch(error => this.databaseError = error);
+  }
+
+  private onGroupDelete(group: DbGroup|null) {
+    if (!group) return;
+
+    // Do not delete groups with entries!
+    if (group.entries.length > 0) {
+      console.error('Attempted to delete non-empty group');
+      return;
+    }
+    if (!this.database) return;
+    this.database.deleteGroup(group);
+    this.selectedGroup = null;
+    this.selectEntry(null);
+    this.updateModel();
   }
 
   private startEditingEntry() {
