@@ -1,7 +1,7 @@
 import {Base64} from './base64';
 import {DbCrypto} from './db-crypto';
 import {DbData} from './db-data';
-import {DbStorage} from './db-storage';
+import {DbStorage, DbStorageError} from './db-storage';
 import {DbDocument, DbModel, DbGroup, DbEntry} from './db-types';
 
 export enum DbState {
@@ -67,12 +67,15 @@ export class Database {
                 .then(() => resolve())
                 .catch(error => reject(error));
           })
-          .catch(error => {
-            const code = 'db/' + error.code;
-            const message = 'Invalid Firebase config or data setup';
-            reject({code, message});
-          });
+          .catch((error: DbStorageError) => reject(error));
     });
+  }
+
+  upload(): Promise<void> {
+    console.log('Database.upload()');
+    const iv = new Uint8Array(16);
+    crypto.getRandomValues(iv);
+    return this.uploadDatabase(iv);
   }
 
   // Locks the database and transitions to LOCKED.
@@ -247,11 +250,7 @@ export class Database {
             this.dbData.setDocument(doc);
             this.dbStorage.upload(doc)
                 .then(() => resolve())
-                .catch(code => {
-                  console.log('Error uploading', code);
-                  const message = 'Failed to upload database';
-                  reject({code, message});
-                });
+                .catch((error: DbStorageError) => reject(error));
           })
           .catch(code => {
             console.log('Error encrypting', code);

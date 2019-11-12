@@ -4,6 +4,12 @@ import 'firebase/firestore';
 
 import {DbDocument} from './db-types';
 
+// Error type for all rejected Promises in this class.
+export interface DbStorageError {
+  code: string;
+  message: string;
+}
+
 // Internal storage backend for Firebase.
 class DbStorageFirebase {
   upload(doc: DbDocument): Promise<void> {
@@ -11,7 +17,11 @@ class DbStorageFirebase {
       const docRef = this.getDocRef();
       docRef.set(doc)
           .then(() => resolve())
-          .catch(error => { console.log(error); reject(error)});  // TODO
+          .catch(error => {
+            const code = 'db/' + error.code;
+            const message = error.message;
+            reject({code, message});
+          });
     });
   }
 
@@ -22,7 +32,11 @@ class DbStorageFirebase {
         if (!doc.exists) resolve(null);
         resolve(doc.data() as DbDocument);
       })
-      .catch(error => { console.log(error); reject(error)});  // TODO
+      .catch(error => {
+        const code = 'db/' + error.code;
+        const message = error.message;
+        reject({code, message});
+      });
     });
   }
 
