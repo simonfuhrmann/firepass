@@ -7,6 +7,7 @@ import {FpDbUnlock} from './fp-db-unlock';
 import {devConfig} from '../config/development';
 import {sharedStyles} from './fp-styles'
 import './fp-app-toolbar';
+import './fp-idle-timeout';
 import './fp-db-unlock';
 import './fp-db-view';
 
@@ -111,6 +112,7 @@ export class FpDatabase extends EventsMixin(LitElement) {
 
   private renderDbView() {
     return html`
+      <fp-idle-timeout></fp-idle-timeout>
       <fp-db-view .database=${this.database}></fp-db-view>
     `;
   }
