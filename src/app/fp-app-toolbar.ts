@@ -5,7 +5,6 @@ import {EventsMixin} from '../mixins/events-mixin';
 import {FpPassGenerator} from './fp-pass-generator';
 import {sharedStyles} from './fp-styles'
 import '../oxygen/oxy-button';
-import '../oxygen/oxy-input';
 import '../oxygen/oxy-icon';
 import '../oxygen/oxy-icons-base';
 import '../oxygen/oxy-icons-communication';
@@ -20,27 +19,26 @@ export class FpAppToolbar extends EventsMixin(LitElement) {
         display: flex;
         flex-direction: row;
         align-items: center;
-        justify-content: flex-end;
         border-bottom: 1px solid #333;
-      }
-      oxy-input {
-        margin: 4px 8px;
-        flex-grow: 1;
-        --oxy-input-background-color: transparent;
-        --oxy-input-border-color: transparent;
-        --oxy-input-box-shadow: none;
       }
       oxy-button {
         color: var(--secondary-text-color);
         padding: 12px;
         border-radius: 0;
       }
-      oxy-input [slot="before"] {
-        color: var(--secondary-text-color);
-        margin: 2px 0 2px 6px;
-        cursor: pointer;
-        width: 20px;
-        height: 20px;
+      #logo {
+        display: flex;
+        align-items: center;
+        flex-grow: 1;
+        margin: 0px 8px;
+      }
+      #logo oxy-icon {
+        color: var(--theme-color-fire3);
+      }
+      #logo h1 {
+        color: var(--tertiary-text-color);
+        font-size: 1.2em;
+        margin: 0 0 0 8px;
       }
       [hidden] {
         display: none !important;
@@ -55,10 +53,11 @@ export class FpAppToolbar extends EventsMixin(LitElement) {
   render() {
     return html`
       <div id="toolbar">
-        <!-- Search input. -->
-        <oxy-input ?hidden=${!this.dbUnlocked}>
-          <oxy-icon slot="before" icon="icons:search"></oxy-icon>
-        </oxy-input>
+        <!-- Logo. -->
+        <div id="logo">
+          <oxy-icon icon="social:whatshot"></oxy-icon>
+          <h1>Firepass</h1>
+        </div>
 
         <!-- Buttons. -->
         <oxy-button
