@@ -2,7 +2,7 @@ import {Base64} from './base64';
 import {DbCrypto} from './db-crypto';
 import {DbData} from './db-data';
 import {DbStorage, DbStorageError} from './db-storage';
-import {DbDocument, DbModel, DbGroup, DbEntry} from './db-types';
+import {DbDocument, DbModel, DbEntry} from './db-types';
 
 export enum DbState {
   INITIAL,  // Initial state before fetching for the first time.
@@ -134,16 +134,16 @@ export class Database {
     });
   }
 
-  deleteEntry(group: DbGroup, entry: DbEntry) {
-    this.dbData.updateEntry(group, entry, null);
+  deleteEntry(entry: DbEntry) {
+    this.dbData.updateEntry(entry, null);
   }
 
-  addEntry(group: DbGroup, entry: DbEntry) {
-    this.dbData.updateEntry(group, null, entry);
+  addEntry(entry: DbEntry) {
+    this.dbData.updateEntry(null, entry);
   }
 
-  updateEntry(group: DbGroup, oldEntry: DbEntry, newEntry: DbEntry) {
-    this.dbData.updateEntry(group, oldEntry, newEntry);
+  updateEntry(oldEntry: DbEntry, newEntry: DbEntry) {
+    this.dbData.updateEntry(oldEntry, newEntry);
   }
 
   decryptEntry(entry: DbEntry): Promise<DbEntry> {
@@ -186,16 +186,8 @@ export class Database {
     });
   }
 
-  deleteGroup(group: DbGroup) {
-    this.dbData.deleteGroup(group);
-  }
-
-  addGroup(name: string): DbGroup {
-    return this.dbData.addGroup(name);
-  }
-
-  sortGroupsAndEntries() {
-    this.dbData.sortGroupsAndEntries();
+  sortEntries() {
+    this.dbData.sortEntries();
   }
 
   private assignDocument(doc: DbDocument): Promise<void> {
@@ -295,16 +287,14 @@ export class Database {
       notes: '',
     };
 
-    const group1 = this.dbData.addGroup('Shopping');
-    const group2 = this.dbData.addGroup('Email');
     return Promise.all([
       this.encryptEntry(amazon),
       this.encryptEntry(ebay),
       this.encryptEntry(gmail),
     ]).then(([encAmazon, encEbay, encGmail]) => {
-      this.addEntry(group1, encAmazon);
-      this.addEntry(group1, encEbay);
-      this.addEntry(group2, encGmail);
+      this.addEntry(encAmazon);
+      this.addEntry(encEbay);
+      this.addEntry(encGmail);
     });
   }
 

@@ -13,15 +13,9 @@ export interface DbEntry {
   notes: string;  // Encrypted, even in the unencrypted DB.
 }
 
-// A group of entries in the database.
-export interface DbGroup {
-  name: string;
-  entries: DbEntry[];
-}
-
 // The database that will be fully encrypted.
 export interface DbModel {
-  groups: DbGroup[];
+  entries: DbEntry[];
 }
 
 // Database settings that will not be encrypted.

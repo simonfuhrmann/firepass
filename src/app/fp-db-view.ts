@@ -3,7 +3,7 @@ import {customElement, property, query} from 'lit-element';
 import {repeat} from 'lit-html/directives/repeat';
 
 import {Database, DatabaseError} from '../database/database';
-import {DbModel, DbGroup, DbEntry} from '../database/db-types';
+import {DbModel, DbEntry} from '../database/db-types';
 import {FpDbEntry} from './fp-db-entry';
 import {sharedStyles} from './fp-styles'
 import '../oxygen/oxy-button';
@@ -29,6 +29,7 @@ export class FpDbView extends LitElement {
       #items {
         display: flex;
         flex-direction: column;
+        flex-grow: 1;
         overflow-y: auto;
       }
       #items::-webkit-scrollbar {
@@ -42,22 +43,12 @@ export class FpDbView extends LitElement {
       #items::-webkit-scrollbar-thumb:hover {
         box-shadow: var(--oxy-scrollbar-thumb-hover-box-shadow);
       }
-      #buttons {
-        display: flex;
-        flex-shrink: 0;
-        align-items: center;
-        background-color: rgba(0, 0, 0, 0.25);
-      }
-      #new-group-button {
-        margin: 32px;
+      #new-entry-button {
+        margin: 16px;
         background-color: var(--theme-color-ice1);
       }
-      #buttons oxy-button {
-        padding: 8px;
-        border-radius: 0;
-      }
       oxy-tab {
-        padding: 8px;
+        padding: 8px 8px 8px 16px;
         min-height: 48px;
         display: flex;
         align-items: center;
@@ -67,19 +58,8 @@ export class FpDbView extends LitElement {
         margin-right: 8px;
         flex-shrink: 0;
       }
-      oxy-tab.group[open] {
-        background-image: linear-gradient(to right, rgba(31, 175, 219, 0.2), transparent);
-      }
-      oxy-tab.group oxy-button {
-        padding: 2px;
-        margin: 0;
-        color: var(--tertiary-text-color);
-      }
-      oxy-tab.entry[selected] {
+      oxy-tab[selected] {
         background-image: linear-gradient(to right, rgba(195, 7, 63, 0.2), transparent);
-      }
-      oxy-tab.entry oxy-icon {
-        margin-left: 16px;
       }
       .entry-text {
         display: flex;
@@ -128,7 +108,6 @@ export class FpDbView extends LitElement {
   @property({type: Object}) database: Database|null = null;
   @property({type: Object}) databaseError: DatabaseError|null = null;
   @property({type: Object}) model: DbModel|null = null;
-  @property({type: Object}) selectedGroup: DbGroup|null = null;
   @property({type: Object}) selectedEntry: DbEntry|null = null;
   @property({type: Object}) decryptedEntry: DbEntry|null = null;
 
@@ -140,34 +119,16 @@ export class FpDbView extends LitElement {
 
   render() {
     if (!this.model) return html``;
-    const groupSelected = !this.selectedEntry && !!this.selectedGroup;
-    const groupEmpty = !!this.selectedGroup &&
-        this.selectedGroup.entries.length === 0;
     return html`
       <div id="sidebar">
-        <div id="buttons">
-          <oxy-button>
-            <oxy-icon icon="icons:create-new-folder"></oxy-icon>
-          </oxy-button>
-          <oxy-button
-              ?disabled=${!groupSelected || !groupEmpty}
-              @click=${() => this.onGroupDelete(this.selectedGroup)}>
-            <oxy-icon icon="icons:delete"></oxy-icon>
-          </oxy-button>
-          <oxy-button ?disabled=${!groupSelected}>
-            <oxy-icon icon="icons:create"></oxy-icon>
-          </oxy-button>
-        </div>
-
         <div id="items">
-          ${repeat(this.model.groups,
-              group => group.name,
-              group => this.renderGroup(group))}
+          ${repeat(this.model.entries,
+              entry => entry.name,
+              entry => this.renderEntry(entry))}
         </div>
 
-        <oxy-button id="new-group-button" ?hidden=${!!this.model.groups.length}>
-          <oxy-icon icon="icons:create-new-folder"></oxy-icon>
-          New Group
+        <oxy-button id="new-entry-button" raised @click=${this.onEntryAdd}>
+          New Entry
         </oxy-button>
       </div>
 
@@ -204,32 +165,6 @@ export class FpDbView extends LitElement {
     `;
   }
 
-  private renderGroup(group: DbGroup) {
-    const isSelected = group === this.selectedGroup;
-    const iconName = isSelected ? 'icons:expand-more' : 'icons:chevron-right';
-    return html`
-      <oxy-tab
-          class="group"
-          orientation="vertical"
-          ?open=${isSelected}
-          @click=${(event: MouseEvent) => this.onGroupClick(event, group)}>
-        <oxy-icon .icon=${iconName}></oxy-icon>
-        <div class="entry-text">
-          <div class="primary">${group.name}</div>
-          <div class="secondary">${group.entries.length} entries</div>
-        </div>
-        <oxy-button
-            @click=${(event: MouseEvent) => this.onEntryAdd(event, group)}>
-          <oxy-icon icon="icons:add"></oxy-icon>
-        </oxy-button>
-      </oxy-tab>
-
-      ${repeat(isSelected ? group.entries : [],
-            entry => entry.name,
-            entry => this.renderEntry(entry))}
-    `;
-  }
-
   private renderEntry(entry: DbEntry) {
     const isSelected = entry === this.selectedEntry;
     return html`
@@ -247,21 +182,16 @@ export class FpDbView extends LitElement {
     `;
   }
 
-  private onGroupClick(event: MouseEvent, group: DbGroup) {
-    if (event.defaultPrevented) return;
-    this.selectedGroup = group;
-    this.selectEntry(null);
-  }
-
   private onEntryClick(entry: DbEntry) {
     this.selectEntry(entry);
   }
 
-  private onEntryAdd(event: MouseEvent, group: DbGroup) {
+  private onEntryAdd(event: MouseEvent) {
     // Prevent clicks on the group the "Add" button is a child of.
     event.preventDefault();
 
     if (!this.database) return;
+
     const entry: DbEntry = {
       name: 'Unnamed',
       icon: 'editor:insert-drive-file',
@@ -279,8 +209,7 @@ export class FpDbView extends LitElement {
             const message = 'The database was invalidated';
             throw {code: 'db/unavailable', message};
           }
-          this.selectedGroup = group;
-          this.database.addEntry(group, encryptedEntry);
+          this.database.addEntry(encryptedEntry);
           this.updateModel();
           this.selectEntry(encryptedEntry);
           this.startEditingEntry();
@@ -293,13 +222,12 @@ export class FpDbView extends LitElement {
     const newEntry = event.detail;
     this.database.encryptEntry(newEntry)
         .then(encryptedEntry => {
-          if (!this.database || !this.selectedGroup || !this.selectedEntry) {
+          if (!this.database || !this.selectedEntry) {
             const message = 'The database was invalidated';
             throw {code: 'db/unavailable', message};
           }
-          this.database.updateEntry(
-              this.selectedGroup, this.selectedEntry, encryptedEntry);
-          this.database.sortGroupsAndEntries();
+          this.database.updateEntry(this.selectedEntry, encryptedEntry);
+          this.database.sortEntries();
           this.updateModel();
           this.selectEntry(encryptedEntry);
         })
@@ -307,10 +235,10 @@ export class FpDbView extends LitElement {
   }
 
   private onEntryDelete(event: CustomEvent<DbEntry>) {
-    if (!this.database || !this.selectedGroup || !this.selectedEntry) return;
+    if (!this.database || !this.selectedEntry) return;
     const entry = event.detail;
     this.selectEntry(null);
-    this.database.deleteEntry(this.selectedGroup, entry);
+    this.database.deleteEntry(entry);
     this.updateModel();
   }
 
@@ -332,21 +260,6 @@ export class FpDbView extends LitElement {
           this.decryptedEntry = decryptedEntry;
         })
         .catch(error => this.databaseError = error);
-  }
-
-  private onGroupDelete(group: DbGroup|null) {
-    if (!group) return;
-
-    // Do not delete groups with entries!
-    if (group.entries.length > 0) {
-      console.error('Attempted to delete non-empty group');
-      return;
-    }
-    if (!this.database) return;
-    this.database.deleteGroup(group);
-    this.selectedGroup = null;
-    this.selectEntry(null);
-    this.updateModel();
   }
 
   private startEditingEntry() {

@@ -62,6 +62,7 @@ export class FpDbEntry extends LitElement {
       #button-bar {
         display: flex;
         justify-content: flex-end;
+        flex-shrink: 0;
       }
       #button-bar oxy-button {
         margin-left: 16px;

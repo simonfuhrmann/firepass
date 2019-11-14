@@ -1,4 +1,4 @@
-import {DbModel, DbGroup, DbEntry, DbSettings, DbDocument, DbSettingsEncoded} from './db-types';
+import {DbModel, DbEntry, DbSettings, DbDocument, DbSettingsEncoded} from './db-types';
 import {Base64} from './base64';
 
 // The in-memory representation of the database.
@@ -69,61 +69,25 @@ export class DbData {
       passSalt: salt,
       aesIv: iv,
     };
-    this.model = {groups: []};
-  }
-
-  // Adds an empty group for entries, and returns it.
-  // Throws if the model is not set, or the group already exists.
-  addGroup(name: string): DbGroup {
-    if (!this.model) throw 'Model not initialized';
-
-    // Check if group already exists.
-    const group = this.model.groups.find(group => group.name === name);
-    if (!!group) {
-      throw `Group "${name}" already exists`;
-    }
-
-    // Create new group.
-    const newGroup: DbGroup = {
-      name: name,
-      entries: [],
-    };
-
-    // Update model.
-    this.model = {
-      groups: [...this.model.groups, newGroup],
-    };
-
-    return newGroup;
-  }
-
-  // Deletes an existing group including all entries.
-  deleteGroup(group: DbGroup) {
-    if (!this.model) throw 'Model not initialized';
-    const groups = this.model.groups.filter(g => g !== group);
-    this.model = {groups};
+    this.model = {entries: []};
   }
 
   // Updates a database entry in a group. If the old entry is null, the new
   // entry is created. If the new entry is null, the old entry is deleted.
   // If both entries are null, an exception is thrown.
   // Note: Only encrypted entries must be added.
-  updateEntry(group: DbGroup, oldEntry: DbEntry|null, newEntry: DbEntry|null) {
+  updateEntry(oldEntry: DbEntry|null, newEntry: DbEntry|null) {
     if (!this.model) throw 'Model not initialized';
     if (!oldEntry && !newEntry) throw 'Both old and new entry are null';
 
-    const groupIdx = this.model.groups.findIndex(elem => elem === group);
-    if (groupIdx < 0) throw `Group "${group.name}" does not exist`;
-    const groupEntries = this.model.groups[groupIdx].entries;
-
     // If the new entry is null, delete the old entry. If the old entry is null,
     // add a new entry. Otherwise update the existing entry.
-    let entries = groupEntries.slice();
+    let entries = this.model.entries.slice();
     if (!oldEntry) {
       if (!newEntry) return;  // Just to prevent TS warnings.
       entries.push(newEntry);
     } else {
-      const entryIdx = groupEntries.findIndex(elem => elem === oldEntry);
+      const entryIdx = entries.findIndex(elem => elem === oldEntry);
       if (!newEntry) {
         entries.splice(entryIdx, 1);
       } else {
@@ -131,19 +95,12 @@ export class DbData {
       }
     }
 
-    // Copy all groups array, update affected group.
-    const groups = this.model.groups.slice();
-    groups[groupIdx].entries = entries;
-
     // Update model.
-    this.model = {groups};
+    this.model = {entries};
   }
 
-  sortGroupsAndEntries() {
+  sortEntries() {
     if (!this.model) throw 'Model not initialized';
-    this.model.groups.sort((a, b) => a.name.localeCompare(b.name));
-    this.model.groups.forEach(group => {
-      group.entries.sort((a, b) => a.name.localeCompare(b.name));
-    });
+    this.model.entries.sort((a, b) => a.name.localeCompare(b.name));
   }
 }
