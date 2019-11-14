@@ -19,7 +19,8 @@ export class FpAppToolbar extends EventsMixin(LitElement) {
         display: flex;
         flex-direction: row;
         align-items: center;
-        border-bottom: 1px solid #333;
+        background-color: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
       }
       oxy-button {
         color: var(--secondary-text-color);
