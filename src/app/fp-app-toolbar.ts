@@ -22,10 +22,15 @@ export class FpAppToolbar extends EventsMixin(LitElement) {
         background-color: rgba(255, 255, 255, 0.1);
         box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
       }
-      oxy-button {
-        color: var(--secondary-text-color);
-        padding: 12px;
-        border-radius: 0;
+      #lock-button {
+        position: relative;
+      }
+      #lock-button > div {
+        position: absolute;
+        font-size: 0.7em;
+        color: black;
+        background-color: var(--secondary-text-color);
+        bottom: 15px;
       }
       #logo {
         display: flex;
@@ -41,6 +46,11 @@ export class FpAppToolbar extends EventsMixin(LitElement) {
         font-size: 1.2em;
         margin: 0 0 0 8px;
       }
+      oxy-button {
+        color: var(--secondary-text-color);
+        padding: 12px;
+        border-radius: 0;
+      }
       [hidden] {
         display: none !important;
       }
@@ -50,6 +60,15 @@ export class FpAppToolbar extends EventsMixin(LitElement) {
   @query('#generator') generator: FpPassGenerator|undefined;
 
   @property({type: Boolean}) dbUnlocked = false;
+  @property({type: Number}) idleTimeoutMs = 0;
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.addListener(this.IDLE_TIMEOUT,
+        this.updateIdleTimeout.bind(this) as EventListener);
+    this.addListener(this.DB_LOCK,
+        this.resetIdleTimeout.bind(this) as EventListener);
+  }
 
   render() {
     return html`
@@ -63,24 +82,26 @@ export class FpAppToolbar extends EventsMixin(LitElement) {
         <!-- Buttons. -->
         <oxy-button
             title="Generate Password"
-            @click=${this.onGenerator_}>
+            @click=${this.onOpenGenerator}>
           <oxy-icon icon="communication:vpn-key"></oxy-icon>
         </oxy-button>
         <oxy-button
             title="Settings"
-            @click=${this.onSettings_}>
+            @click=${this.onOpenSettings}>
           <oxy-icon icon="icons:settings"></oxy-icon>
         </oxy-button>
         <oxy-button
             title="Log out"
-            @click=${this.onLogout_}>
+            @click=${this.onLogout}>
           <oxy-icon icon="icons:exit-to-app"></oxy-icon>
         </oxy-button>
         <oxy-button
+            id="lock-button"
             title="Lock database"
             ?disabled=${!this.dbUnlocked}
-            @click=${this.onLock_}>
+            @click=${this.onLock}>
           <oxy-icon icon="icons:lock"></oxy-icon>
+          <div ?hidden=${!this.idleTimeoutMs}>${this.formatIdleTime()}</div>
         </oxy-button>
       </div>
 
@@ -88,21 +109,35 @@ export class FpAppToolbar extends EventsMixin(LitElement) {
     `;
   }
 
-  onGenerator_() {
+  private onOpenGenerator() {
     const generator = this.generator;
     if (!generator) return;
     generator.open();
   }
 
-  onSettings_() {
+  private onOpenSettings() {
     // TODO
   }
 
-  onLogout_() {
+  private onLogout() {
     this.dispatch(this.USER_SIGNOFF);
   }
 
-  onLock_() {
+  private onLock() {
     this.dispatch(this.DB_LOCK);
+  }
+
+  private updateIdleTimeout(event: CustomEvent<number>) {
+    this.idleTimeoutMs = event.detail;
+  }
+
+  private resetIdleTimeout() {
+    this.idleTimeoutMs = 0;
+  }
+
+  private formatIdleTime() {
+    const secs = Math.ceil(this.idleTimeoutMs / 1000);
+    const mins = Math.ceil(secs / 60);
+    return secs >= 60 ? mins.toString() : secs.toString();
   }
 }

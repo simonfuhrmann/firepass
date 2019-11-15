@@ -14,6 +14,7 @@ export function EventsMixin<TBase extends Constructor>(Base: TBase) {
     // Available global events.
     protected DB_LOCK: string = 'db-lock';
     protected USER_SIGNOFF: string = 'user-signoff';
+    protected IDLE_TIMEOUT: string = 'idle-timeout';
 
     private listeners_: EventReference[] = [];
 
