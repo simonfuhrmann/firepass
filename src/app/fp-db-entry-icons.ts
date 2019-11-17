@@ -44,6 +44,27 @@ export class FpDbEntryIcons extends LitElement {
   }
 
   private icons: string[] = [
+    'logos:amazon',
+    'logos:apple',
+    'logos:google',
+    'logos:facebook',
+    'logos:instagram',
+    'logos:twitter',
+    'logos:whatsapp',
+    'logos:skype',
+    'logos:slack',
+    'logos:windows',
+    'logos:xbox',
+    'logos:dropbox',
+    'logos:github',
+    'logos:steam',
+    'logos:battlenet',
+    'logos:uplay',
+    'logos:paypal',
+    'logos:visa',
+    'logos:mastercard',
+    'logos:amex',
+    'logos:linkedin',
     'icons:account-box',
     'icons:account-circle',
     'icons:alarm',
@@ -115,6 +136,7 @@ export class FpDbEntryIcons extends LitElement {
     'social:public',
     'social:school',
     'social:whatshot',
+    'places:spa',
   ];
 
   @property({type: Boolean, reflect: true}) opened = false;

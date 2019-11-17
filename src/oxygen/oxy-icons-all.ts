@@ -1,6 +1,7 @@
 import './oxy-icons-av';
 import './oxy-icons-base';
 import './oxy-icons-communication';
+import './oxy-icons-logos';
 import './oxy-icons-device';
 import './oxy-icons-editor';
 import './oxy-icons-hardware';
