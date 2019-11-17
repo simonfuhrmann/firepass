@@ -1,4 +1,4 @@
-import {DbModel, DbEntry, DbSettings, DbDocument, DbSettingsEncoded} from './db-types';
+import {DbModel, DbEntry, DbSettings, DbDocument} from './db-types';
 import {Base64} from './base64';
 
 // The in-memory representation of the database.
@@ -23,8 +23,8 @@ export class DbData {
     this.model = null;
   }
 
-  // Sets the document stored in the database backend, e.g., after downloading
-  // it from the backend, or after uploading a new version to the backend.
+  // Sets the document stored in the database backend. Required after
+  // downloading it from the storage backend.
   setDocument(doc: DbDocument) {
     if (!doc.settings || !doc.payload) {
       throw 'db/unexpected-format';
@@ -36,14 +36,32 @@ export class DbData {
     };
   }
 
-  // Returns the (base64 encoded) database settings.
-  getEncodedSettings(): DbSettingsEncoded {
+  // Returns the database document with base64 encoded settings and payload.
+  // Required for upload to the storage backend.
+  getDocument(): DbDocument {
     if (!this.settings) throw 'Settings not initialized';
-    return {
+    if (!this.payload) throw 'Payload not initialized';
+    const settings = {
       passSalt: Base64.encode(this.settings.passSalt),
       aesIv: Base64.encode(this.settings.aesIv),
     };
+    const payload = Base64.encode(this.payload);
+    return {settings, payload};
   }
+
+  // Sets a new payload (the encrypted database). Required after the  database
+  // has locally changed.
+  setPayload(payload: ArrayBuffer, aesIv: ArrayBuffer) {
+    if (!this.settings) throw 'Settings not initialized';
+    this.payload = payload;
+    this.settings.aesIv = aesIv;
+  }
+
+  // Returns the database payload (the encrypted database).
+  getPayload(): ArrayBuffer {
+    if (!this.payload) throw 'Payload not initialzed';
+    return this.payload;
+  };
 
   // Returns the salt for deriving the master key from the master password.
   getPasswordSalt(): ArrayBuffer {
@@ -56,12 +74,6 @@ export class DbData {
     if (!this.settings) throw 'Settings not initialized';
     return this.settings.aesIv;
   }
-
-  // Returns the database payload (the encrypted database).
-  getPayload(): ArrayBuffer {
-    if (!this.payload) throw 'Payload not initialzed';
-    return this.payload;
-  };
 
   // Creates a new, empty database with the given crypto parameters.
   createNewDatabase(salt: ArrayBuffer, iv: ArrayBuffer) {
@@ -88,6 +100,7 @@ export class DbData {
       entries.push(newEntry);
     } else {
       const entryIdx = entries.findIndex(elem => elem === oldEntry);
+      if (entryIdx < 0) throw 'Old entry not in database';
       if (!newEntry) {
         entries.splice(entryIdx, 1);
       } else {

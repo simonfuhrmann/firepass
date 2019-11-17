@@ -5,6 +5,7 @@ import {repeat} from 'lit-html/directives/repeat';
 import {Database, DatabaseError} from '../database/database';
 import {DbModel, DbEntry} from '../database/db-types';
 import {FpDbEntry} from './fp-db-entry';
+import {devConfig} from '../config/development';
 import {sharedStyles} from './fp-styles'
 import '../oxygen/oxy-button';
 import '../oxygen/oxy-icon';
@@ -69,6 +70,7 @@ export class FpDbView extends LitElement {
       .entry-text .primary {
         color: var(--primary-text-color);
         font-weight: 500;
+        font-size: 0.9em;
       }
       .entry-text .secondary {
         color: var(--tertiary-text-color);
@@ -159,7 +161,7 @@ export class FpDbView extends LitElement {
       <fp-db-entry
           id="entry"
           .entry=${this.decryptedEntry}
-          @delete=${this.onEntryDelete}
+          @delete=${() => this.onEntryDelete(this.selectedEntry)}
           @save=${this.onEntrySave}>
       </fp-db-entry>
     `;
@@ -230,16 +232,17 @@ export class FpDbView extends LitElement {
           this.database.sortEntries();
           this.updateModel();
           this.selectEntry(encryptedEntry);
+          this.uploadDatabase();
         })
         .catch(error => this.databaseError = error);
   }
 
-  private onEntryDelete(event: CustomEvent<DbEntry>) {
-    if (!this.database || !this.selectedEntry) return;
-    const entry = event.detail;
+  private onEntryDelete(entry: DbEntry|null) {
+    if (!this.database || !entry) return;
     this.selectEntry(null);
     this.database.deleteEntry(entry);
     this.updateModel();
+    this.uploadDatabase();
   }
 
   private selectEntry(entry: DbEntry|null) {
@@ -269,6 +272,16 @@ export class FpDbView extends LitElement {
       const entryElement = this.entryElement;
       if (entryElement) entryElement.editing = true;
     }, 0);
+  }
+
+  private uploadDatabase() {
+    if (!this.database) return;
+    if (devConfig.skipUpload) {
+      console.warn('Skipping database upload (dev setting)');
+      return;
+    }
+    this.database.upload()
+        .catch((error) => this.databaseError = error);
   }
 
   private updateModel() {

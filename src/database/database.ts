@@ -135,14 +135,17 @@ export class Database {
   }
 
   deleteEntry(entry: DbEntry) {
+    console.log('Database.deleteEntry()');
     this.dbData.updateEntry(entry, null);
   }
 
   addEntry(entry: DbEntry) {
+    console.log('Database.addEntry()');
     this.dbData.updateEntry(null, entry);
   }
 
   updateEntry(oldEntry: DbEntry, newEntry: DbEntry) {
+    console.log('Database.upateEntry()');
     this.dbData.updateEntry(oldEntry, newEntry);
   }
 
@@ -187,6 +190,7 @@ export class Database {
   }
 
   sortEntries() {
+    console.log('Database.sortEntries()');
     this.dbData.sortEntries();
   }
 
@@ -234,12 +238,10 @@ export class Database {
     console.log('Database.uploadDatabase()');
     return new Promise((resolve, reject) => {
       const model = this.dbData.getModel();
-      const settings = this.dbData.getEncodedSettings();
       this.dbCrypto.encrypt(model, iv)
           .then(buffer => {
-            const payload = Base64.encode(buffer);
-            const doc: DbDocument = {settings, payload};
-            this.dbData.setDocument(doc);
+            this.dbData.setPayload(buffer, iv);
+            const doc = this.dbData.getDocument();
             this.dbStorage.upload(doc)
                 .then(() => resolve())
                 .catch((error: DbStorageError) => reject(error));

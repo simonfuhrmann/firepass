@@ -10,4 +10,7 @@ export const devConfig = {
   // Unlock password for the database.
   // If provided, the database is auto-unlocked after download.
   unlockPassword: '',
+
+  // Skip uploading the database after saving an entry.
+  skipUpload: false,
 };
