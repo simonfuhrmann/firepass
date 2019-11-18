@@ -59,6 +59,7 @@ export class OxyInput extends LitElement {
   @property({type: Boolean, reflect: true}) focused = false;
   @property({type: Boolean}) selectOnFocus = false;
   @property({type: Boolean}) clearOnEscape = false;
+  @property({type: Boolean}) autofocus = false;
 
   render() {
     return html`
@@ -83,6 +84,9 @@ export class OxyInput extends LitElement {
   }
 
   firstUpdated() {
+    if (this.autofocus) {
+      setTimeout(() => this.focus(), 0);
+    }
     if (!this.shadowRoot) return;
     this.input = this.shadowRoot.getElementById('input') as HTMLInputElement;
   }
