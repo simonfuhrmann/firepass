@@ -185,9 +185,11 @@ export class FpDbEntry extends LitElement {
 
   updated(changedProps: Map<string, any>) {
     if (changedProps.has('entry')) {
-      this.editing = false;
-      this.showPassword = false;
+      this.stopEditing();
       this.copyEntryToInputs();
+    }
+    if (changedProps.has('editing') && this.editing) {
+      this.startEditing();
     }
   }
 
@@ -329,7 +331,7 @@ export class FpDbEntry extends LitElement {
             title="Edit entry"
             raised
             ?hidden=${this.editing}
-            @click=${this.onEditClick}>
+            @click=${this.startEditing}>
           <oxy-icon icon="icons:create"></oxy-icon>
           Edit
         </oxy-button>
@@ -381,8 +383,18 @@ export class FpDbEntry extends LitElement {
     `;
   }
 
-  private onEditClick() {
+  private startEditing() {
     this.editing = true;
+
+    // Focus the name input.
+    if (!this.shadowRoot) return;
+    const nameInput = this.shadowRoot.getElementById('name') as OxyInput;
+    nameInput.focus();
+  }
+
+  private stopEditing() {
+    this.editing = false;
+    this.showPassword = false;
   }
 
   private openDeleteDialog() {
@@ -402,13 +414,13 @@ export class FpDbEntry extends LitElement {
 
   private onSaveClick() {
     this.copyInputsToEntry();
-    this.editing = false;
+    this.stopEditing();
     this.dispatchEvent(new CustomEvent('save', {detail: this.entry}));
   }
 
   private onRevertClick() {
     this.copyEntryToInputs();
-    this.editing = false;
+    this.stopEditing();
   }
 
   private onOpenUrl() {
@@ -486,12 +498,12 @@ export class FpDbEntry extends LitElement {
   private copyBetweenEntryAndInputs(entryToInputs: boolean) {
     if (!this.entry) return;
     if (!this.shadowRoot) return;
-    const nameInput = <OxyInput>this.shadowRoot.getElementById('name');
-    const urlInput = <OxyInput>this.shadowRoot.getElementById('url');
-    const emailInput = <OxyInput>this.shadowRoot.getElementById('email');
-    const loginInput = <OxyInput>this.shadowRoot.getElementById('login');
-    const passwordInput = <OxyInput>this.shadowRoot.getElementById('password');
-    const notesInput = <OxyTextarea>this.shadowRoot.getElementById('notes');
+    const nameInput = this.shadowRoot.getElementById('name') as OxyInput;
+    const urlInput = this.shadowRoot.getElementById('url') as OxyInput;
+    const emailInput = this.shadowRoot.getElementById('email') as OxyInput;
+    const loginInput = this.shadowRoot.getElementById('login') as OxyInput;
+    const passInput = this.shadowRoot.getElementById('password') as OxyInput;
+    const notesInput = this.shadowRoot.getElementById('notes') as OxyTextarea;
 
     if (entryToInputs) {
       this.entryIcon = this.entry.icon;
@@ -499,7 +511,7 @@ export class FpDbEntry extends LitElement {
       urlInput.value = this.entry.url;
       emailInput.value = this.entry.email;
       loginInput.value = this.entry.login;
-      passwordInput.value = this.entry.password;
+      passInput.value = this.entry.password;
       notesInput.value = this.entry.notes;
     } else {
       this.entry = {
@@ -509,7 +521,7 @@ export class FpDbEntry extends LitElement {
         email: emailInput.value,
         login: loginInput.value,
         aesIv: '',
-        password: passwordInput.value,
+        password: passInput.value,
         notes: notesInput.value,
       };
     }
