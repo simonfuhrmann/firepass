@@ -4,12 +4,16 @@ import {repeat} from 'lit-html/directives/repeat';
 
 import {Database, DatabaseError} from '../database/database';
 import {DbModel, DbEntry} from '../database/db-types';
+import {OxyInput} from '../oxygen/oxy-input';
+import {OxyToast} from '../oxygen/oxy-toast';
 import {FpDbEntry} from './fp-db-entry';
 import {devConfig} from '../config/development';
 import {sharedStyles} from './fp-styles'
 import '../oxygen/oxy-button';
 import '../oxygen/oxy-icon';
+import '../oxygen/oxy-input';
 import '../oxygen/oxy-tab';
+import '../oxygen/oxy-toast';
 import './fp-db-entry';
 
 @customElement('fp-db-view')
@@ -27,11 +31,46 @@ export class FpDbView extends LitElement {
         border-right: 1px solid var(--separator-color);
         width: 256px;
       }
+      #actions {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        border-bottom: 1px solid var(--separator-color);
+      }
+      #actions oxy-input {
+        flex-grow: 1;
+        margin: 0;
+        --oxy-input-text-padding: 6px;
+        --oxy-input-border-width: 0;
+        --oxy-input-border-radius: 0;
+        --oxy-input-box-shadow: none;
+        --oxy-input-box-shadow-focused: none;
+        --oxy-input-background-color: transparent;
+        --oxy-input-background-color-focused: transparent;
+      }
+      #actions oxy-input oxy-icon {
+        color: var(--disabled-text-color);
+        cursor: pointer;
+        margin-left: 8px;
+      }
+      #actions oxy-input oxy-icon[active] {
+        color: var(--primary-text-color);
+      }
+      #actions oxy-button {
+        padding: 4px;
+        border-radius: 0;
+      }
       #items {
         display: flex;
         flex-direction: column;
         flex-grow: 1;
         overflow-y: auto;
+      }
+      #items p {
+        align-self: center;
+        color: var(--disabled-text-color);
+        font-size: 0.9em;
+        margin: 32px;
       }
       #items::-webkit-scrollbar {
         width: var(--oxy-scrollbar-width);
@@ -44,12 +83,8 @@ export class FpDbView extends LitElement {
       #items::-webkit-scrollbar-thumb:hover {
         box-shadow: var(--oxy-scrollbar-thumb-hover-box-shadow);
       }
-      #new-entry-button {
-        margin: 16px;
-        background-color: var(--theme-color-ice1);
-      }
       oxy-tab {
-        padding: 8px 8px 8px 16px;
+        padding: 8px 8px 8px 12px;
         min-height: 48px;
         display: flex;
         align-items: center;
@@ -82,7 +117,7 @@ export class FpDbView extends LitElement {
       }
       #empty {
         font-size: 1.2em;
-        color: var(--separator-color);
+        color: var(--disabled-text-color);
         text-align: center;
         margin: 128px 32px;
       }
@@ -106,10 +141,13 @@ export class FpDbView extends LitElement {
   }
 
   @query('#entry') private entryElement: FpDbEntry|undefined;
+  @query('#filter') private filterInput: OxyInput|undefined;
+  @query('#toast') private toastElement: OxyToast|undefined;
 
   @property({type: Object}) database: Database|null = null;
   @property({type: Object}) databaseError: DatabaseError|null = null;
   @property({type: Object}) model: DbModel|null = null;
+  @property({type: Array}) filteredEntries: DbEntry[]|null = null;
   @property({type: Object}) selectedEntry: DbEntry|null = null;
   @property({type: Object}) decryptedEntry: DbEntry|null = null;
 
@@ -120,24 +158,57 @@ export class FpDbView extends LitElement {
   }
 
   render() {
-    if (!this.model) return html``;
+    // Display filtered entries, or all entries from the model.
+    const entries = !!this.filteredEntries
+        ? this.filteredEntries
+        : (this.model ? this.model.entries : []);
+
     return html`
       <div id="sidebar">
+        <div id="actions">
+          <oxy-input
+              id="filter"
+              clearonescape autofocus
+              @keydown=${this.onFilterKeydown}
+              @change=${this.onFilterChange}>
+            <oxy-icon
+                slot="before"
+                icon="icons:filter-list"
+                ?active=${!!this.filteredEntries}
+                @click=${this.onFilterClear}>
+            </oxy-icon>
+          </oxy-input>
+          <oxy-button title="New entry" @click=${this.onEntryAdd}>
+            <oxy-icon icon="icons:add"></oxy-icon>
+          </oxy-button>
+        </div>
         <div id="items">
-          ${repeat(this.model.entries,
+          ${repeat(entries,
               entry => entry.name,
               entry => this.renderEntry(entry))}
+          ${this.renderNoItems()}
         </div>
-
-        <oxy-button id="new-entry-button" raised @click=${this.onEntryAdd}>
-          New Entry
-        </oxy-button>
       </div>
 
       ${this.renderDatabaseError()}
       ${this.renderNoEntrySelected()}
       ${this.renderEntryView()}
+
+      <oxy-toast id="toast"></oxy-toast>
     `;
+  }
+
+  private renderNoItems() {
+    if (!this.model) {
+      return html`<p>No model selected</p>`;
+    }
+    if (!!this.filteredEntries && this.filteredEntries.length === 0) {
+      return html`<p>No entries match the filter</p>`;
+    }
+    if (!this.filteredEntries && this.model.entries.length === 0) {
+      return html`<p>No entries, create one!</p>`;
+    }
+    return html``;
   }
 
   private renderDatabaseError() {
@@ -191,6 +262,8 @@ export class FpDbView extends LitElement {
   private onEntryAdd(event: MouseEvent) {
     // Prevent clicks on the group the "Add" button is a child of.
     event.preventDefault();
+    // Reset any previous filter.
+    this.onFilterClear();
 
     if (!this.database) return;
 
@@ -265,6 +338,42 @@ export class FpDbView extends LitElement {
         .catch(error => this.databaseError = error);
   }
 
+  private onFilterClear() {
+    if (!this.filterInput) return;
+    this.filterInput.clear();
+  }
+
+  private onFilterChange(event: CustomEvent<string>) {
+    if (!this.model) return;
+    const filter = event.detail.toLowerCase();
+    if (filter.length < 3) {
+      this.filteredEntries = null;
+      return;
+    }
+    this.filteredEntries = this.model.entries.filter(entry => {
+      return entry.name.toLowerCase().search(filter) >= 0 ||
+          entry.url.toLowerCase().search(filter) >= 0 ||
+          entry.email.toLowerCase().search(filter) >= 0 ||
+          entry.login.toLowerCase().search(filter) >= 0;
+    });
+  }
+
+  private onFilterKeydown(event: KeyboardEvent) {
+    if (event.key !== 'Enter') return;
+    if (!this.filteredEntries || this.filteredEntries.length === 0) return;
+    const firstEntry = this.filteredEntries[0];
+    this.selectEntry(firstEntry);
+
+    if (!this.database) return;
+    this.database.decryptEntry(firstEntry)
+        .then(decryptedEntry => {
+          navigator.clipboard.writeText(decryptedEntry.password)
+              .then(() => this.showToast('Password copied to clipboard'))
+              .catch(() => this.showToast('Failed to copy to clipboard'));
+        })
+        .catch(error => this.databaseError = error);
+  }
+
   private startEditingEntry() {
     // Editing mode gets disabled in <fp-db-entry> after switching entries.
     // This timeout re-enables editing mode immediately afterwards.
@@ -287,5 +396,10 @@ export class FpDbView extends LitElement {
   private updateModel() {
     if (!this.database) return;
     this.model = this.database.getModel();
+  }
+
+  private showToast(text: string) {
+    if (!this.toastElement) return;
+    this.toastElement.openNormal(text);
   }
 }
