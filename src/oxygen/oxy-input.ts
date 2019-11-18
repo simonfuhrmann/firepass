@@ -40,7 +40,7 @@ export class OxyInput extends LitElement {
         outline: none;
         background: transparent;
         text-align: inherit;
-        min-width: 1em;
+        width: 0;
       }
       input::placeholder {
         color: var(--oxy-input-placeholder-color);
@@ -58,6 +58,7 @@ export class OxyInput extends LitElement {
   @property({type: Boolean}) disabled = false;
   @property({type: Boolean, reflect: true}) focused = false;
   @property({type: Boolean}) selectOnFocus = false;
+  @property({type: Boolean}) clearOnEscape = false;
 
   render() {
     return html`
@@ -65,13 +66,14 @@ export class OxyInput extends LitElement {
         <slot name="before"></slot>
         <input
             id="input"
-            .type=${this.type}
             .value=${this.value}
             ?disabled=${this.disabled}
             ?readonly=${this.readonly}
+            type="${this.type}"
             maxlength="${this.maxlength}"
             placeholder="${this.placeholder}"
             spellcheck="false"
+            @keydown=${this.onKeydown}
             @input=${this.onValueChanged}
             @focus=${this.onFocus}
             @blur=${this.onBlur}>
@@ -82,7 +84,7 @@ export class OxyInput extends LitElement {
 
   firstUpdated() {
     if (!this.shadowRoot) return;
-    this.input = <HTMLInputElement>this.shadowRoot.getElementById('input');
+    this.input = this.shadowRoot.getElementById('input') as HTMLInputElement;
   }
 
   focus() {
@@ -101,7 +103,9 @@ export class OxyInput extends LitElement {
   }
 
   clear() {
+    if (this.value === '') return;
     this.value = '';
+    this.emitChange();
   }
 
   copyToClipboard() {
@@ -124,10 +128,20 @@ export class OxyInput extends LitElement {
         });
   }
 
+  private emitChange() {
+    this.dispatchEvent(new CustomEvent('change', {detail: this.value}));
+  }
+
   private onValueChanged() {
     if (!this.input) return;
     this.value = this.input.value;
-    this.dispatchEvent(new CustomEvent('change', {detail: this.value}));
+    this.emitChange();
+  }
+
+  private onKeydown(event: KeyboardEvent) {
+    if (this.clearOnEscape && event.key === "Escape") {
+      this.clear();
+    }
   }
 
   private onFocus() {
