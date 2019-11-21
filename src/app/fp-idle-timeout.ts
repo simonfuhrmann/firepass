@@ -2,13 +2,13 @@ import {LitElement} from 'lit-element';
 import {customElement} from 'lit-element';
 
 import {EventsMixin} from '../mixins/events-mixin';
+import {appConfig} from '../config/application';
 
 @customElement('fp-idle-timeout')
 export class FpIdleTimeout extends EventsMixin(LitElement) {
   private resetListener = this.resetTimeout.bind(this);
   private intervalHandle = -1;
   private checkIntervalMs = 1000;  // Every second
-  private maxIdleTimeMs = 1000 * 60 * 5;  // 5 Minutes
   private lastActivityMs = Date.now();
 
   connectedCallback() {
@@ -33,10 +33,10 @@ export class FpIdleTimeout extends EventsMixin(LitElement) {
 
   private checkTimeout() {
     const idleTimeMs = Date.now() - this.lastActivityMs;
-    if (idleTimeMs > this.maxIdleTimeMs) {
+    if (idleTimeMs > appConfig.idleTimeoutMs) {
       this.dispatch(this.DB_LOCK);
     } else {
-      this.dispatch(this.IDLE_TIMEOUT, this.maxIdleTimeMs - idleTimeMs);
+      this.dispatch(this.IDLE_TIMEOUT, appConfig.idleTimeoutMs - idleTimeMs);
     }
   }
 }
