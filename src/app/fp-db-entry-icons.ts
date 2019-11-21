@@ -43,7 +43,7 @@ export class FpDbEntryIcons extends LitElement {
     `;
   }
 
-  private icons: string[] = [
+  private readonly icons: string[] = [
     'logos:amazon',
     'logos:apple',
     'logos:google',

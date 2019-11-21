@@ -6,9 +6,9 @@ import {appConfig} from '../config/application';
 
 @customElement('fp-idle-timeout')
 export class FpIdleTimeout extends EventsMixin(LitElement) {
-  private resetListener = this.resetTimeout.bind(this);
+  private readonly resetListener = this.resetTimeout.bind(this);
+  private readonly checkIntervalMs = 1000;  // Every second
   private intervalHandle = -1;
-  private checkIntervalMs = 1000;  // Every second
   private lastActivityMs = Date.now();
 
   connectedCallback() {
