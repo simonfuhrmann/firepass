@@ -1,4 +1,4 @@
-import {Base64} from './base64';
+import {Base64} from '../modules/base64';
 import {DbCrypto} from './db-crypto';
 import {DbData} from './db-data';
 import {DbStorage, DbStorageError} from './db-storage';

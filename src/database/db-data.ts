@@ -1,11 +1,11 @@
 import {DbModel, DbEntry, DbSettings, DbDocument} from './db-types';
-import {Base64} from './base64';
+import {Base64} from '../modules/base64';
 
 // The in-memory representation of the database.
 export class DbData {
   private payload: ArrayBuffer|null = null;  // The encrypted database.
   private settings: DbSettings|null = null;  // The database settings.
-  private model: DbModel|null = null;  // The decrupted database.
+  private model: DbModel|null = null;  // The decrypted database.
 
   // Returns the decrypted database model. Throws if not set before.
   getModel(): DbModel {
@@ -49,7 +49,7 @@ export class DbData {
     return {settings, payload};
   }
 
-  // Sets a new payload (the encrypted database). Required after the  database
+  // Sets a new payload (the encrypted database). Required after the database
   // has locally changed.
   setPayload(payload: ArrayBuffer, aesIv: ArrayBuffer) {
     if (!this.settings) throw 'Settings not initialized';
