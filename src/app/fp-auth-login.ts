@@ -64,8 +64,8 @@ export class FpAuthLogin extends LitElement {
 
   firstUpdated() {
     if (!this.shadowRoot) return;
-    this.emailInput = <OxyInput>this.shadowRoot.getElementById('email');
-    this.passwordInput = <OxyInput>this.shadowRoot.getElementById('password');
+    this.emailInput = this.shadowRoot.getElementById('email') as OxyInput;
+    this.passwordInput = this.shadowRoot.getElementById('password') as OxyInput;
 
     setTimeout(() => {
       if (!this.emailInput) return;
@@ -82,13 +82,13 @@ export class FpAuthLogin extends LitElement {
   }
 
   private onEmailKeydown(event: KeyboardEvent) {
-    if (event.keyCode != 13 || !this.passwordInput) return;
+    if (event.key !== 'Enter' || !this.passwordInput) return;
     this.passwordInput.focus();
     this.passwordInput.select();
   }
 
   private onPassKeydown(event: KeyboardEvent) {
-    if (event.keyCode != 13) return;
+    if (event.key !== 'Enter') return;
     this.login();
   }
 
