@@ -1,23 +1,19 @@
 import {LitElement, html, css} from 'lit-element';
-import {customElement, property} from 'lit-element';
+import {customElement, property, query} from 'lit-element';
 
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
 
+import * as Actions from '../modules/state-actions';
+import {AuthState, State} from '../modules/state-types';
 import {EventsMixin} from '../mixins/events-mixin';
+import {StateMixin} from '../mixins/state-mixin';
 import {FpAuthLogin} from './fp-auth-login';
 import {sharedStyles} from './fp-styles'
 import './fp-auth-login';
 
-enum AuthState {
-  PENDING,
-  ERROR,
-  SIGNED_OFF,
-  SIGNED_ON,
-}
-
 @customElement('fp-authentication')
-export class FpAuthentication extends EventsMixin(LitElement) {
+export class FpAuthentication extends StateMixin(EventsMixin(LitElement)) {
   static get styles() {
     return css`
       ${sharedStyles}
@@ -54,7 +50,8 @@ export class FpAuthentication extends EventsMixin(LitElement) {
     `;
   }
 
-  @property({type: Number}) state = AuthState.PENDING;
+  @query('#login') loginElement: FpAuthLogin|undefined;
+  @property({type: Number}) authState = AuthState.PENDING;
   @property({type: String}) errorCode = '';
   @property({type: String}) errorMessage = '';
 
@@ -64,11 +61,17 @@ export class FpAuthentication extends EventsMixin(LitElement) {
         this.onUserSignoff.bind(this) as EventListener);
   }
 
+  stateChanged(newState: State, oldState: State|null) {
+    if (!oldState || newState.authState !== oldState.authState) {
+      this.authState = newState.authState;
+    }
+  }
+
   render() {
     return html`
-      ${this.state === AuthState.PENDING ? this.renderLoading() : ''}
-      ${this.state === AuthState.ERROR ? this.renderAuthError() : ''}
-      ${this.state === AuthState.SIGNED_OFF ? this.renderSignon() : ''}
+      ${this.authState === AuthState.PENDING ? this.renderLoading() : ''}
+      ${this.authState === AuthState.ERROR ? this.renderAuthError() : ''}
+      ${this.authState === AuthState.SIGNED_OFF ? this.renderSignon() : ''}
     `;
   }
 
@@ -81,11 +84,11 @@ export class FpAuthentication extends EventsMixin(LitElement) {
     } catch (error) {
       this.errorCode = error.code;
       this.errorMessage = 'Missing Firebase config or authentication setup';
-      this.setAuthState(AuthState.ERROR);
+      Actions.setAuthState(AuthState.ERROR);
       return;
     }
     firebaseAuth.onAuthStateChanged((user: any) => {
-      this.setAuthState(!!user ? AuthState.SIGNED_ON : AuthState.SIGNED_OFF);
+      Actions.setAuthState(!!user ? AuthState.SIGNED_ON : AuthState.SIGNED_OFF);
     });
   }
 
@@ -110,32 +113,24 @@ export class FpAuthentication extends EventsMixin(LitElement) {
       </fp-auth-login>`;
   }
 
-  private setAuthState(newState: AuthState) {
-    this.state = newState;
-    const detail = {detail: newState === AuthState.SIGNED_ON};
-    this.dispatchEvent(new CustomEvent('state-change', detail));
-  }
-
   private onUserSignoff() {
     firebase.auth().signOut();
   }
 
   private onUserSignon(event: CustomEvent) {
-    if (!this.shadowRoot) return;
-    const authLogin = <FpAuthLogin>this.shadowRoot.getElementById('login');
-    if (!authLogin) return;
+    const loginElement = this.loginElement;
+    if (!loginElement) return;
 
-    authLogin.disabled = true;
-    authLogin.errorMessage = '';
+    loginElement.disabled = true;
+    loginElement.errorMessage = '';
     const email: string = event.detail.email;
     const pass: string = event.detail.pass;
     firebase.auth().signInWithEmailAndPassword(email, pass)
         .catch((error: any) => {
-          if (!authLogin) return;
-          authLogin.disabled = false;
-          authLogin.errorMessage = error.code;
-          authLogin.focusPassword();
-          this.setAuthState(AuthState.SIGNED_OFF);
+          loginElement.disabled = false;
+          loginElement.errorMessage = error.code;
+          loginElement.focusPassword();
+          Actions.setAuthState(AuthState.SIGNED_OFF);
         });
   }
 }

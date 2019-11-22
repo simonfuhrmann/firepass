@@ -3,11 +3,13 @@ import {customElement, property} from 'lit-element';
 import * as firebase from 'firebase/app';
 
 import {firebaseConfig} from '../config/firebase';
+import {AuthState, State} from '../modules/state-types';
+import {StateMixin} from '../mixins/state-mixin';
 import './fp-authentication';
 import './fp-database';
 
 @customElement('fp-app')
-export class FpApp extends LitElement {
+export class FpApp extends StateMixin(LitElement) {
   static get styles() {
     return css`
       :host {
@@ -29,11 +31,15 @@ export class FpApp extends LitElement {
     firebase.initializeApp(firebaseConfig);
   }
 
+  stateChanged(newState: State, oldState: State|null) {
+    if (!oldState || newState.authState !== oldState.authState) {
+      this.isAuthenticated = newState.authState === AuthState.SIGNED_ON;
+    }
+  }
+
   render() {
     return html`
-      <fp-authentication
-          @state-change=${this.onAuthStateChanged}>
-      </fp-authentication>
+      <fp-authentication></fp-authentication>
       ${this.isAuthenticated ? this.renderDatabase() : ''}
     `;
   }
@@ -42,9 +48,5 @@ export class FpApp extends LitElement {
     return html`
       <fp-database></fp-database>
     `;
-  }
-
-  private onAuthStateChanged(event: CustomEvent<boolean>) {
-    this.isAuthenticated = event.detail;
   }
 }
