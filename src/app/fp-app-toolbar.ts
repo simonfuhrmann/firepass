@@ -2,7 +2,10 @@ import {LitElement, html, css} from 'lit-element';
 import {property, query, customElement} from 'lit-element';
 
 import {EventsMixin} from '../mixins/events-mixin';
+import {State} from '../modules/state-types';
+import {StateMixin} from '../mixins/state-mixin';
 import {FpPassGenerator} from './fp-pass-generator';
+import {appConfig} from '../config/application';
 import {sharedStyles} from './fp-styles'
 import '../oxygen/oxy-button';
 import '../oxygen/oxy-icon';
@@ -11,7 +14,7 @@ import '../oxygen/oxy-icons-communication';
 import './fp-pass-generator';
 
 @customElement('fp-app-toolbar')
-export class FpAppToolbar extends EventsMixin(LitElement) {
+export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
   static get styles() {
     return css`
       ${sharedStyles}
@@ -57,17 +60,33 @@ export class FpAppToolbar extends EventsMixin(LitElement) {
     `;
   }
 
+  private idleTimeoutIntervalHandle: number = -1;
+
   @query('#generator') generator: FpPassGenerator|undefined;
 
   @property({type: Boolean}) dbUnlocked = false;
-  @property({type: Number}) idleTimeoutMs = 0;
+  @property({type: String}) idleTimeout = '';
 
   connectedCallback() {
     super.connectedCallback();
-    this.addListener(this.IDLE_TIMEOUT,
-        this.updateIdleTimeout.bind(this) as EventListener);
-    this.addListener(this.DB_LOCK,
-        this.resetIdleTimeout.bind(this) as EventListener);
+    this.resetIdleTimeoutInterval();
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.clearIdleTimeoutInterval();
+  }
+
+  updated(changedProps: Map<string, unknown>) {
+    if (changedProps.has('dbUnlocked')) {
+      this.resetIdleTimeoutInterval();
+    }
+  }
+
+  stateChanged(newState: State, oldState: State|null) {
+    if (!oldState || newState.lastActivityMs !== oldState.lastActivityMs) {
+      this.resetIdleTimeoutInterval();
+    }
   }
 
   render() {
@@ -101,7 +120,7 @@ export class FpAppToolbar extends EventsMixin(LitElement) {
             ?disabled=${!this.dbUnlocked}
             @click=${this.onLock}>
           <oxy-icon icon="icons:lock"></oxy-icon>
-          <div ?hidden=${!this.idleTimeoutMs}>${this.formatIdleTime()}</div>
+          <div ?hidden=${!this.idleTimeout}>${this.idleTimeout}</div>
         </oxy-button>
       </div>
 
@@ -127,17 +146,35 @@ export class FpAppToolbar extends EventsMixin(LitElement) {
     this.dispatch(this.DB_LOCK);
   }
 
-  private updateIdleTimeout(event: CustomEvent<number>) {
-    this.idleTimeoutMs = event.detail;
+  private resetIdleTimeoutInterval() {
+    this.clearIdleTimeoutInterval();
+    this.idleTimeoutIntervalHandle = window.setInterval(
+          this.updateIdleTimeout.bind(this), 1000);
+    this.updateIdleTimeout();
   }
 
-  private resetIdleTimeout() {
-    this.idleTimeoutMs = 0;
+  private clearIdleTimeoutInterval() {
+    if (this.idleTimeoutIntervalHandle < 0) return;
+    window.clearInterval(this.idleTimeoutIntervalHandle);
+    this.idleTimeoutIntervalHandle = -1;
   }
 
-  private formatIdleTime() {
-    const secs = Math.ceil(this.idleTimeoutMs / 1000);
-    const mins = Math.ceil(secs / 60);
-    return secs >= 60 ? mins.toString() : secs.toString();
+  private updateIdleTimeout() {
+    if (!this.dbUnlocked) {
+      this.idleTimeout = '';
+      return;
+    }
+
+    const elapsedMs = Date.now() - this.getState().lastActivityMs;
+    const remainingMs = Math.max(0, appConfig.idleTimeoutMs - elapsedMs);
+    const remainingSecs = Math.ceil(remainingMs / 1000);
+    const remainingMins = Math.ceil(remainingSecs / 60);
+    if (remainingSecs >= 60) {
+      this.idleTimeout = remainingMins.toString();
+    } else if (remainingSecs > 0) {
+      this.idleTimeout = remainingSecs.toString();
+    } else {
+      this.idleTimeout = '';
+    }
   }
 }
