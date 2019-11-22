@@ -44,7 +44,7 @@ export class Database {
   }
 
   removeStateListener(callback: DbStateListener) {
-    this.stateListeners = this.stateListeners.filter(x => x != callback);
+    this.stateListeners = this.stateListeners.filter(x => x !== callback);
   }
 
   // Attempts to download the database. Transitions to the FETCHING state
@@ -82,8 +82,8 @@ export class Database {
   // TODO: Encrypt the database and save if there are changes.
   // TODO: Overwrite memory?
   lock(): Promise<void> {
+    console.log('Database.lock()');
     return new Promise((resolve, /*reject*/) => {
-      console.log('Database.lock()');
       this.dbData.clearModel();
       this.dbCrypto.clear();
       this.setState(DbState.LOCKED);

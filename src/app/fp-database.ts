@@ -46,8 +46,8 @@ export class FpDatabase extends EventsMixin(LitElement) {
     `;
   }
 
+  private readonly stateListener = this.onStateChanged.bind(this);
   private database: Database = new Database();
-  private stateListener = (state: DbState) => this.onStateChanged(state);
   private autoUnlockFailed = false;
 
   @property({type: Number}) dbState: DbState = DbState.INITIAL;
@@ -130,13 +130,13 @@ export class FpDatabase extends EventsMixin(LitElement) {
   }
 
   private onCreateDb(event: CustomEvent<string>) {
-    if (this.dbState != DbState.MISSING) return;
+    if (this.dbState !== DbState.MISSING) return;
     this.database.create(event.detail)
         .catch(error => this.onUnlockFailure(error));
   }
 
   private onUnlockDb(event: CustomEvent<string>) {
-    if (this.dbState != DbState.LOCKED) return;
+    if (this.dbState !== DbState.LOCKED) return;
     this.database.unlock(event.detail)
         .catch(error => this.onUnlockFailure(error));
   }
