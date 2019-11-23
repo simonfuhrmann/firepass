@@ -33,7 +33,7 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
         font-size: 0.7em;
         color: black;
         background-color: var(--secondary-text-color);
-        bottom: 15px;
+        bottom: 14px;
       }
       #logo {
         display: flex;
