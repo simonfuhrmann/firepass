@@ -9,7 +9,6 @@ export class OxyTab extends LitElement {
         position: relative;
         display: block;
         box-sizing: border-box;
-        font-weight: 500;
         cursor: pointer;
         outline: none;
         overflow: hidden;
@@ -18,6 +17,7 @@ export class OxyTab extends LitElement {
         opacity: 0.7;
       }
       :host(:hover),
+      :host(:focus),
       :host([selected]) {
         opacity: 1.0;
       }
@@ -70,6 +70,7 @@ export class OxyTab extends LitElement {
   constructor() {
     super();
     this.setAttribute('role', 'tab');
+    this.setAttribute('tabindex', '0');
   }
 
   render() {
