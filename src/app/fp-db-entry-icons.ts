@@ -13,26 +13,16 @@ export class FpDbEntryIcons extends LitElement {
     return css`
       ${sharedStyles}
       oxy-dialog {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-
-        top: 10%;
-        left: 10%;
-        right: 10%;
-        max-height: 80%;
-        transform: none;
-        background-color: #333;
-        border-radius: 8px;
+        --oxy-dialog-min-width: 60%;
+        --oxy-dialog-max-width: 80%;
       }
       #container {
         overflow-y: auto;
-        margin: 0 16px 16px 16px;
+        margin: 0 16px;
         display: flex;
         flex-wrap: wrap;
-        justify-content: center;
       }
-      oxy-button {
+      #container oxy-button {
         margin: 6px;
         padding: 6px;
         background-color: rgba(0, 0, 0, 0.25);
@@ -143,10 +133,16 @@ export class FpDbEntryIcons extends LitElement {
 
   render() {
     return html`
-      <oxy-dialog ?opened=${this.opened} backdrop @close=${this.onClose}>
-        <h2>Select icon</h2>
+      <oxy-dialog
+          backdrop
+          heading="Select icon"
+          ?opened=${this.opened}
+          @close=${this.onClose}>
         <div id="container">
           ${this.icons.map(icon => this.renderIcon(icon))}
+        </div>
+        <div slot="buttons">
+          <oxy-button text @click=${this.close}>Cancel</oxy-button>
         </div>
       </oxy-dialog>
     `;

@@ -76,28 +76,12 @@ export class FpDbEntry extends LitElement {
         background-color: var(--theme-color-ice1);
       }
 
-      #delete-dialog {
+      #delete-dialog-content {
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        top: 20%;
-        left: 20%;
-        right: 20%;
-        max-height: 60%;
-        background-color: #333;
-        border-radius: 8px;
-        transform: none;
+        padding: 0 16px;
       }
       #delete-dialog oxy-icon {
         margin-right: 8px;
-      }
-      #delete-dialog #delete-cancel-button {
-        background-color: var(--theme-color-gray);
-        margin: 32px 8px;
-      }
-      #delete-dialog #delete-confirm-button {
-        background-color: var(--theme-color-fire1);
-        margin: 32px 8px;
       }
 
       table {
@@ -351,23 +335,16 @@ export class FpDbEntry extends LitElement {
           @changed=${this.onIconSelected}>
       </fp-db-entry-icons>
 
-      <oxy-dialog id="delete-dialog" backdrop>
-        <h2>Delete entry?</h2>
-        <div flex-row>
+      <oxy-dialog id="delete-dialog" heading="Delete entry" backdrop>
+        <div id="delete-dialog-content">
           <oxy-icon icon=${this.entryIcon}></oxy-icon>
           <div>${this.entry ? this.entry.name : ''}</div>
         </div>
-        <div class="dialog-buttons">
-          <oxy-button
-              id="delete-cancel-button"
-              raised
-              @click=${this.closeDeleteDialog}>
+        <div slot="buttons">
+          <oxy-button text @click=${this.closeDeleteDialog}>
             Cancel
           </oxy-button>
-          <oxy-button
-              id="delete-confirm-button"
-              raised
-              @click=${this.confirmDeleteDialog}>
+          <oxy-button text @click=${this.confirmDeleteDialog}>
             Delete
           </oxy-button>
         </div>

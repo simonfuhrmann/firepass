@@ -1,5 +1,5 @@
 import {LitElement, html, css} from 'lit-element';
-import {property, customElement} from 'lit-element';
+import {property, customElement, query} from 'lit-element';
 
 // A simple dialog custom element.
 //
@@ -10,40 +10,101 @@ import {property, customElement} from 'lit-element';
 //
 // Focus trapping is currently not implemented. Which means that focus can
 // leave the dialog, and focus is not reset after the dialog is closed.
-// This component does not provide styles. Style the dialog using CSS on the
-// host element, such as min-width, or background directives.
 @customElement('oxy-dialog')
 export class OxyDialog extends LitElement {
-  static get styles() {
+    static get styles() {
     return css`
       :host {
-        z-index: 3;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%,-50%);
-        outline: none;
-        box-shadow: 0 0 64px 8px rgba(0, 0, 0, 0.5)
+        display: none;
       }
-      :host(:not([opened])) {
-        visibility: hidden;
+      :host([opened]) {
+        display: block;
+      }
+      #backdrop {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        background: var(--oxy-dialog-backdrop-background, rgba(0, 0, 0, 0.3));
+        z-index: 10;
+      }
+      #layout {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 11;
+        pointer-events: none;
+      }
+      #dialog {
+        background: var(--oxy-dialog-background, white);
+        color: var(--oxy-dialog-text-color, black);
+        min-width: var(--oxy-dialog-min-width, 200px);
+        max-width: var(--oxy-dialog-max-width, 500px);
+        flex-shrink: 0;
+        box-shadow: var(--oxy-dialog-box-shadow, 0 8px 64px rgba(0, 0, 0, 0.5));
+        border-radius: 4px;
+        pointer-events: auto;
+      }
+      h2 {
+        font-size: 1.2em;
+        line-height: 2em;
+        margin: 0;
+        padding: 16px 16px 8px 16px;
+      }
+      slot[name="buttons"] {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        padding: 16px 8px 8px 8px;
+      }
+      [hidden] {
+        display: none !important;
       }
     `;
   }
 
-  private static KEY_TAB = 9;
-  private static KEY_ESC = 27;
+  private readonly keyListener = this.onKeydown.bind(this);
 
-  private backdropElem: HTMLElement|null = null;
-  private keyListener = (event: KeyboardEvent) => this.onKeydown(event);
-
+  @query('#backdrop') backdropElem: HTMLElement|undefined;
+  @query('#dialog') dialogElem: HTMLElement|undefined;
   @property({type: Boolean, reflect: true}) opened = false;
+  @property({type: String}) heading: string = '';
   @property({type: Boolean}) backdrop = false;
   @property({type: Boolean}) noescape = false;
+  @property({type: Boolean}) showBackdrop = false;
+
+  updated(changedProps: Map<string, any>) {
+    if (changedProps.has('opened')) {
+      if (this.opened) {
+        this.afterOpen();
+      } else {
+        this.afterClose();
+      }
+    }
+  }
 
   render() {
     return html`
-      <slot></slot>
+      <div
+          id="backdrop"
+          ?hidden=${!this.showBackdrop}
+          @click=${this.onBackdropClick}>
+      </div>
+
+      <div id="layout">
+        <div id="dialog">
+          ${this.heading ? html`<h2>${this.heading}</h2>` : html``}
+          <slot></slot>
+          <slot name="buttons"></slot>
+        </div>
+      </div>
     `;
   }
 
@@ -55,55 +116,18 @@ export class OxyDialog extends LitElement {
     this.opened = false;
   }
 
-  updated(changedProps: Map<string, any>) {
-    if (changedProps.has('opened')) {
-      if (this.opened) {
-        this.onOpen();
-      } else {
-        this.onClose();
-      }
-    }
-  }
-
-  private onOpen() {
-    if (this.backdrop) {
-      this.addBackdropToBody();
-    }
-    if (!this.noescape) {
-      this.addKeyListener();
-    }
+  private afterOpen() {
+    this.showBackdrop = this.backdrop;
+    this.addKeyListener();
     this.saveAndMoveFocus();
-    this.focus();
-    this.dispatchEvent(new CustomEvent('open'));
+    this.dispatchEvent(new CustomEvent('opened'));
   }
 
-  private onClose() {
-    this.removeBackdropFromBody();
+  private afterClose() {
+    this.showBackdrop = false;
     this.removeKeyListener();
     this.restoreFocus();
-    this.dispatchEvent(new CustomEvent('close'));
-  }
-
-  private addBackdropToBody() {
-    if (!this.backdropElem) {
-      const elem = document.createElement('div');
-      elem.id = 'oxy-dialog-backdrop';
-      elem.style.position = 'fixed';
-      elem.style.left = '0';
-      elem.style.right = '0';
-      elem.style.top = '0';
-      elem.style.bottom = '0';
-      elem.style.background = 'rgba(0, 0, 0, 0.5)';
-      elem.style.zIndex = '2';
-      elem.addEventListener('click', () => this.onBackdropClick());
-      this.backdropElem = elem;
-    }
-    document.body.appendChild(this.backdropElem);
-  }
-
-  private removeBackdropFromBody() {
-    if (!this.backdropElem) return;
-    document.body.removeChild(this.backdropElem);
+    this.dispatchEvent(new CustomEvent('closed'));
   }
 
   private addKeyListener() {
@@ -114,13 +138,19 @@ export class OxyDialog extends LitElement {
     document.body.removeEventListener('keydown', this.keyListener);
   }
 
+  private onBackdropClick() {
+    if (!this.noescape) {
+      this.close();
+    }
+  }
+
   private onKeydown(event: KeyboardEvent) {
-    switch(event.keyCode) {
-      case OxyDialog.KEY_ESC:
+    switch(event.key) {
+      case 'Escape':
         event.preventDefault();
         this.onEscapePress();
         break;
-      case OxyDialog.KEY_TAB:
+      case 'Tab':
         event.preventDefault();
         this.onTabPress();
         break;
@@ -128,12 +158,6 @@ export class OxyDialog extends LitElement {
   }
 
   private onEscapePress() {
-    if (!this.noescape) {
-      this.close();
-    }
-  }
-
-  private onBackdropClick() {
     if (!this.noescape) {
       this.close();
     }

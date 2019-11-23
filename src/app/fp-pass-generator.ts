@@ -8,6 +8,7 @@ import {OxyToast} from '../oxygen/oxy-toast';
 import {sharedStyles} from './fp-styles';
 import '../oxygen/oxy-button';
 import '../oxygen/oxy-checkbox';
+import '../oxygen/oxy-dialog';
 import '../oxygen/oxy-icon';
 import '../oxygen/oxy-input';
 import '../oxygen/oxy-slider';
@@ -20,20 +21,6 @@ export class FpPassGenerator extends LitElement {
   static get styles() {
     return css`
       ${sharedStyles}
-      oxy-dialog {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-
-        top: 20%;
-        left: 25%;
-        right: 25%;
-        max-height: 60%;
-        min-width: 300px;
-        background-color: #333;
-        border-radius: 8px;
-        transform: none;
-      }
       oxy-input {
         align-self: stretch;
         margin: 16px 32px 0 32px;
@@ -117,9 +104,7 @@ export class FpPassGenerator extends LitElement {
 
   render() {
     return html`
-      <oxy-dialog id="dialog" backdrop>
-        <h2>Password generator</h2>
-
+      <oxy-dialog id="dialog" heading="Password generator" backdrop>
         <div class="layout horizontal">
           <div id="checkboxes" class="layout vertical">
             <oxy-checkbox
@@ -188,28 +173,28 @@ export class FpPassGenerator extends LitElement {
           </div>
         </oxy-input>
 
-        <div id="buttons" class="layout horizontal">
+        <div slot="buttons">
           <oxy-button
-              raised
+              text
               ?hidden=${this.selectable}
               @click=${this.close}>
             Close
           </oxy-button>
           <oxy-button
-              raised
+              text
               ?hidden=${this.selectable}
               @click=${this.onCopyPassword}>
             Copy
           </oxy-button>
 
           <oxy-button
-              raised
+              text
               ?hidden=${!this.selectable}
               @click=${this.close}>
             Cancel
           </oxy-button>
           <oxy-button
-              raised
+              text
               ?hidden=${!this.selectable}
               @click=${this.onSelectPassword}>
             Select

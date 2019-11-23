@@ -53,6 +53,10 @@ export const sharedStyles = css`
     --oxy-slider-thumb-color: var(--theme-color-ice3);
     --oxy-slider-thumb-active-color: var(--theme-color-ice3);
 
+    --oxy-dialog-background: #333;
+    --oxy-dialog-text-color: var(--primary-text-color);
+    --oxy-dialog-min-width: 300px;
+
     --oxy-scrollbar-width: 12px;
     --oxy-scrollbar-track-color: transparent;
     --oxy-scrollbar-track-border-radius: 0;

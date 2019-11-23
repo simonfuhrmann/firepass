@@ -61,6 +61,11 @@ export class OxyButton extends LitElement {
                     0 2px 2px 0 rgba(0, 0, 0, 0.14),
                     0 1px 5px 0 rgba(0, 0, 0, 0.12);
       }
+      :host([text]) {
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 0.85em;
+      }
     `;
   }
 
