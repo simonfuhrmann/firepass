@@ -1,3 +1,5 @@
+// To pay appropriate credit, most icons have been taken from icons8.com.
+// Although these icons have been heavily modified for Oxygen.
 import {svg} from 'lit-html';
 import {OxyIconset, OxyIconMap} from './oxy-iconset';
 
