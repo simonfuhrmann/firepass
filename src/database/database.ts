@@ -201,7 +201,7 @@ export class Database {
         this.dbData.setDocument(doc);
       } catch (error) {
         const code = 'db/unexpected-format';
-        const message = 'Unexpected database format';
+        const message = error.message;
         reject({code, message});
       }
 
@@ -223,7 +223,6 @@ export class Database {
           .then(model => {
             this.dbData.setModel(model as DbModel);
             this.setState(DbState.UNLOCKED);
-            console.log('decrypted model', model);
             resolve();
           })
           .catch(code => {

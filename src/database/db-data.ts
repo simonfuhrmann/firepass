@@ -3,6 +3,7 @@ import {Base64} from '../modules/base64';
 
 // The in-memory representation of the database.
 export class DbData {
+  private readonly dataVersion: number = 1;
   private payload: ArrayBuffer|null = null;  // The encrypted database.
   private settings: DbSettings|null = null;  // The database settings.
   private model: DbModel|null = null;  // The decrypted database.
@@ -27,12 +28,14 @@ export class DbData {
   // downloading it from the storage backend.
   setDocument(doc: DbDocument) {
     if (!doc.settings || !doc.payload) {
-      throw 'db/unexpected-format';
+      throw new Error('Document format not recognized');
     }
+    doc = this.convertDataFormat(doc);
     this.payload = Base64.decode(doc.payload);
     this.settings = {
       passSalt: Base64.decode(doc.settings.passSalt),
       aesIv: Base64.decode(doc.settings.aesIv),
+      dataVersion: doc.settings.dataVersion,
     };
   }
 
@@ -44,6 +47,7 @@ export class DbData {
     const settings = {
       passSalt: Base64.encode(this.settings.passSalt),
       aesIv: Base64.encode(this.settings.aesIv),
+      dataVersion: this.dataVersion,
     };
     const payload = Base64.encode(this.payload);
     return {settings, payload};
@@ -80,6 +84,7 @@ export class DbData {
     this.settings = {
       passSalt: salt,
       aesIv: iv,
+      dataVersion: this.dataVersion,
     };
     this.model = {entries: []};
   }
@@ -115,5 +120,17 @@ export class DbData {
   sortEntries() {
     if (!this.model) throw 'Model not initialized';
     this.model.entries.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  private convertDataFormat(doc: DbDocument): DbDocument {
+    // Application can not handle unknown versions.
+    if (!doc.settings.dataVersion) {
+      throw new Error('Document version unspecified');
+    }
+    // Application can not handle newer versions.
+    if (doc.settings.dataVersion > this.dataVersion) {
+      throw new Error('Document version unsupported');
+    }
+    return doc;
   }
 }

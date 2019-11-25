@@ -24,12 +24,14 @@ export interface DbModel {
 export interface DbSettings {
   passSalt: ArrayBuffer;
   aesIv: ArrayBuffer;
+  dataVersion: number;
 }
 
 // Same as DbSettings, but uses primitive types only.
 export interface DbSettingsEncoded {
   passSalt: string;  // Base64 encoded.
   aesIv: string;  // Base64 encoded.
+  dataVersion: number;
 }
 
 // The database document uploaded to Firebase.
