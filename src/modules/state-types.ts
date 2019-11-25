@@ -10,6 +10,7 @@ export enum AuthState {
 export interface State {
   authState: AuthState;
   lastActivityMs: number;
+  sidebarVisible: boolean;
 }
 
 // Creates the global state with initial values.
@@ -17,5 +18,6 @@ export function initializeState(): State {
   return {
     authState: AuthState.PENDING,
     lastActivityMs: Date.now(),
+    sidebarVisible: true,
   };
 }

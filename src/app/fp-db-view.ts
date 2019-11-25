@@ -2,11 +2,14 @@ import {LitElement, html, css} from 'lit-element';
 import {customElement, property, query} from 'lit-element';
 import {repeat} from 'lit-html/directives/repeat';
 
+import * as Actions from '../modules/state-actions';
 import {Database, DatabaseError} from '../database/database';
 import {DbModel, DbEntry} from '../database/db-types';
 import {OxyInput} from '../oxygen/oxy-input';
 import {OxyToast} from '../oxygen/oxy-toast';
 import {FpDbEntry} from './fp-db-entry';
+import {State} from '../modules/state-types';
+import {StateMixin} from '../mixins/state-mixin';
 import {devConfig} from '../config/development';
 import {sharedStyles} from './fp-styles'
 import '../oxygen/oxy-button';
@@ -17,7 +20,7 @@ import '../oxygen/oxy-toast';
 import './fp-db-entry';
 
 @customElement('fp-db-view')
-export class FpDbView extends LitElement {
+export class FpDbView extends StateMixin(LitElement) {
   static get styles() {
     return css`
       ${sharedStyles}
@@ -40,7 +43,7 @@ export class FpDbView extends LitElement {
       #actions oxy-input {
         flex-grow: 1;
         margin: 0;
-        --oxy-input-text-padding: 6px;
+        --oxy-input-text-padding: 8px;
         --oxy-input-border-width: 0;
         --oxy-input-border-radius: 0;
         --oxy-input-box-shadow: none;
@@ -57,7 +60,7 @@ export class FpDbView extends LitElement {
         color: var(--primary-text-color);
       }
       #actions oxy-button {
-        padding: 4px;
+        padding: 8px;
         border-radius: 0;
       }
       #items {
@@ -137,6 +140,27 @@ export class FpDbView extends LitElement {
       [hidden] {
         display: none !important;
       }
+
+      @media screen and (max-width: 700px) {
+        #sidebar {
+          display: none;
+        }
+        :host([sidebar]) #sidebar {
+          display: flex;
+          flex-grow: 1;
+        }
+        :host([sidebar]) #entry,
+        :host([sidebar]) #empty {
+          display: none;
+        }
+        .entry-text .primary {
+          font-size: 1.0em;
+        }
+        .entry-text .secondary {
+          color: var(--tertiary-text-color);
+          font-size: 0.9em;
+        }
+      }
     `;
   }
 
@@ -150,11 +174,16 @@ export class FpDbView extends LitElement {
   @property({type: Array}) filteredEntries: DbEntry[]|null = null;
   @property({type: Object}) selectedEntry: DbEntry|null = null;
   @property({type: Object}) decryptedEntry: DbEntry|null = null;
+  @property({type: Boolean, reflect: true}) sidebar: boolean = true;
 
   updated(changedProps: Map<string, any>) {
     if (changedProps.has('database')) {
       this.updateModel();
     }
+  }
+
+  stateChanged(newState: State, _oldState: State|null) {
+    this.sidebar = newState.sidebarVisible;
   }
 
   render() {
@@ -173,7 +202,7 @@ export class FpDbView extends LitElement {
               @change=${this.onFilterChange}>
             <oxy-icon
                 slot="before"
-                icon="icons:filter-list"
+                icon="icons:search"
                 ?active=${!!this.filteredEntries}
                 @click=${this.onFilterClear}>
             </oxy-icon>
@@ -289,7 +318,7 @@ export class FpDbView extends LitElement {
           this.selectEntry(encryptedEntry);
           this.startEditingEntry();
         })
-        .catch(error => this.databaseError = error);
+        .catch(error => this.setDatabaseError(error));
   }
 
   private onEntrySave(event: CustomEvent<DbEntry>) {
@@ -307,7 +336,7 @@ export class FpDbView extends LitElement {
           this.selectEntry(encryptedEntry);
           this.uploadDatabase();
         })
-        .catch(error => this.databaseError = error);
+        .catch(error => this.setDatabaseError(error));
   }
 
   private onEntryDelete(entry: DbEntry|null) {
@@ -334,8 +363,10 @@ export class FpDbView extends LitElement {
         .then(decryptedEntry => {
           this.selectedEntry = entry;
           this.decryptedEntry = decryptedEntry;
+          // Hide sidebar on mobile.
+          Actions.setSidebarVisible(false);
         })
-        .catch(error => this.databaseError = error);
+        .catch(error => this.setDatabaseError(error));
   }
 
   private onFilterClear() {
@@ -371,7 +402,7 @@ export class FpDbView extends LitElement {
               .then(() => this.showToast('Password copied to clipboard'))
               .catch(() => this.showToast('Failed to copy to clipboard'));
         })
-        .catch(error => this.databaseError = error);
+        .catch(error => this.setDatabaseError(error));
   }
 
   private startEditingEntry() {
@@ -390,7 +421,12 @@ export class FpDbView extends LitElement {
       return;
     }
     this.database.upload()
-        .catch((error) => this.databaseError = error);
+        .catch((error) => this.setDatabaseError(error));
+  }
+
+  private setDatabaseError(error: DatabaseError) {
+    Actions.setSidebarVisible(false);
+    this.databaseError = error
   }
 
   private updateModel() {

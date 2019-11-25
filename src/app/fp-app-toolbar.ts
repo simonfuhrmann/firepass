@@ -1,6 +1,7 @@
 import {LitElement, html, css} from 'lit-element';
 import {property, query, customElement} from 'lit-element';
 
+import * as Actions from '../modules/state-actions';
 import {EventsMixin} from '../mixins/events-mixin';
 import {State} from '../modules/state-types';
 import {StateMixin} from '../mixins/state-mixin';
@@ -11,6 +12,7 @@ import '../oxygen/oxy-button';
 import '../oxygen/oxy-icon';
 import '../oxygen/oxy-icons-base';
 import '../oxygen/oxy-icons-communication';
+import '../oxygen/oxy-icons-logos';
 import './fp-pass-generator';
 
 @customElement('fp-app-toolbar')
@@ -39,15 +41,20 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
         display: flex;
         align-items: center;
         flex-grow: 1;
-        margin: 0px 8px;
       }
-      #logo oxy-icon {
+      #logo > oxy-icon {
         color: var(--theme-color-fire3);
+        padding: 10px;
+      }
+      #logo > oxy-button {
+        display: none;
+        padding: 6px;
+        margin: 4px;
+        border-radius: 18px;
       }
       #logo h1 {
         color: var(--tertiary-text-color);
         font-size: 1.2em;
-        margin: 0 0 0 8px;
       }
       oxy-button {
         color: var(--secondary-text-color);
@@ -56,6 +63,21 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
       }
       [hidden] {
         display: none !important;
+      }
+
+      @media screen and (max-width: 700px) {
+        #logo > oxy-icon {
+          display: none;
+        }
+        #logo > oxy-button {
+          display: inline-flex;
+        }
+        :host([sidebar]) #logo > oxy-icon {
+          display: flex;
+        }
+        :host([sidebar]) #logo > oxy-button {
+          display: none;
+        }
       }
     `;
   }
@@ -66,6 +88,7 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
 
   @property({type: Boolean}) dbUnlocked = false;
   @property({type: String}) idleTimeout = '';
+  @property({type: Boolean, reflect: true}) sidebar = false;
 
   connectedCallback() {
     super.connectedCallback();
@@ -87,6 +110,7 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
     if (!oldState || newState.lastActivityMs !== oldState.lastActivityMs) {
       this.resetIdleTimeoutInterval();
     }
+    this.sidebar = newState.sidebarVisible;
   }
 
   render() {
@@ -94,7 +118,12 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
       <div id="toolbar">
         <!-- Logo. -->
         <div id="logo">
-          <oxy-icon icon="social:whatshot"></oxy-icon>
+          <oxy-icon icon="logos:firepass"></oxy-icon>
+          <oxy-button
+              title="Show entry list"
+              @click=${this.onShowSidebar}>
+            <oxy-icon icon="icons:list"></oxy-icon>
+          </oxy-button>
           <h1>Firepass</h1>
         </div>
 
@@ -104,11 +133,13 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
             @click=${this.onOpenGenerator}>
           <oxy-icon icon="communication:vpn-key"></oxy-icon>
         </oxy-button>
+        <!--
         <oxy-button
             title="Settings"
             @click=${this.onOpenSettings}>
           <oxy-icon icon="icons:settings"></oxy-icon>
         </oxy-button>
+        -->
         <oxy-button
             title="Log out"
             @click=${this.onLogout}>
@@ -126,6 +157,10 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
 
       <fp-pass-generator id="generator"></fp-pass-generator>
     `;
+  }
+
+  private onShowSidebar() {
+    Actions.setSidebarVisible(true);
   }
 
   private onOpenGenerator() {

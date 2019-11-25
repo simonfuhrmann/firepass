@@ -18,3 +18,12 @@ export function setLastActivityMs(lastActivityMs: number) {
   };
   stateManager.processAction(action);
 }
+
+// Sets whether the sidebar is visible in mobile mode.
+export function setSidebarVisible(sidebarVisible: boolean) {
+  const action = (state: State) => {
+    if (state.sidebarVisible === sidebarVisible) return state;
+    return {...state, sidebarVisible};
+  };
+  stateManager.processAction(action);
+}
