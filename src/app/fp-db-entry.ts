@@ -52,6 +52,7 @@ export class FpDbEntry extends LitElement {
       }
       #header oxy-input {
         font-size: 1.2em;
+        font-weight: medium;
         flex-grow: 1;
       }
       #header oxy-input[readonly] {
@@ -63,6 +64,7 @@ export class FpDbEntry extends LitElement {
         display: flex;
         justify-content: flex-end;
         flex-shrink: 0;
+        margin-top: 8px;
       }
       #button-bar oxy-button {
         margin-left: 16px;
@@ -289,8 +291,6 @@ export class FpDbEntry extends LitElement {
           </td>
         </tr>
       </table>
-
-      <div flex-grow></div>
 
       <div id="button-bar">
         <oxy-button
