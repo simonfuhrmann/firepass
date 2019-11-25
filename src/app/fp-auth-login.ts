@@ -44,6 +44,7 @@ export class FpAuthLogin extends LitElement {
       <div class="label">Login</div>
       <oxy-input
           id="email"
+          type="email"
           value=${devConfig.loginEmail}
           ?disabled=${this.disabled}
           @keydown=${this.onEmailKeydown}>
