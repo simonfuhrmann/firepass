@@ -100,19 +100,23 @@ export class FpDbView extends StateMixin(LitElement) {
       oxy-tab[selected] {
         background-image: linear-gradient(to right, rgba(195, 7, 63, 0.2), transparent);
       }
-      .entry-text {
+      oxy-tab .entry-text {
         display: flex;
         flex-direction: column;
         flex-grow: 1;
       }
-      .entry-text .primary {
+      oxy-tab .entry-text .primary {
         color: var(--primary-text-color);
         font-weight: 500;
         font-size: 0.9em;
       }
-      .entry-text .secondary {
+      oxy-tab .entry-text .secondary {
         color: var(--tertiary-text-color);
         font-size: 0.8em;
+      }
+      oxy-tab oxy-button {
+        color: var(--tertiary-text-color);
+        padding: 4px;
       }
 
       #empty, #error, #entry {
@@ -153,10 +157,10 @@ export class FpDbView extends StateMixin(LitElement) {
         :host([sidebar]) #empty {
           display: none;
         }
-        .entry-text .primary {
+        oxy-tab .entry-text .primary {
           font-size: 1.0em;
         }
-        .entry-text .secondary {
+        oxy-tab .entry-text .secondary {
           color: var(--tertiary-text-color);
           font-size: 0.9em;
         }
@@ -269,6 +273,10 @@ export class FpDbView extends StateMixin(LitElement) {
 
   private renderEntry(entry: DbEntry) {
     const isSelected = entry === this.selectedEntry;
+    const copyHandler = (event: MouseEvent) => {
+      event.stopPropagation();
+      this.copyEntryPassword(entry);
+    };
     return html`
       <oxy-tab
           class="entry"
@@ -280,6 +288,9 @@ export class FpDbView extends StateMixin(LitElement) {
           <div class="primary">${entry.name}</div>
           <div class="secondary">${entry.login || entry.email}</div>
         </div>
+        <oxy-button @click=${copyHandler}>
+          <oxy-icon icon="icons:content-copy"></oxy-icon>
+        </oxy-button>
       </oxy-list-item>
     `;
   }
@@ -395,9 +406,12 @@ export class FpDbView extends StateMixin(LitElement) {
     const firstEntry = this.filteredEntries[0];
     this.selectEntry(firstEntry);
     this.onFilterClear();
+    this.copyEntryPassword(firstEntry);
+  }
 
+  private copyEntryPassword(entry: DbEntry) {
     if (!this.database) return;
-    this.database.decryptEntry(firstEntry)
+    this.database.decryptEntry(entry)
         .then(decryptedEntry => {
           navigator.clipboard.writeText(decryptedEntry.password)
               .then(() => this.showToast('Password copied to clipboard'))
