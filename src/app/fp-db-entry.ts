@@ -106,12 +106,10 @@ export class FpDbEntry extends LitElement {
         --oxy-input-box-shadow: none;
         --oxy-input-box-shadow-focused: none;
       }
-      oxy-input [slot="after"] {
-        margin-right: 4px;
-      }
       oxy-input oxy-button {
         color: var(--tertiary-text-color);
-        padding: 4px;
+        padding: 8px;
+        border-radius: 0;
       }
       oxy-input oxy-button oxy-icon {
         width: 16px;
