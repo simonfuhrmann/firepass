@@ -394,6 +394,7 @@ export class FpDbView extends StateMixin(LitElement) {
     if (!this.filteredEntries || this.filteredEntries.length === 0) return;
     const firstEntry = this.filteredEntries[0];
     this.selectEntry(firstEntry);
+    this.onFilterClear();
 
     if (!this.database) return;
     this.database.decryptEntry(firstEntry)
