@@ -10,6 +10,7 @@ import {OxyToast} from '../oxygen/oxy-toast';
 import {FpDbEntry} from './fp-db-entry';
 import {State} from '../modules/state-types';
 import {StateMixin} from '../mixins/state-mixin';
+import {EventsMixin} from '../mixins/events-mixin';
 import {devConfig} from '../config/development';
 import {sharedStyles} from './fp-styles'
 import '../oxygen/oxy-button';
@@ -20,7 +21,7 @@ import '../oxygen/oxy-toast';
 import './fp-db-entry';
 
 @customElement('fp-db-view')
-export class FpDbView extends StateMixin(LitElement) {
+export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
   static get styles() {
     return css`
       ${sharedStyles}
@@ -179,6 +180,14 @@ export class FpDbView extends StateMixin(LitElement) {
   @property({type: Object}) selectedEntry: DbEntry|null = null;
   @property({type: Object}) decryptedEntry: DbEntry|null = null;
   @property({type: Boolean, reflect: true}) sidebar: boolean = true;
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.addListener(this.HISTORY_POPSTATE, (event) => {
+      const popstate = event as PopStateEvent;
+      Actions.setSidebarVisible(!popstate.state.showEntry);
+    });
+  }
 
   updated(changedProps: Map<string, any>) {
     if (changedProps.has('database')) {
@@ -376,6 +385,11 @@ export class FpDbView extends StateMixin(LitElement) {
           this.decryptedEntry = decryptedEntry;
           // Hide sidebar on mobile.
           Actions.setSidebarVisible(false);
+          // Push history state so that the back button can be used.
+          // Ignore if the top of the stack is already the same state.
+          if (!window.history.state.showEntry) {
+            window.history.pushState({showEntry: true}, 'Entry');
+          }
         })
         .catch(error => this.setDatabaseError(error));
   }

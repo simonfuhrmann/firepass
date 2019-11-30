@@ -1,7 +1,6 @@
 import {LitElement, html, css} from 'lit-element';
 import {property, query, customElement} from 'lit-element';
 
-import * as Actions from '../modules/state-actions';
 import {EventsMixin} from '../mixins/events-mixin';
 import {State} from '../modules/state-types';
 import {StateMixin} from '../mixins/state-mixin';
@@ -47,6 +46,7 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
         padding: 10px;
       }
       #logo > oxy-button {
+        color: var(--theme-color-fire3);
         display: none;
         padding: 6px;
         margin: 4px;
@@ -122,7 +122,7 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
           <oxy-button
               title="Show entry list"
               @click=${this.onShowSidebar}>
-            <oxy-icon icon="icons:list"></oxy-icon>
+            <oxy-icon icon="icons:arrow-back"></oxy-icon>
           </oxy-button>
           <h1>Firepass</h1>
         </div>
@@ -160,7 +160,7 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
   }
 
   private onShowSidebar() {
-    Actions.setSidebarVisible(true);
+    window.history.back();
   }
 
   private onOpenGenerator() {
