@@ -19,6 +19,7 @@ export class FpDatabase extends EventsMixin(LitElement) {
       :host {
         display: flex;
         flex-direction: column;
+        min-height: 0;  /* To enable scrolling of items. */
       }
       #unlock {
         align-self: center;

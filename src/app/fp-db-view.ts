@@ -28,6 +28,7 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
       :host {
         display: flex;
         flex-direction: row;
+        min-height: 0;  /* To enable scrolling of items. */
       }
       #sidebar {
         display: flex;
