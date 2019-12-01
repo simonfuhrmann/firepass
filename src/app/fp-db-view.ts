@@ -170,7 +170,7 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
     super.connectedCallback();
     this.addListener(this.HISTORY_POPSTATE, (event) => {
       const popstate = event as PopStateEvent;
-      Actions.setSidebarVisible(!popstate.state.showEntry);
+      Actions.setSidebarVisible(!popstate.state || !popstate.state.showEntry);
     });
   }
 
@@ -372,7 +372,7 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
           Actions.setSidebarVisible(false);
           // Push history state so that the back button can be used.
           // Ignore if the top of the stack is already the same state.
-          if (!window.history.state.showEntry) {
+          if (!window.history.state || !window.history.state.showEntry) {
             window.history.pushState({showEntry: true}, 'Entry');
           }
         })
