@@ -131,10 +131,6 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
         margin: 8px;
       }
 
-      [hidden] {
-        display: none !important;
-      }
-
       @media screen and (max-width: 700px) {
         #sidebar {
           display: none;

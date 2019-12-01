@@ -61,9 +61,6 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
         padding: 12px;
         border-radius: 0;
       }
-      [hidden] {
-        display: none !important;
-      }
 
       @media screen and (max-width: 700px) {
         #logo > oxy-icon {

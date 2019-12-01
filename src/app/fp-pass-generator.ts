@@ -72,9 +72,6 @@ export class FpPassGenerator extends LitElement {
       .layout.vertical.spaced > :not(:last-child) {
         margin-bottom: 8px;
       }
-      [hidden] {
-        display: none !important;
-      }
     `;
   }
 

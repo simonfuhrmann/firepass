@@ -32,9 +32,6 @@ export class FpDbUnlock extends LitElement {
       #error {
         color: var(--error-text-color);
       }
-      [hidden] {
-        display: none !important;
-      }
     `;
   }
 

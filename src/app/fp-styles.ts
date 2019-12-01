@@ -87,4 +87,8 @@ export const sharedStyles = css`
     background: var(--oxy-scrollbar-thumb-hover-color);
     box-shadow: var(--oxy-scrollbar-thumb-hover-box-shadow);
   }
+
+  [hidden] {
+    display: none !important;
+  }
 `;

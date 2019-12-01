@@ -140,9 +140,6 @@ export class FpDbEntry extends LitElement {
       [flex-grow] {
         flex-grow: 1;
       }
-      [hidden] {
-        display: none !important;
-      }
     `;
   }
 
