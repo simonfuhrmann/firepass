@@ -1,4 +1,5 @@
 .cache/
+.firebase/
 node_modules/
 dev_images/
 dist/
