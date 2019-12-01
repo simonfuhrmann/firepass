@@ -15,6 +15,7 @@ export function EventsMixin<TBase extends Constructor>(Base: TBase) {
     protected DB_LOCK: string = 'db-lock';
     protected USER_SIGNOFF: string = 'user-signoff';
     protected IDLE_TIMEOUT: string = 'idle-timeout';
+    protected HISTORY_POPSTATE: string = 'popstate';
 
     private listeners_: EventReference[] = [];
 
