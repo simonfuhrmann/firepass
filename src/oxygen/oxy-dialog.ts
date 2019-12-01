@@ -47,6 +47,7 @@ export class OxyDialog extends LitElement {
         color: var(--oxy-dialog-text-color, black);
         min-width: var(--oxy-dialog-min-width, 200px);
         max-width: var(--oxy-dialog-max-width, 500px);
+        max-height: var(--oxy-dialog-max-height, 80%);
         flex-shrink: 0;
         box-shadow: var(--oxy-dialog-box-shadow, 0 8px 64px rgba(0, 0, 0, 0.5));
         border-radius: 4px;

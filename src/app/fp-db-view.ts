@@ -76,17 +76,6 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
         font-size: 0.9em;
         margin: 32px;
       }
-      #items::-webkit-scrollbar {
-        width: var(--oxy-scrollbar-width);
-      }
-      #items::-webkit-scrollbar-thumb {
-        box-shadow: var(--oxy-scrollbar-thumb-box-shadow);
-        border: var(--oxy-scrollbar-thumb-border);
-        border-radius: var(--oxy-scrollbar-thumb-border-radius);
-      }
-      #items::-webkit-scrollbar-thumb:hover {
-        box-shadow: var(--oxy-scrollbar-thumb-hover-box-shadow);
-      }
       oxy-tab {
         padding: 8px 8px 8px 12px;
         min-height: 48px;
@@ -224,7 +213,7 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
             <oxy-icon icon="icons:add"></oxy-icon>
           </oxy-button>
         </div>
-        <div id="items">
+        <div id="items" class="scrollable">
           ${repeat(entries,
               entry => entry.name,
               entry => this.renderEntry(entry))}

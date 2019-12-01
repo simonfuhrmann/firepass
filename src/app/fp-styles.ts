@@ -61,11 +61,30 @@ export const sharedStyles = css`
     --oxy-scrollbar-track-color: transparent;
     --oxy-scrollbar-track-border-radius: 0;
     --oxy-scrollbar-thumb-color: transparent;
-    --oxy-scrollbar-thumb-hover-color: transparent;
     --oxy-scrollbar-thumb-border: 1px solid transparent;
     --oxy-scrollbar-thumb-border-radius: 3px;
     --oxy-scrollbar-thumb-box-shadow:
-        inset 0 0 0 var(--oxy-scrollbar-width) var(--separator-color);
+        inset 0 0 0 var(--oxy-scrollbar-width) var(--disabled-text-color);
+    --oxy-scrollbar-thumb-hover-color: transparent;
     --oxy-scrollbar-thumb-hover-box-shadow:
         inset 0 0 0 var(--oxy-scrollbar-width) var(--tertiary-text-color);
-  }`;
+  }
+
+  .scrollable::-webkit-scrollbar {
+    width: var(--oxy-scrollbar-width);
+  }
+  .scrollable::-webkit-scrollbar-track {
+    background: var(--oxy-scrollbar-track-color);
+    border-radius: var(--oxy-scrollbar-track-border-radius);
+  }
+  .scrollable::-webkit-scrollbar-thumb {
+    background: var(--oxy-scrollbar-thumb-color);
+    border: var(--oxy-scrollbar-thumb-border);
+    border-radius: var(--oxy-scrollbar-thumb-border-radius);
+    box-shadow: var(--oxy-scrollbar-thumb-box-shadow);
+  }
+  .scrollable::-webkit-scrollbar-thumb:hover {
+    background: var(--oxy-scrollbar-thumb-hover-color);
+    box-shadow: var(--oxy-scrollbar-thumb-hover-box-shadow);
+  }
+`;

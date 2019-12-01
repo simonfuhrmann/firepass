@@ -15,12 +15,15 @@ export class FpDbEntryIcons extends LitElement {
       oxy-dialog {
         --oxy-dialog-min-width: 60%;
         --oxy-dialog-max-width: 80%;
+        --oxy-dialog-max-height: 100%;
       }
       #container {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        max-height: 50vh;
         overflow-y: auto;
         margin: 0 16px;
-        display: flex;
-        flex-wrap: wrap;
       }
       #container oxy-button {
         margin: 6px;
@@ -138,7 +141,7 @@ export class FpDbEntryIcons extends LitElement {
           heading="Select icon"
           ?opened=${this.opened}
           @close=${this.onClose}>
-        <div id="container">
+        <div id="container" class="scrollable">
           ${this.icons.map(icon => this.renderIcon(icon))}
         </div>
         <div slot="buttons">
