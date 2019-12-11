@@ -87,7 +87,10 @@ export class OxySlider extends LitElement {
           @mouseup=${this.onMouseUp}
           @mousemove=${this.onMouseMove}
           @mouseleave=${this.onMouseLeave}
-          @mouseenter=${this.onMouseEnter}>
+          @mouseenter=${this.onMouseEnter}
+          @touchstart=${this.onTouchStart}
+          @touchend=${this.onTouchEnd}
+          @touchmove=${this.onTouchMove}>
         <div id="track"></div>
         <div id="thumb"></div>
       </div>
@@ -115,9 +118,29 @@ export class OxySlider extends LitElement {
   }
 
   private onMouseMove(event: MouseEvent) {
+    if (!this.dragging) return;
+    this.updateValueFromMouse(event.clientX);
+  }
+
+  private onTouchStart(event: TouchEvent) {
+    this.dragging = true;
+    this.onTouchMove(event);
+  }
+
+  private onTouchEnd() {
+    this.dragging = false;
+  }
+
+  private onTouchMove(event: TouchEvent) {
     if (!this.container || !this.dragging) return;
+    if (event.touches.length < 1) return;
+    this.updateValueFromMouse(event.touches[0].clientX);
+  }
+
+  private updateValueFromMouse(clientX: number) {
+    if (!this.container) return;
     const rect = this.container.getBoundingClientRect();
-    const ratio = (event.clientX - rect.left) / (rect.right - rect.left);
+    const ratio = (clientX - rect.left) / (rect.right - rect.left);
     const value = Math.round(this.min + ratio * (this.max - this.min));
     this.value = value;
   }
