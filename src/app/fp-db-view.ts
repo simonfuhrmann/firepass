@@ -351,6 +351,8 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
     this.database.deleteEntry(entry);
     this.updateModel();
     this.uploadDatabase();
+    Actions.setSidebarVisible(true);
+    this.showToast(`Entry "${entry.name}" deleted`);
   }
 
   private selectEntry(entry: DbEntry|null) {
