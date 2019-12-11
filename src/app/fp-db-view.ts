@@ -56,13 +56,13 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
       #actions oxy-input oxy-icon {
         color: var(--disabled-text-color);
         cursor: pointer;
-        margin-left: 8px;
+        margin-left: 12px;
       }
       #actions oxy-input oxy-icon[active] {
         color: var(--primary-text-color);
       }
       #actions oxy-button {
-        padding: 8px;
+        padding: 8px 12px;
         border-radius: 0;
       }
       #items {
@@ -201,7 +201,7 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
               @change=${this.onFilterChange}>
             <oxy-icon
                 slot="before"
-                icon="icons:search"
+                icon="${this.filteredEntries ? 'icons:close' : 'icons:search'}"
                 ?active=${!!this.filteredEntries}
                 @click=${this.onFilterClear}>
             </oxy-icon>
