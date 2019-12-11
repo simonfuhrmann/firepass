@@ -34,10 +34,8 @@ export class FpPassGenerator extends LitElement {
       }
       oxy-input oxy-button {
         color: var(--tertiary-text-color);
-        padding: 4px;
-      }
-      oxy-input oxy-button:last-child {
-        margin-right: 4px;
+        padding: 8px;
+        border-radius: 0;
       }
       oxy-input oxy-button[active] {
         color: var(--theme-color-fire3);
@@ -54,12 +52,8 @@ export class FpPassGenerator extends LitElement {
         padding: 0 32px;
       }
       #buttons {
-        margin: 32px;
-      }
-      #buttons > oxy-button {
-        min-width: 64px;
-        margin: 0 8px;
-        background-color: var(--theme-color-gray);
+        display: flex;
+        flex-grow: 1;
       }
       .layout.horizontal {
         display: flex;
@@ -71,6 +65,9 @@ export class FpPassGenerator extends LitElement {
       }
       .layout.vertical.spaced > :not(:last-child) {
         margin-bottom: 8px;
+      }
+      [flex-grow] {
+        flex-grow: 1;
       }
     `;
   }
@@ -156,12 +153,6 @@ export class FpPassGenerator extends LitElement {
             .type=${this.showPassword ? 'text' : 'password'}>
           <div slot="after" class="layout horizontal">
             <oxy-button
-                title="Regenerate"
-                ?hidden=${!this.showPassword}
-                @click=${this.onRegenerate}>
-              <oxy-icon icon="icons:autorenew"></oxy-icon>
-            </oxy-button>
-            <oxy-button
                 title="Show password"
                 ?active=${this.showPassword}
                 @click=${this.onShowPassword}>
@@ -170,18 +161,26 @@ export class FpPassGenerator extends LitElement {
           </div>
         </oxy-input>
 
-        <div slot="buttons">
+        <div id="buttons" slot="buttons">
           <oxy-button
               text
-              ?hidden=${this.selectable}
-              @click=${this.close}>
-            Close
+              @click=${this.onRegenerate}>
+            Regenerate
           </oxy-button>
+
+          <div flex-grow></div>
+
           <oxy-button
               text
               ?hidden=${this.selectable}
               @click=${this.onCopyPassword}>
             Copy
+          </oxy-button>
+          <oxy-button
+              text
+              ?hidden=${this.selectable}
+              @click=${this.close}>
+            Close
           </oxy-button>
 
           <oxy-button
