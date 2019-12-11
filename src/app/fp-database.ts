@@ -1,6 +1,7 @@
 import {LitElement, html, css} from 'lit-element';
 import {customElement, property} from 'lit-element';
 
+import * as Actions from '../modules/state-actions';
 import {Database, DbState, DatabaseError} from '../database/database';
 import {EventsMixin} from '../mixins/events-mixin';
 import {FpDbUnlock} from './fp-db-unlock';
@@ -138,6 +139,7 @@ export class FpDatabase extends EventsMixin(LitElement) {
 
   private onUnlockDb(event: CustomEvent<string>) {
     if (this.dbState !== DbState.LOCKED) return;
+    Actions.setSidebarVisible(true);
     this.database.unlock(event.detail)
         .catch(error => this.onUnlockFailure(error));
   }
