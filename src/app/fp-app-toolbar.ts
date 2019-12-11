@@ -140,7 +140,7 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
         <oxy-button
             title="Log out"
             @click=${this.onLogout}>
-          <oxy-icon icon="icons:exit-to-app"></oxy-icon>
+          <oxy-icon icon="icons:power-settings-new"></oxy-icon>
         </oxy-button>
         <oxy-button
             id="lock-button"
