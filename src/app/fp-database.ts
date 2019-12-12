@@ -6,6 +6,7 @@ import {Database, DbState, DatabaseError} from '../database/database';
 import {EventsMixin} from '../mixins/events-mixin';
 import {FpDbUnlock} from './fp-db-unlock';
 import {devConfig} from '../config/development';
+import {downloadText} from '../modules/download';
 import {sharedStyles} from './fp-styles'
 import './fp-app-toolbar';
 import './fp-idle-timeout';
@@ -58,7 +59,10 @@ export class FpDatabase extends EventsMixin(LitElement) {
 
   connectedCallback() {
     super.connectedCallback();
-    this.addListener(this.DB_LOCK, this.onLockDb.bind(this) as EventListener);
+    this.addListener(this.DB_LOCK,
+        this.onLockDb.bind(this) as EventListener);
+    this.addListener(this.DB_EXPORT,
+        this.onExportDb.bind(this) as EventListener);
   }
 
   firstUpdated() {
@@ -146,6 +150,18 @@ export class FpDatabase extends EventsMixin(LitElement) {
 
   private onLockDb() {
     this.database.lock();
+  }
+
+  private onExportDb() {
+    const doc = this.database.getDocument();
+    const json = JSON.stringify(doc);
+    const date = new Date();
+    const dateArray = [date.getFullYear(), date.getMonth() + 1, date.getDate()];
+    const timeArray = [date.getHours(), date.getMinutes(), date.getSeconds()];
+    const dateStr = dateArray.map(s => s.toString().padStart(2, '0')).join('');
+    const timeStr = timeArray.map(s => s.toString().padStart(2, '0')).join('');
+    const filename = `firepass_export-${dateStr}_${timeStr}.json`;
+    downloadText(json, filename);
   }
 
   private onDownloadError(error: DatabaseError) {

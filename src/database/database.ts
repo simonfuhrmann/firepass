@@ -30,10 +30,6 @@ export class Database {
   private dbStorage: DbStorage = new DbStorage();
   private dbData: DbData = new DbData();
 
-  getModel(): DbModel {
-    return this.dbData.getModel();
-  }
-
   getState(): DbState {
     return this.dbState;
   }
@@ -45,6 +41,14 @@ export class Database {
 
   removeStateListener(callback: DbStateListener) {
     this.stateListeners = this.stateListeners.filter(x => x !== callback);
+  }
+
+  getModel(): DbModel {
+    return this.dbData.getModel();
+  }
+
+  getDocument(): DbDocument {
+    return this.dbData.getDocument();
   }
 
   // Attempts to download the database. Transitions to the FETCHING state

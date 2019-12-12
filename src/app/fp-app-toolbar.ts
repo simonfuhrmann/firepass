@@ -5,6 +5,7 @@ import {EventsMixin} from '../mixins/events-mixin';
 import {State} from '../modules/state-types';
 import {StateMixin} from '../mixins/state-mixin';
 import {FpPassGenerator} from './fp-pass-generator';
+import {FpSettings} from './fp-settings';
 import {appConfig} from '../config/application';
 import {sharedStyles} from './fp-styles'
 import '../oxygen/oxy-button';
@@ -13,6 +14,7 @@ import '../oxygen/oxy-icons-base';
 import '../oxygen/oxy-icons-communication';
 import '../oxygen/oxy-icons-logos';
 import './fp-pass-generator';
+import './fp-settings';
 
 @customElement('fp-app-toolbar')
 export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
@@ -81,7 +83,8 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
 
   private idleTimeoutIntervalHandle: number = -1;
 
-  @query('#generator') generator: FpPassGenerator|undefined;
+  @query('fp-pass-generator') generator: FpPassGenerator|undefined;
+  @query('fp-settings') settings: FpSettings|undefined;
 
   @property({type: Boolean}) dbUnlocked = false;
   @property({type: String}) idleTimeout = '';
@@ -130,13 +133,11 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
             @click=${this.onOpenGenerator}>
           <oxy-icon icon="communication:vpn-key"></oxy-icon>
         </oxy-button>
-        <!--
         <oxy-button
             title="Settings"
             @click=${this.onOpenSettings}>
           <oxy-icon icon="icons:settings"></oxy-icon>
         </oxy-button>
-        -->
         <oxy-button
             title="Log out"
             @click=${this.onLogout}>
@@ -152,7 +153,8 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
         </oxy-button>
       </div>
 
-      <fp-pass-generator id="generator"></fp-pass-generator>
+      <fp-pass-generator></fp-pass-generator>
+      <fp-settings></fp-settings>
     `;
   }
 
@@ -167,7 +169,9 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
   }
 
   private onOpenSettings() {
-    // TODO
+    const settings = this.settings;
+    if (!settings) return;
+    settings.open();
   }
 
   private onLogout() {

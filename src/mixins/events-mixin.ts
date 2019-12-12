@@ -13,6 +13,7 @@ export function EventsMixin<TBase extends Constructor>(Base: TBase) {
   return class extends Base {
     // Available global events.
     protected DB_LOCK: string = 'db-lock';
+    protected DB_EXPORT: string = 'db-export';
     protected USER_SIGNOFF: string = 'user-signoff';
     protected IDLE_TIMEOUT: string = 'idle-timeout';
     protected HISTORY_POPSTATE: string = 'popstate';
