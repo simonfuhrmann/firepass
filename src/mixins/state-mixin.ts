@@ -8,7 +8,7 @@ type Constructor<T = LitElement> = new (...args: any[]) => T;
 // Helper mixin for the global state management.
 export function StateMixin<TBase extends Constructor>(Base: TBase) {
   return class extends Base {
-    readonly stateListener: StateListener = this.stateChanged.bind(this);
+    readonly mixinStateListener: StateListener = this.stateChanged.bind(this);
 
     constructor(...args: any[]) {
       super(...args);
@@ -16,12 +16,12 @@ export function StateMixin<TBase extends Constructor>(Base: TBase) {
 
     connectedCallback() {
       super.connectedCallback();
-      stateManager.addListener(this.stateListener);
+      stateManager.addListener(this.mixinStateListener);
     }
 
     disconnectedCallback() {
       super.disconnectedCallback();
-      stateManager.removeListener(this.stateListener);
+      stateManager.removeListener(this.mixinStateListener);
     }
 
     getState() {
