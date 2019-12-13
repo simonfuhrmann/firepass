@@ -76,8 +76,8 @@ export class FpDbUnlock extends LitElement {
 
   firstUpdated() {
     if (!this.shadowRoot) return;
-    this.pass_ = <OxyInput>this.shadowRoot.getElementById('pass');
-    this.repeat_ = <OxyInput>this.shadowRoot.getElementById('repeat');
+    this.pass_ = this.shadowRoot.getElementById('pass') as OxyInput;
+    this.repeat_ = this.shadowRoot.getElementById('repeat') as OxyInput;
 
     setTimeout(() => {
       if (!this.pass_) return;

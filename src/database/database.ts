@@ -82,10 +82,12 @@ export class Database {
     return this.uploadDatabase(iv);
   }
 
-  // Locks the database and transitions to LOCKED.
-  // TODO: Encrypt the database and save if there are changes.
-  // TODO: Overwrite memory?
+  // Locks the database and transitions to LOCKED. If the database is in
+  // any other state than UNLOCKED, this function does nothing.
   lock(): Promise<void> {
+    if (this.dbState !== DbState.UNLOCKED) {
+      return Promise.resolve();
+    }
     console.log('Database.lock()');
     return new Promise((resolve, /*reject*/) => {
       this.dbData.clearModel();
