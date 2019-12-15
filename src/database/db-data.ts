@@ -10,7 +10,7 @@ export class DbData {
 
   // Returns the decrypted database model. Throws if not set before.
   getModel(): DbModel {
-    if (!this.model) throw 'Model not initialized';
+    if (!this.model) throw new Error('Model not initialized');
     return this.model;
   }
 
@@ -42,8 +42,8 @@ export class DbData {
   // Returns the database document with base64 encoded settings and payload.
   // Required for upload to the storage backend.
   getDocument(): DbDocument {
-    if (!this.settings) throw 'Settings not initialized';
-    if (!this.payload) throw 'Payload not initialized';
+    if (!this.settings) throw new Error('Settings not initialized');
+    if (!this.payload) throw new Error('Payload not initialized');
     const settings = {
       passSalt: Base64.encode(this.settings.passSalt),
       aesIv: Base64.encode(this.settings.aesIv),
@@ -56,26 +56,26 @@ export class DbData {
   // Sets a new payload (the encrypted database). Required after the database
   // has locally changed.
   setPayload(payload: ArrayBuffer, aesIv: ArrayBuffer) {
-    if (!this.settings) throw 'Settings not initialized';
+    if (!this.settings) throw new Error('Settings not initialized');
     this.payload = payload;
     this.settings.aesIv = aesIv;
   }
 
   // Returns the database payload (the encrypted database).
   getPayload(): ArrayBuffer {
-    if (!this.payload) throw 'Payload not initialzed';
+    if (!this.payload) throw new Error('Payload not initialzed');
     return this.payload;
   };
 
   // Returns the salt for deriving the master key from the master password.
   getPasswordSalt(): ArrayBuffer {
-    if (!this.settings) throw 'Settings not initialized';
+    if (!this.settings) throw new Error('Settings not initialized');
     return this.settings.passSalt;
   }
 
   // Returns the AES initialization vector for encryption/decyption.
   getAesIv(): ArrayBuffer {
-    if (!this.settings) throw 'Settings not initialized';
+    if (!this.settings) throw new Error('Settings not initialized');
     return this.settings.aesIv;
   }
 
@@ -94,8 +94,8 @@ export class DbData {
   // If both entries are null, an exception is thrown.
   // Note: Only encrypted entries must be added.
   updateEntry(oldEntry: DbEntry|null, newEntry: DbEntry|null) {
-    if (!this.model) throw 'Model not initialized';
-    if (!oldEntry && !newEntry) throw 'Both old and new entry are null';
+    if (!this.model) throw new Error('Model not initialized');
+    if (!oldEntry && !newEntry) throw new Error('Both entries are null');
 
     // If the new entry is null, delete the old entry. If the old entry is null,
     // add a new entry. Otherwise update the existing entry.
@@ -105,7 +105,7 @@ export class DbData {
       entries.push(newEntry);
     } else {
       const entryIdx = entries.findIndex(elem => elem === oldEntry);
-      if (entryIdx < 0) throw 'Old entry not in database';
+      if (entryIdx < 0) throw new Error('Old entry not in database');
       if (!newEntry) {
         entries.splice(entryIdx, 1);
       } else {
@@ -118,7 +118,7 @@ export class DbData {
   }
 
   sortEntries() {
-    if (!this.model) throw 'Model not initialized';
+    if (!this.model) throw new Error('Model not initialized');
     this.model.entries.sort((a, b) => a.name.localeCompare(b.name));
   }
 
