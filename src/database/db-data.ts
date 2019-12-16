@@ -15,18 +15,18 @@ export class DbData {
   }
 
   // Sets the decrypted database model, e.g., after unlocking and decrypting.
-  setModel(model: DbModel) {
+  setModel(model: DbModel): void {
     this.model = model;
   }
 
   // Clears all decrypted data, e.g., on database lock.
-  clearModel() {
+  clearModel(): void {
     this.model = null;
   }
 
   // Sets the document stored in the database backend. Required after
   // downloading it from the storage backend.
-  setDocument(doc: DbDocument) {
+  setDocument(doc: DbDocument): void {
     if (!doc.settings || !doc.payload) {
       throw new Error('Document format not recognized');
     }
@@ -55,7 +55,7 @@ export class DbData {
 
   // Sets a new payload (the encrypted database). Required after the database
   // has locally changed.
-  setPayload(payload: ArrayBuffer, aesIv: ArrayBuffer) {
+  setPayload(payload: ArrayBuffer, aesIv: ArrayBuffer): void {
     if (!this.settings) throw new Error('Settings not initialized');
     this.payload = payload;
     this.settings.aesIv = aesIv;
@@ -80,7 +80,7 @@ export class DbData {
   }
 
   // Creates a new, empty database with the given crypto parameters.
-  createNewDatabase(salt: ArrayBuffer, iv: ArrayBuffer) {
+  createNewDatabase(salt: ArrayBuffer, iv: ArrayBuffer): void {
     this.settings = {
       passSalt: salt,
       aesIv: iv,
@@ -93,7 +93,7 @@ export class DbData {
   // entry is created. If the new entry is null, the old entry is deleted.
   // If both entries are null, an exception is thrown.
   // Note: Only encrypted entries must be added.
-  updateEntry(oldEntry: DbEntry|null, newEntry: DbEntry|null) {
+  updateEntry(oldEntry: DbEntry|null, newEntry: DbEntry|null): void {
     if (!this.model) throw new Error('Model not initialized');
     if (!oldEntry && !newEntry) throw new Error('Both entries are null');
 
@@ -117,7 +117,7 @@ export class DbData {
     this.model = {entries};
   }
 
-  sortEntries() {
+  sortEntries(): void {
     if (!this.model) throw new Error('Model not initialized');
     this.model.entries.sort((a, b) => a.name.localeCompare(b.name));
   }
