@@ -4,7 +4,7 @@ export class DbCrypto {
   // Computes the AES key from the master password and salt. The salt can be
   // stored without encryption, but should be randomized every time a new
   // password is chosen.
-  setMasterPassword(password: string, salt: ArrayBuffer) {
+  setMasterPassword(password: string, salt: ArrayBuffer): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!password) {
         reject('crypto/empty-password');
@@ -33,7 +33,7 @@ export class DbCrypto {
 
   // Removes the master password from memory.
   // TODO: Overwrite password.
-  clear() {
+  clear(): void {
     this.masterKey = null;
   }
 
