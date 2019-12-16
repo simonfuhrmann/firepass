@@ -1,20 +1,23 @@
 import {LitElement, html, css} from 'lit-element';
-import {customElement, property} from 'lit-element';
+import {customElement, property, query} from 'lit-element';
 
 import * as Actions from '../modules/state-actions';
+import {State} from '../modules/state-types';
 import {Database, DbState, DatabaseError} from '../database/database';
 import {EventsMixin} from '../mixins/events-mixin';
 import {FpDbUnlock} from './fp-db-unlock';
+import {StateMixin} from '../mixins/state-mixin';
 import {devConfig} from '../config/development';
 import {downloadText} from '../modules/download';
 import {sharedStyles} from './fp-styles'
 import './fp-app-toolbar';
 import './fp-idle-timeout';
+import './fp-db-change-pass';
 import './fp-db-unlock';
 import './fp-db-view';
 
 @customElement('fp-database')
-export class FpDatabase extends EventsMixin(LitElement) {
+export class FpDatabase extends StateMixin(EventsMixin(LitElement)) {
   static get styles() {
     return css`
       ${sharedStyles}
@@ -22,11 +25,6 @@ export class FpDatabase extends EventsMixin(LitElement) {
         display: flex;
         flex-direction: column;
         min-height: 0;  /* To enable scrolling of items. */
-      }
-      #unlock {
-        align-self: center;
-        margin: calc(128px - 49px) 32px 128px 32px;
-        width: 250px;
       }
       #error {
         align-self: center;
@@ -41,34 +39,42 @@ export class FpDatabase extends EventsMixin(LitElement) {
         font-size: 0.8em;
         margin: 8px;
       }
+      fp-db-unlock {
+        align-self: center;
+        margin: calc(128px - 49px) 32px 128px 32px;
+        width: 250px;
+      }
       fp-db-view,
       fp-db-unlock,
+      fp-db-change-pass,
       #error  {
         flex-grow: 1;
       }
     `;
   }
 
-  private readonly stateListener = this.onStateChanged.bind(this);
+  private readonly stateListener = this.onDbStateChanged.bind(this);
   private database: Database = new Database();
   private autoUnlockFailed = false;
 
+  @query('fp-db-unlock') unlockElem: FpDbUnlock|undefined;
   @property({type: Number}) dbState: DbState = DbState.INITIAL;
+  @property({type: Boolean}) changePassword: boolean = false;
   @property({type: String}) errorCode: string = '';
   @property({type: String}) errorMessage: string = '';
 
   connectedCallback() {
     super.connectedCallback();
+    this.database.addStateListener(this.stateListener);
+    this.downloadDatabase();
     this.addListener(this.DB_LOCK,
         this.onLockDb.bind(this) as EventListener);
     this.addListener(this.DB_EXPORT,
         this.onExportDb.bind(this) as EventListener);
   }
 
-  firstUpdated() {
-    this.database.addStateListener(this.stateListener);
-    this.database.download(/*setState=*/true)
-        .catch(error => this.onDownloadError(error));
+  stateChanged(newState: State, _oldState: State|null) {
+    this.changePassword = newState.changePassword;
   }
 
   disconnectedCallback() {
@@ -89,9 +95,9 @@ export class FpDatabase extends EventsMixin(LitElement) {
 
   private renderDbState() {
     return html`
-      ${this.dbState === DbState.UNLOCKED
-          ? this.renderDbView()
-          : this.renderDbUnlock()}
+      ${this.renderDbUnlock()}
+      ${this.renderChangePass()}
+      ${this.renderDbView()}
     `;
   }
 
@@ -105,9 +111,10 @@ export class FpDatabase extends EventsMixin(LitElement) {
   }
 
   private renderDbUnlock() {
+    if (this.dbState === DbState.UNLOCKED) return html``;
+    if (this.changePassword) return html``;
     return html`
       <fp-db-unlock
-          id="unlock"
           ?isFetching=${this.dbState === DbState.FETCHING}
           ?createDb=${this.dbState === DbState.MISSING}
           @create=${this.onCreateDb}
@@ -117,13 +124,27 @@ export class FpDatabase extends EventsMixin(LitElement) {
   }
 
   private renderDbView() {
+    if (this.dbState !== DbState.UNLOCKED) return html``;
     return html`
       <fp-idle-timeout></fp-idle-timeout>
       <fp-db-view .database=${this.database}></fp-db-view>
     `;
   }
 
-  private onStateChanged(state: DbState) {
+  private renderChangePass() {
+    if (this.dbState === DbState.UNLOCKED) return html``;
+    if (!this.changePassword) return html``;
+    return html`
+      <fp-db-change-pass @change=${this.onDbPassChanged}></fp-db-change-pass>
+    `;
+  }
+
+  private downloadDatabase() {
+    this.database.download(/*setState=*/true)
+        .catch(error => this.onDownloadError(error));
+  }
+
+  private onDbStateChanged(state: DbState) {
     this.dbState = state;
 
     // Development feature: Auto-unlock.
@@ -133,6 +154,11 @@ export class FpDatabase extends EventsMixin(LitElement) {
       const detail = {detail: devConfig.unlockPassword};
       this.onUnlockDb(new CustomEvent('unlock', detail));
     }
+  }
+
+  private onDbPassChanged() {
+    this.database.resetState();
+    this.downloadDatabase();
   }
 
   private onCreateDb(event: CustomEvent<string>) {
@@ -169,9 +195,9 @@ export class FpDatabase extends EventsMixin(LitElement) {
   }
 
   private onUnlockFailure(error: DatabaseError) {
-    if (!this.shadowRoot) return;
-    const dbUnlock = <FpDbUnlock>this.shadowRoot.getElementById('unlock');
-    dbUnlock.setErrorMessage(error.code);
+    const unlockElem = this.unlockElem;
+    if (!unlockElem) return;
+    unlockElem.setErrorMessage(error.code);
   }
 
   // Displays a permanent error, such as a database download error.
