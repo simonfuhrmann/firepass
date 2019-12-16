@@ -1,6 +1,7 @@
 import {LitElement, html, css} from 'lit-element';
 import {property, customElement} from 'lit-element';
 
+import * as Actions from '../modules/state-actions';
 import {EventsMixin} from '../mixins/events-mixin';
 import {sharedStyles} from './fp-styles'
 import '../oxygen/oxy-button';
@@ -59,12 +60,10 @@ export class FpSettings extends EventsMixin(LitElement) {
           <div class="primary">Export database</div>
           <div class="secondary">Download the encrypted database</div>
         </oxy-button>
-        <!--
-        <oxy-button>
+        <oxy-button @click=${this.onChangePassword}>
           <div class="primary">Change password</div>
           <div class="secondary">Change the database password</div>
         </oxy-button>
-        -->
       </div>
     `;
   }
@@ -79,5 +78,10 @@ export class FpSettings extends EventsMixin(LitElement) {
 
   private onExport() {
     this.dispatch(this.DB_EXPORT);
+  }
+
+  private onChangePassword() {
+    this.dispatch(this.DB_LOCK);
+    Actions.setChangePassword(true);
   }
 }

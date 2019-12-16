@@ -11,6 +11,7 @@ export interface State {
   authState: AuthState;
   lastActivityMs: number;
   sidebarVisible: boolean;
+  changePassword: boolean;
 }
 
 // Creates the global state with initial values.
@@ -19,5 +20,6 @@ export function initializeState(): State {
     authState: AuthState.PENDING,
     lastActivityMs: Date.now(),
     sidebarVisible: true,
+    changePassword: false,
   };
 }

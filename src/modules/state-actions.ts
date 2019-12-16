@@ -27,3 +27,12 @@ export function setSidebarVisible(sidebarVisible: boolean) {
   };
   stateManager.processAction(action);
 }
+
+// Shows the change password form when database is locked.
+export function setChangePassword(changePassword: boolean) {
+  const action = (state: State) => {
+    if (state.changePassword === changePassword) return state;
+    return {...state, changePassword};
+  };
+  stateManager.processAction(action);
+}
