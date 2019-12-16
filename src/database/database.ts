@@ -25,10 +25,16 @@ export type DbStateListener = (status: DbState) => void;
 export class Database {
   private dbState: DbState = DbState.INITIAL;
   private stateListeners: DbStateListener[] = [];
-
   private dbCrypto: DbCrypto = new DbCrypto();
   private dbStorage: DbStorage = new DbStorage();
   private dbData: DbData = new DbData();
+
+  resetState() {
+    this.dbCrypto = new DbCrypto();
+    this.dbStorage = new DbStorage();
+    this.dbData = new DbData();
+    this.setState(DbState.INITIAL);
+  }
 
   getState(): DbState {
     return this.dbState;
@@ -198,6 +204,57 @@ export class Database {
   sortEntries() {
     console.log('Database.sortEntries()');
     this.dbData.sortEntries();
+  }
+
+  async changePassword(oldPass: string, newPass: string): Promise<void> {
+    if (oldPass == newPass) {
+      const error: DatabaseError = {
+        code: 'db/invalid-password',
+        message: 'Passwords identical',
+      };
+      return Promise.reject(error);
+    }
+    if (!oldPass || !newPass) {
+      const error: DatabaseError = {
+        code: 'db/invalid-password',
+        message: 'Password is empty',
+      };
+      return Promise.reject(error);
+    }
+    if (this.getState() === DbState.UNLOCKED) {
+      const error: DatabaseError = {
+        code: 'db/invalid-state',
+        message: 'Database must be locked',
+      };
+      return Promise.reject(error);
+    }
+    if (this.getState() !== DbState.LOCKED) {
+      const error: DatabaseError = {
+        code: 'db/invalid-state',
+        message: 'Database unavailable',
+      };
+      return Promise.reject(error);
+    }
+
+    // Decrypt the database.
+    await this.unlock(oldPass);
+    // Decrypt all entries.
+    const oldModel = this.getModel();
+    const decryptedEntries = await Promise.all(
+        oldModel.entries.map((entry) => this.decryptEntry(entry)));
+    // Change master password, randomize a new salt and AES init vector.
+    const salt = new Uint8Array(32);
+    crypto.getRandomValues(salt);
+    await this.dbCrypto.setMasterPassword(newPass, salt);
+    // Encrypt all entries.
+    const encryptedEntries = await Promise.all(
+        decryptedEntries.map((entry) => this.encryptEntry(entry)));
+    // Create a new database and assign entires.
+    const iv = new Uint8Array(16);
+    crypto.getRandomValues(iv);
+    this.dbData.createNewDatabase(salt, iv);
+    this.dbData.setModel({...oldModel, entries: encryptedEntries});
+    return Promise.resolve();
   }
 
   private assignDocument(doc: DbDocument): Promise<void> {
