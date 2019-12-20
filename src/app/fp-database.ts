@@ -135,7 +135,9 @@ export class FpDatabase extends StateMixin(EventsMixin(LitElement)) {
     if (this.dbState === DbState.UNLOCKED) return html``;
     if (!this.changePassword) return html``;
     return html`
-      <fp-db-change-pass @change=${this.onDbPassChanged}></fp-db-change-pass>
+      <fp-db-change-pass
+          @finish=${this.onDbChangePassFinished}>
+      </fp-db-change-pass>
     `;
   }
 
@@ -156,8 +158,9 @@ export class FpDatabase extends StateMixin(EventsMixin(LitElement)) {
     }
   }
 
-  private onDbPassChanged() {
-    this.database.resetState();
+  private onDbChangePassFinished() {
+    this.database.reset();
+    Actions.setChangePassword(false);
     this.downloadDatabase();
   }
 

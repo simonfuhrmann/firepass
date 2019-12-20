@@ -1,7 +1,6 @@
 import {LitElement, html, css} from 'lit-element';
 import {customElement, property, query} from 'lit-element';
 
-import * as Actions from '../modules/state-actions';
 import {Database, DatabaseError} from '../database/database';
 import {OxyInput} from '../oxygen/oxy-input'
 import {sharedStyles} from './fp-styles'
@@ -135,7 +134,7 @@ export class FpDbChangePass extends LitElement {
   }
 
   private onCancel() {
-    Actions.setChangePassword(false);
+    this.dispatchEvent(new CustomEvent('finish'));
   }
 
   private onContinue() {
@@ -159,6 +158,7 @@ export class FpDbChangePass extends LitElement {
 
     this.changePassword(oldPass, newPass).then(() => {
       this.disabled = false;
+      this.dispatchEvent(new CustomEvent('finish'));
     }).catch((error: DatabaseError) => {
       this.disabled = false;
       this.errorMessage = error.message || error.code || error.toString();
@@ -175,7 +175,5 @@ export class FpDbChangePass extends LitElement {
     console.log('Uploading database...');
     await database.upload();
     console.log('Database password changed.');
-    Actions.setChangePassword(false);
-    this.dispatchEvent(new CustomEvent('change'));
   }
 }

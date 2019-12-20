@@ -29,7 +29,9 @@ export class Database {
   private dbStorage: DbStorage = new DbStorage();
   private dbData: DbData = new DbData();
 
-  resetState() {
+  // Resets the database state (crypto, storage, data, state).
+  // Does not remove previously installed state listeners.
+  reset() {
     this.dbCrypto = new DbCrypto();
     this.dbStorage = new DbStorage();
     this.dbData = new DbData();
