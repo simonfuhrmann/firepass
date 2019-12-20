@@ -57,6 +57,7 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
       #logo h1 {
         color: var(--tertiary-text-color);
         font-size: 1.2em;
+        margin: 0;
       }
       oxy-button {
         color: var(--secondary-text-color);
