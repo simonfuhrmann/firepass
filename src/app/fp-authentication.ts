@@ -114,6 +114,7 @@ export class FpAuthentication extends StateMixin(EventsMixin(LitElement)) {
   }
 
   private onUserSignoff() {
+    Actions.resetAppState();
     firebase.auth().signOut();
   }
 
@@ -130,6 +131,7 @@ export class FpAuthentication extends StateMixin(EventsMixin(LitElement)) {
           loginElement.disabled = false;
           loginElement.errorMessage = error.code;
           loginElement.focusPassword();
+          Actions.resetAppState();
           Actions.setAuthState(AuthState.SIGNED_OFF);
         });
   }

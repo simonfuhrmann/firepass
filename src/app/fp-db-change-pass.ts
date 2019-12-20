@@ -155,6 +155,18 @@ export class FpDbChangePass extends LitElement {
       this.resetFocus();
       return;
     }
+    if (oldPass === newPass) {
+      this.disabled = false;
+      this.errorMessage = 'Passwords identical';
+      this.resetFocus();
+      return;
+    }
+    if (!oldPass || !newPass) {
+      this.disabled = false;
+      this.errorMessage = 'Password empty';
+      this.resetFocus();
+      return;
+    }
 
     this.changePassword(oldPass, newPass).then(() => {
       this.disabled = false;

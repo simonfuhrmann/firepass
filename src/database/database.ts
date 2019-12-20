@@ -209,13 +209,6 @@ export class Database {
   }
 
   async changePassword(oldPass: string, newPass: string): Promise<void> {
-    if (oldPass == newPass) {
-      const error: DatabaseError = {
-        code: 'db/invalid-password',
-        message: 'Passwords identical',
-      };
-      return Promise.reject(error);
-    }
     if (!oldPass || !newPass) {
       const error: DatabaseError = {
         code: 'db/invalid-password',

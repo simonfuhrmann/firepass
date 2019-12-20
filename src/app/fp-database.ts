@@ -160,7 +160,7 @@ export class FpDatabase extends StateMixin(EventsMixin(LitElement)) {
 
   private onDbChangePassFinished() {
     this.database.reset();
-    Actions.setChangePassword(false);
+    Actions.resetAppState();
     this.downloadDatabase();
   }
 
@@ -172,7 +172,7 @@ export class FpDatabase extends StateMixin(EventsMixin(LitElement)) {
 
   private onUnlockDb(event: CustomEvent<string>) {
     if (this.dbState !== DbState.LOCKED) return;
-    Actions.setSidebarVisible(true);
+    Actions.resetAppState();
     this.database.unlock(event.detail)
         .catch(error => this.onUnlockFailure(error));
   }

@@ -1,4 +1,4 @@
-import {State, AuthState} from './state-types';
+import {State, AuthState, getInitialState} from './state-types';
 import {stateManager} from './state-manager';
 
 // Sets the user authentication state.
@@ -33,6 +33,15 @@ export function setChangePassword(changePassword: boolean) {
   const action = (state: State) => {
     if (state.changePassword === changePassword) return state;
     return {...state, changePassword};
+  };
+  stateManager.processAction(action);
+}
+
+// Resets the application state, except for the authentication state.
+export function resetAppState() {
+  const action = (state: State) => {
+    const initialState = getInitialState();
+    return {...initialState, authState: state.authState};
   };
   stateManager.processAction(action);
 }
