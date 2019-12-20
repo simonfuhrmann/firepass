@@ -435,6 +435,7 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
     if (!this.database) return;
     if (devConfig.skipUpload) {
       console.warn('Skipping database upload (dev setting)');
+      this.showToast('Warning: Upload disabled (demo site)');
       return;
     }
     this.database.upload()
