@@ -15,7 +15,7 @@ export interface State {
 }
 
 // Creates the global state with initial values.
-export function initializeState(): State {
+export function getInitialState(): State {
   return {
     authState: AuthState.PENDING,
     lastActivityMs: Date.now(),

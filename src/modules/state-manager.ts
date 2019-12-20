@@ -1,4 +1,4 @@
-import {State, initializeState} from './state-types';
+import {State, getInitialState} from './state-types';
 
 // A state change notification sent for all state change listeners.
 export interface Notification {
@@ -20,7 +20,7 @@ export type StateAction = (state: State) => State;
 // Manages the state change listeners and the notification queue.
 class StateManager {
   private listeners: StateListener[] = [];
-  private state: State = initializeState();
+  private state: State = getInitialState();
   private queue: Notification[] = [];
 
   // Adds a new listener to the manager.
