@@ -3,21 +3,28 @@
 Firepass is a password manager. Firepass stores your database in the cloud so
 you can access it from anywhere, anytime, from any device with a browser. It
 uses Google Firebase as storage and authentication backend. In contrast to
-popular online password managers you have to host your own Firebase instance and
-take control of your data. See "Installation" below for details.
+popular online password managers you have to host your own Google Firebase
+instance and take control of your data. See "Installation" below for details.
 
 Want to play with a demo?
 
-* Visit https://firepass-demo.firebaseapp.com/
-* Login: demo@demo.com (password: demo123)
+* Visit https://firepass-demo.web.app/
+* Login: demo@demo.com (supports local modifications only)
+* Login password: demo123
 * Database password: demo321
 
 Firepass uses username/password authentication to restrict access to your
 database. If your login credentials get compromised, your database is
 susceptible to vandalism (deletion, corruption), but all passwords are safely
-encrypted using your master password. All crytographic operations happen locally
-and unencrypted data never leaves the client. See "Cryptographic Notes" below
+encrypted using your master password. Unencrypted data never leaves your client,
+and all cryptographic operations happen locally. See "Cryptographic Notes" below
 for more information.
+
+## Important Notes
+
+* Firepass currently does not support offline access to your database.
+* Firepass (intentionally) does not support auto-fill forms on websites.
+* Every software has bugs. Make regular backups of your (encrypted) database.
 
 ## Cryptographic Notes
 
@@ -26,11 +33,20 @@ initialization vector for CBC is randomized every time the database is
 encrypted, and stored along with the encrypted database. The symmetric AES key
 is derived from your master password using PBKDF2 with 2048 iterations and a
 256 bit salt which is randomized whenever the master password is changed. The
-salt is stored along with the encrypted database. The database is encrypted in
-its entirety into one opaque binary blob as opposed to individually encrypted
-entries. Thus, no information about the database contents is revealed. The byte
-size of the encrypted database will, however, correlate with the number of
-entries in the the database.
+salt is stored along with the encrypted database.
+
+All cryptographic operations are implemented locally in the client using the
+Web Crypto API (`SubtleCrypto`). Your plain text password is never stored in
+JavaScript; it is used immediately to derive the master password using PBKDF2
+and then stored in a `CryptoKey` object, which is administered by the browser
+implementation.
+
+For storage, the database is encrypted in its entirety into one opaque binary
+blob as opposed to individually encrypted entries. No information about the
+database contents is revealed in storage or transit. The byte size of the
+encrypted database may, however, correlate with the number of entries in the
+database. After a certain idle period the local database is locked, your AES key
+and all unencrypted data are cleared from the client.
 
 ## Installation
 
