@@ -5,6 +5,7 @@ import * as firebase from 'firebase/app';
 import {firebaseConfig} from '../config/firebase';
 import {AuthState, State} from '../modules/state-types';
 import {StateMixin} from '../mixins/state-mixin';
+import {appConfig} from '../config/application';
 import './fp-authentication';
 import './fp-database';
 
@@ -19,6 +20,13 @@ export class FpApp extends StateMixin(LitElement) {
       }
       fp-database {
         flex-grow: 1;
+      }
+      #version {
+        position: fixed;
+        left: 2px;
+        bottom: 2px;
+        color: #333;
+        font-size: 0.7em;
       }
     `;
   }
@@ -41,12 +49,19 @@ export class FpApp extends StateMixin(LitElement) {
     return html`
       <fp-authentication></fp-authentication>
       ${this.isAuthenticated ? this.renderDatabase() : ''}
+      ${!this.isAuthenticated ? this.renderVersion() : ''}
     `;
   }
 
-  renderDatabase() {
+  private renderDatabase() {
     return html`
       <fp-database></fp-database>
+    `;
+  }
+
+  private renderVersion() {
+    return html`
+      <div id="version">v${appConfig.appVersion}</div>
     `;
   }
 }
