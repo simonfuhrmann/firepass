@@ -71,7 +71,7 @@ signed in, Firepass uses the "Cloud Firestore" database backend to host your
 * Add "Email/Password" users in the "Authentication" menu.
 * Create a "Cloud Firestore" database in the "Database" menu.
 * Add the below security rules to your database.
-* Add a web-app to your project in the Settings and obtain the Firebase config.
+* Add a web-app in the project settings and obtain the Firebase config.
 
 ### Add Database rules
 
@@ -91,10 +91,16 @@ service cloud.firestore {
 
 ### Enable Firebase hosting
 
-Firebase can also host your Firepass instance (optional, but recommended).
+Google Firebase can also host your Firepass instance (optional).
 
-* Click on "Hosting" in the Firebase console.
-* Click "Get Started" and follow the instructions (install the Firebase tools,
-  and login from the command line).
-* Create a production build (`npm run build`)
+* Click on "Hosting" in the Google Firebase console.
+* Click "Get Started" and follow the instructions (install the Firebase tools)
+* Login from the command line (`firebase login`)
+* DO NOT run `firebase init`, a `firebase.json` is already provided
+* Create a production build (`rm -fr dist/ .cache/ && npm run build`)
 * Deploy the build (`firebase deploy`)
+
+Your website is now served from http://PROJECT-ID.web.app. Even though Google
+Firebase hosts your website, you can access the website from a domain of your
+choice. To do so, select "Add custom domain" from the "Hosting" menu in the
+Google Firebase console and follow the instructions.
