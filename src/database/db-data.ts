@@ -1,9 +1,9 @@
 import {DbModel, DbEntry, DbSettings, DbDocument} from './db-types';
 import {Base64} from '../modules/base64';
+import {appConfig} from '../config/application';
 
 // The in-memory representation of the database.
 export class DbData {
-  private readonly dataVersion: number = 1;
   private payload: ArrayBuffer|null = null;  // The encrypted database.
   private settings: DbSettings|null = null;  // The database settings.
   private model: DbModel|null = null;  // The decrypted database.
@@ -47,7 +47,7 @@ export class DbData {
     const settings = {
       passSalt: Base64.encode(this.settings.passSalt),
       aesIv: Base64.encode(this.settings.aesIv),
-      dataVersion: this.dataVersion,
+      dataVersion: appConfig.dataVersion,
     };
     const payload = Base64.encode(this.payload);
     return {settings, payload};
@@ -84,7 +84,7 @@ export class DbData {
     this.settings = {
       passSalt: salt,
       aesIv: iv,
-      dataVersion: this.dataVersion,
+      dataVersion: appConfig.dataVersion,
     };
     this.model = {entries: []};
   }
@@ -128,8 +128,16 @@ export class DbData {
       throw new Error('Document version unspecified');
     }
     // Application can not handle newer versions.
-    if (doc.settings.dataVersion > this.dataVersion) {
+    if (doc.settings.dataVersion > appConfig.dataVersion) {
       throw new Error('Document version unsupported');
+    }
+
+    // Handle any conversions here.
+    // There is currently only version 1.
+
+    // Application could not handle older version.
+    if (doc.settings.dataVersion < appConfig.dataVersion) {
+      throw new Error('No converter for version ' + doc.settings.dataVersion);
     }
     return doc;
   }
