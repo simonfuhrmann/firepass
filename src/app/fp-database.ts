@@ -65,12 +65,12 @@ export class FpDatabase extends StateMixin(EventsMixin(LitElement)) {
 
   connectedCallback() {
     super.connectedCallback();
-    this.database.addStateListener(this.stateListener);
-    this.downloadDatabase();
     this.addListener(this.DB_LOCK,
         this.onLockDb.bind(this) as EventListener);
     this.addListener(this.DB_EXPORT,
         this.onExportDb.bind(this) as EventListener);
+    this.database.addStateListener(this.stateListener);
+    this.downloadDatabase();
   }
 
   stateChanged(newState: State, _oldState: State|null) {
@@ -118,7 +118,8 @@ export class FpDatabase extends StateMixin(EventsMixin(LitElement)) {
           ?isFetching=${this.dbState === DbState.FETCHING}
           ?createDb=${this.dbState === DbState.MISSING}
           @create=${this.onCreateDb}
-          @unlock=${this.onUnlockDb}>
+          @unlock=${this.onUnlockDb}
+          @refetch=${this.downloadDatabase}>
       </fp-db-unlock>
     `;
   }

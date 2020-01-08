@@ -3,6 +3,7 @@ import {customElement, property} from 'lit-element';
 
 import {OxyInput} from '../oxygen/oxy-input'
 import {sharedStyles} from './fp-styles'
+import {appConfig} from '../config/application';
 import '../oxygen/oxy-input'
 
 @customElement('fp-db-unlock')
@@ -35,8 +36,10 @@ export class FpDbUnlock extends LitElement {
     `;
   }
 
-  private pass_: OxyInput|null = null;
-  private repeat_ : OxyInput|null = null;
+  private passInput: OxyInput|undefined;
+  private repeatInput: OxyInput|undefined;
+  private visibilityChangedFn = () => { this.onVisibilityChanged(); }
+  private lastDbFetchMs: number = Date.now();
 
   @property({type: Boolean}) createDb = false;
   @property({type: Boolean}) isFetching = false;
@@ -74,14 +77,24 @@ export class FpDbUnlock extends LitElement {
     `;
   }
 
+  connectedCallback() {
+    super.connectedCallback();
+    document.addEventListener('visibilitychange', this.visibilityChangedFn);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    document.removeEventListener('visibilitychange', this.visibilityChangedFn);
+  }
+
   firstUpdated() {
     if (!this.shadowRoot) return;
-    this.pass_ = this.shadowRoot.getElementById('pass') as OxyInput;
-    this.repeat_ = this.shadowRoot.getElementById('repeat') as OxyInput;
+    this.passInput = this.shadowRoot.getElementById('pass') as OxyInput;
+    this.repeatInput = this.shadowRoot.getElementById('repeat') as OxyInput;
 
     setTimeout(() => {
-      if (!this.pass_) return;
-      this.pass_.focus();
+      if (!this.passInput) return;
+      this.passInput.focus();
     }, 0);
   }
 
@@ -89,9 +102,9 @@ export class FpDbUnlock extends LitElement {
     this.errorMessage = errorMessage;
     this.disabled = false;
     setTimeout(() => {
-      if (!this.pass_) return;
-      this.pass_.focus();
-      this.pass_.select();
+      if (!this.passInput) return;
+      this.passInput.focus();
+      this.passInput.select();
     }, 0);
   }
 
@@ -100,31 +113,43 @@ export class FpDbUnlock extends LitElement {
 
     this.errorMessage = '';
     if (this.createDb) {
-      if (!this.repeat_) return;
-      this.repeat_.focus();
-      this.repeat_.select();
+      if (!this.repeatInput) return;
+      this.repeatInput.focus();
+      this.repeatInput.select();
       return;
     }
 
     if (this.isFetching) return;
-    if (!this.pass_) return;
+    if (!this.passInput) return;
     this.errorMessage = '';
     this.disabled = true;
-    this.dispatchEvent(new CustomEvent('unlock', {detail: this.pass_.value}));
+    const password = this.passInput.value;
+    this.dispatchEvent(new CustomEvent('unlock', {detail: password}));
   }
 
   private onRepeatKeydown(event: KeyboardEvent) {
     if (event.keyCode != 13) return;
-    if (!this.pass_ || !this.repeat_) return;
-    if (this.pass_.value != this.repeat_.value) {
-      this.pass_.clear();
-      this.repeat_.clear();
+    if (!this.passInput || !this.repeatInput) return;
+    if (this.passInput.value != this.repeatInput.value) {
+      this.passInput.clear();
+      this.repeatInput.clear();
       this.setErrorMessage('Passwords do not match');
       return;
     }
     if (this.isFetching) return;
     this.errorMessage = '';
     this.disabled = true;
-    this.dispatchEvent(new CustomEvent('create', {detail: this.pass_.value}));
+    const password = this.passInput.value;
+    this.dispatchEvent(new CustomEvent('create', {detail: password}));
+  }
+
+  private onVisibilityChanged() {
+    const pageActivated = !document.hidden;
+    const idleTimeMs = Date.now() - this.lastDbFetchMs;
+    const needsRefetch = idleTimeMs > appConfig.refetchTimeoutMs;
+    if (pageActivated && needsRefetch) {
+      this.dispatchEvent(new CustomEvent('refetch'));
+      this.lastDbFetchMs = Date.now();
+    }
   }
 }
