@@ -95,6 +95,7 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
         display: flex;
         flex-direction: column;
         flex-grow: 1;
+        overflow: hidden;
       }
       oxy-tab .entry-text .primary {
         color: var(--primary-text-color);
