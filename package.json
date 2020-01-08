@@ -11,12 +11,12 @@
     "build": "parcel build index.html"
   },
   "dependencies": {
-    "@webcomponents/webcomponentsjs": "^2.2.10",
-    "firebase": "^6.4.0",
+    "@webcomponents/webcomponentsjs": "^2.4.0",
+    "firebase": "^6.6.2",
     "lit-element": "^2.2.1"
   },
   "devDependencies": {
-    "parcel-bundler": "^1.12.3",
-    "typescript": "^3.5.3"
+    "parcel-bundler": "^1.12.4",
+    "typescript": "^3.7.4"
   }
 }
