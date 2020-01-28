@@ -205,6 +205,7 @@ export class FpPassGenerator extends LitElement {
   open() {
     if (!this.dialog) return;
     this.dialog.open();
+    this.onRegenerate();
   }
 
   close() {
@@ -236,8 +237,7 @@ export class FpPassGenerator extends LitElement {
 
   private onRegenerate() {
     if (!this.input) return;
-    const pass = this.generatePassword();
-    this.input.value = pass;
+    this.input.value = this.generatePassword();
   }
 
   private onPassLengthChanged(event: CustomEvent<number>) {
