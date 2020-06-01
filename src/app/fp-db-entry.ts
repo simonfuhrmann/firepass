@@ -92,11 +92,13 @@ export class FpDbEntry extends LitElement {
       }
       table th {
         font-weight: normal;
-        width: 1px;
         white-space: nowrap;
         text-align: left;
         padding: 2px 8px;
         color: var(--tertiary-text-color);
+      }
+      table td {
+        width: 100%;
       }
       oxy-input[readonly] {
         --oxy-input-background-color: transparent;
