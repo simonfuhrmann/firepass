@@ -389,8 +389,11 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
   }
 
   private onFilterChange(event: CustomEvent<string>) {
+    this.filterEntries(event.detail.toLowerCase());
+  }
+
+  private filterEntries(filter: string) {
     if (!this.model) return;
-    const filter = event.detail.toLowerCase();
     if (filter.length < 3) {
       this.filteredEntries = null;
       return;
@@ -451,6 +454,13 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
   private updateModel() {
     if (!this.database) return;
     this.model = this.database.getModel();
+
+    // Rerun the user filter after the model was updated.
+    const filterInput = this.filterInput;
+    if (filterInput) {
+      const filterString = filterInput.value;
+      this.filterEntries(filterString);
+    }
   }
 
   private showToast(text: string) {
