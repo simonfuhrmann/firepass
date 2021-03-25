@@ -250,7 +250,7 @@ export class FpDbEntry extends LitElement {
         </tr>
 
         <tr>
-          <th>Pasword</th>
+          <th>Password</th>
           <td>
             <oxy-input
                 id="password"
