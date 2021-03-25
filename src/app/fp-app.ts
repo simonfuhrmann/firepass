@@ -1,6 +1,6 @@
 import {LitElement, html, css} from 'lit-element';
 import {customElement, property} from 'lit-element';
-import * as firebase from 'firebase/app';
+import firebase from 'firebase/app';
 
 import {firebaseConfig} from '../config/firebase';
 import {AuthState, State} from '../modules/state-types';

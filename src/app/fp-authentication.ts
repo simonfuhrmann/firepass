@@ -1,7 +1,7 @@
 import {LitElement, html, css} from 'lit-element';
 import {customElement, property, query} from 'lit-element';
 
-import * as firebase from 'firebase/app';
+import firebase from 'firebase/app';
 import 'firebase/auth';
 
 import * as Actions from '../modules/state-actions';
