@@ -133,6 +133,12 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
         margin: 8px;
       }
 
+      /*
+       * When the screen is below a certain width (e.g., on mobile), either the
+       * sidebar OR the password entry is shown, controlled by the "sidebar"
+       * property. To enable the browser's back button functionality, a history
+       * entry is pushed when an entry is selected.
+       */
       @media screen and (max-width: 700px) {
         #sidebar {
           display: none;
@@ -389,7 +395,7 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
   }
 
   private onFilterChange(event: CustomEvent<string>) {
-    this.filterEntries(event.detail.toLowerCase());
+    this.filterEntries(event.detail);
   }
 
   private filterEntries(filter: string) {
@@ -398,6 +404,7 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
       this.filteredEntries = null;
       return;
     }
+    filter = filter.toLowerCase();
     this.filteredEntries = this.model.entries.filter(entry => {
       return entry.name.toLowerCase().search(filter) >= 0 ||
           entry.url.toLowerCase().search(filter) >= 0 ||
