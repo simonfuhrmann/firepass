@@ -1,14 +1,13 @@
 import {LitElement} from 'lit-element';
 
-import {State} from '../modules/state-types';
-import {StateListener, stateManager} from '../modules/state-manager';
+import {State, stateManager} from '../modules/state-types';
 
 type Constructor<T = LitElement> = new (...args: any[]) => T;
 
 // Helper mixin for the global state management.
 export function StateMixin<TBase extends Constructor>(Base: TBase) {
   return class extends Base {
-    readonly mixinStateListener: StateListener = this.stateChanged.bind(this);
+    private readonly mixinStateListener = this.stateChanged.bind(this);
 
     constructor(...args: any[]) {
       super(...args);

@@ -1,3 +1,5 @@
+import {StateManager} from './state-manager';
+
 // State of the user authentication.
 export enum AuthState {
   PENDING,
@@ -23,3 +25,5 @@ export function getInitialState(): State {
     changePassword: false,
   };
 }
+
+export const stateManager = new StateManager(getInitialState());

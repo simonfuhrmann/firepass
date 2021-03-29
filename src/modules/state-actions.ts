@@ -1,5 +1,4 @@
-import {State, AuthState, getInitialState} from './state-types';
-import {stateManager} from './state-manager';
+import {State, AuthState, getInitialState, stateManager} from './state-types';
 
 // Sets the user authentication state.
 export function setAuthState(authState: AuthState) {
