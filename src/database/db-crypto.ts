@@ -127,7 +127,7 @@ export class DbCrypto {
     const key = new TextEncoder().encode(password);
     const algo = 'PBKDF2';
     const extract = false;
-    const usage = ['deriveKey'];
+    const usage: KeyUsage[] = ['deriveKey'];
     return crypto.subtle.importKey(format, key, algo, extract, usage);
   }
 
@@ -140,7 +140,7 @@ export class DbCrypto {
     };
     const type = { name: 'AES-CBC', length: 256, };
     const extract = false;
-    const usage = ['encrypt', 'decrypt'];
+    const usage: KeyUsage[] = ['encrypt', 'decrypt'];
     return crypto.subtle.deriveKey(algo, key, type, extract, usage);
   }
 }
