@@ -2,8 +2,10 @@
 
 Firepass is a password manager. Firepass stores your database in the cloud so
 you can access it from anywhere, anytime, from any device with a browser. It
-uses Google Firebase as storage and authentication backend. In contrast to
-popular online password managers you have to host your own Google Firebase
+uses [Google Firebase](https://firebase.google.com/) as
+[storage](https://firebase.google.com/products/firestore) and
+[authentication](https://firebase.google.com/products/auth) backend. In contrast
+to popular online password managers you have to create your own Google Firebase
 instance and take control of your data. See "Installation" below for details.
 
 Want to play with a demo?
@@ -97,7 +99,7 @@ Google Firebase can also host your Firepass instance (optional).
 * Click "Get Started" and follow the instructions (install the Firebase tools)
 * Login from the command line (`firebase login`)
 * DO NOT run `firebase init`, a `firebase.json` is already provided
-* Create a production build (`rm -fr dist/ .cache/ && npm run build`)
+* Create a production build (`npm run clean && npm run build`)
 * Deploy the build (`firebase deploy`)
 
 Your website is now served from http://PROJECT-ID.web.app. Even though Google
