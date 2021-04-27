@@ -1,5 +1,5 @@
-import {LitElement, css, html} from 'lit';
-import {customElement, property, query} from 'lit/decorators';
+import {LitElement, css, html, nothing} from 'lit';
+import {customElement, query, state} from 'lit/decorators';
 
 import * as Actions from '../modules/state-actions';
 import {State} from '../modules/state-types';
@@ -58,10 +58,10 @@ export class FpDatabase extends StateMixin(EventsMixin(LitElement)) {
   private autoUnlockFailed = false;
 
   @query('fp-db-unlock') unlockElem: FpDbUnlock|undefined;
-  @property({type: Number}) dbState: DbState = DbState.INITIAL;
-  @property({type: Boolean}) changePassword: boolean = false;
-  @property({type: String}) errorCode: string = '';
-  @property({type: String}) errorMessage: string = '';
+  @state() private dbState: DbState = DbState.INITIAL;
+  @state() private changePassword: boolean = false;
+  @state() private errorCode: string = '';
+  @state() private errorMessage: string = '';
 
   connectedCallback() {
     super.connectedCallback();
@@ -111,8 +111,8 @@ export class FpDatabase extends StateMixin(EventsMixin(LitElement)) {
   }
 
   private renderDbUnlock() {
-    if (this.dbState === DbState.UNLOCKED) return html``;
-    if (this.changePassword) return html``;
+    if (this.dbState === DbState.UNLOCKED) return nothing;
+    if (this.changePassword) return nothing;
     return html`
       <fp-db-unlock
           ?isFetching=${this.dbState === DbState.FETCHING}
@@ -125,7 +125,7 @@ export class FpDatabase extends StateMixin(EventsMixin(LitElement)) {
   }
 
   private renderDbView() {
-    if (this.dbState !== DbState.UNLOCKED) return html``;
+    if (this.dbState !== DbState.UNLOCKED) return nothing;
     return html`
       <fp-idle-timeout></fp-idle-timeout>
       <fp-db-view .database=${this.database}></fp-db-view>
@@ -133,8 +133,8 @@ export class FpDatabase extends StateMixin(EventsMixin(LitElement)) {
   }
 
   private renderChangePass() {
-    if (this.dbState === DbState.UNLOCKED) return html``;
-    if (!this.changePassword) return html``;
+    if (this.dbState === DbState.UNLOCKED) return nothing;
+    if (!this.changePassword) return nothing;
     return html`
       <fp-db-change-pass
           @finish=${this.onDbChangePassFinished}>

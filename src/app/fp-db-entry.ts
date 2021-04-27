@@ -1,4 +1,4 @@
-import {LitElement, css, html} from 'lit';
+import {LitElement, css, html, nothing} from 'lit';
 import {customElement, property} from 'lit/decorators';
 
 import {OxyDialog} from 'oxygen-mdc/oxy-dialog';
@@ -178,7 +178,7 @@ export class FpDbEntry extends LitElement {
   }
 
   render() {
-    if (!this.entry) return html``;
+    if (!this.entry) return nothing;
 
     return html`
       <div id="header">

@@ -1,5 +1,5 @@
 import {LitElement, css, html} from 'lit';
-import {customElement, property, query} from 'lit/decorators';
+import {customElement, property, query, state} from 'lit/decorators';
 
 import {OxyInput} from 'oxygen-mdc/oxy-input'
 import 'oxygen-mdc/oxy-button';
@@ -57,8 +57,8 @@ export class FpDbChangePass extends LitElement {
   @query('#old-pass') oldPassElem: OxyInput|undefined;
   @query('#new-pass') newPassElem: OxyInput|undefined;
   @query('#repeat-pass') repeatPassElem: OxyInput|undefined;
-  @property({type: String}) errorMessage: string = '';
   @property({type: Boolean, reflect: true}) disabled: boolean = false;
+  @state() private errorMessage: string = '';
 
   firstUpdated() {
     this.resetFocus();

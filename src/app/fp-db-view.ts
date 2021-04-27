@@ -1,5 +1,5 @@
-import {LitElement, css, html} from 'lit';
-import {customElement, property, query} from 'lit/decorators';
+import {LitElement, css, html, nothing} from 'lit';
+import {customElement, property, query, state} from 'lit/decorators';
 import {repeat} from 'lit/directives/repeat';
 
 import {OxyInput} from 'oxygen-mdc/oxy-input';
@@ -168,12 +168,12 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
   @query('#toast') private toastElement: OxyToast|undefined;
 
   @property({type: Object}) database: Database|null = null;
-  @property({type: Object}) databaseError: DatabaseError|null = null;
-  @property({type: Object}) model: DbModel|null = null;
-  @property({type: Array}) filteredEntries: DbEntry[]|null = null;
-  @property({type: Object}) selectedEntry: DbEntry|null = null;
-  @property({type: Object}) decryptedEntry: DbEntry|null = null;
   @property({type: Boolean, reflect: true}) sidebar: boolean = true;
+  @state() private databaseError: DatabaseError|null = null;
+  @state() private model: DbModel|null = null;
+  @state() private filteredEntries: DbEntry[]|null = null;
+  @state() private selectedEntry: DbEntry|null = null;
+  @state() private decryptedEntry: DbEntry|null = null;
 
   connectedCallback() {
     super.connectedCallback();
@@ -244,7 +244,7 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
     if (!this.filteredEntries && this.model.entries.length === 0) {
       return html`<p>No entries, create one!</p>`;
     }
-    return html``;
+    return nothing;
   }
 
   private renderDatabaseError() {

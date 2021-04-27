@@ -1,5 +1,5 @@
 import {LitElement, css, html} from 'lit';
-import {customElement, property, query} from 'lit/decorators';
+import {customElement, query, state} from 'lit/decorators';
 
 import firebase from 'firebase/app';
 import 'firebase/auth';
@@ -51,9 +51,9 @@ export class FpAuthentication extends StateMixin(EventsMixin(LitElement)) {
   }
 
   @query('#login') loginElement: FpAuthLogin|undefined;
-  @property({type: Number}) authState = AuthState.PENDING;
-  @property({type: String}) errorCode = '';
-  @property({type: String}) errorMessage = '';
+  @state() private authState = AuthState.PENDING;
+  @state() private errorCode = '';
+  @state() private errorMessage = '';
 
   connectedCallback() {
     super.connectedCallback();

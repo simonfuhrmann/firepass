@@ -1,5 +1,5 @@
 import {LitElement, css, html} from 'lit';
-import {property, query, customElement} from 'lit/decorators';
+import {customElement, property, query, state} from 'lit/decorators';
 
 import 'oxygen-mdc/oxy-button';
 import 'oxygen-mdc/oxy-icon';
@@ -89,8 +89,8 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
   @query('fp-settings') settings: FpSettings|undefined;
 
   @property({type: Boolean}) dbUnlocked = false;
-  @property({type: String}) idleTimeout = '';
   @property({type: Boolean, reflect: true}) sidebar = false;
+  @state() private idleTimeout = '';
 
   connectedCallback() {
     super.connectedCallback();

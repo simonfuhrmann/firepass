@@ -1,5 +1,5 @@
 import {LitElement, css, html} from 'lit';
-import {customElement, property} from 'lit/decorators';
+import {customElement, state} from 'lit/decorators';
 import firebase from 'firebase/app';
 
 import {firebaseConfig} from '../config/firebase';
@@ -31,7 +31,7 @@ export class FpApp extends StateMixin(LitElement) {
     `;
   }
 
-  @property({type: Boolean}) isAuthenticated = false;
+  @state() private isAuthenticated = false;
 
   constructor() {
     super();
