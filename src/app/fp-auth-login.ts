@@ -1,5 +1,5 @@
-import {LitElement, html, css} from 'lit-element';
-import {customElement, property} from 'lit-element';
+import {LitElement, css, html} from 'lit';
+import {customElement, property} from 'lit/decorators';
 
 import {OxyInput} from '../oxygen/oxy-input'
 import {devConfig} from '../config/development';

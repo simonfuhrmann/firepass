@@ -1,5 +1,5 @@
-import {LitElement, html, css} from 'lit-element';
-import {customElement, property, query} from 'lit-element';
+import {LitElement, css, html} from 'lit';
+import {customElement, property, query} from 'lit/decorators';
 
 import * as Actions from '../modules/state-actions';
 import {State} from '../modules/state-types';

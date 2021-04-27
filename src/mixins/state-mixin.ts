@@ -1,4 +1,4 @@
-import {LitElement} from 'lit-element';
+import {LitElement} from 'lit';
 
 import {State, stateManager} from '../modules/state-types';
 

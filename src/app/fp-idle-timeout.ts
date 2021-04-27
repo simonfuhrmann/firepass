@@ -1,5 +1,5 @@
-import {LitElement} from 'lit-element';
-import {customElement} from 'lit-element';
+import {LitElement} from 'lit';
+import {customElement} from 'lit/decorators';
 
 import * as Actions from '../modules/state-actions';
 import {EventsMixin} from '../mixins/events-mixin';
