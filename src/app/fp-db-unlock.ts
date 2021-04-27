@@ -1,10 +1,11 @@
 import {LitElement, css, html} from 'lit';
 import {customElement, property} from 'lit/decorators';
 
-import {OxyInput} from '../oxygen/oxy-input'
+import {OxyInput} from 'oxygen-mdc/oxy-input'
+import 'oxygen-mdc/oxy-input'
+
 import {sharedStyles} from './fp-styles'
 import {appConfig} from '../config/application';
-import '../oxygen/oxy-input'
 
 @customElement('fp-db-unlock')
 export class FpDbUnlock extends LitElement {

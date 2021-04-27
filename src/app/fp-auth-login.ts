@@ -1,10 +1,11 @@
 import {LitElement, css, html} from 'lit';
 import {customElement, property} from 'lit/decorators';
 
-import {OxyInput} from '../oxygen/oxy-input'
+import {OxyInput} from 'oxygen-mdc/oxy-input'
+import 'oxygen-mdc/oxy-input'
+
 import {devConfig} from '../config/development';
 import {sharedStyles} from './fp-styles'
-import '../oxygen/oxy-input'
 
 @customElement('fp-auth-login')
 export class FpAuthLogin extends LitElement {

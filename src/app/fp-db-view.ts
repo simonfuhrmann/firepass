@@ -2,22 +2,23 @@ import {LitElement, css, html} from 'lit';
 import {customElement, property, query} from 'lit/decorators';
 import {repeat} from 'lit/directives/repeat';
 
+import {OxyInput} from 'oxygen-mdc/oxy-input';
+import {OxyToast} from 'oxygen-mdc/oxy-toast';
+import 'oxygen-mdc/oxy-button';
+import 'oxygen-mdc/oxy-icon';
+import 'oxygen-mdc/oxy-input';
+import 'oxygen-mdc/oxy-tab';
+import 'oxygen-mdc/oxy-toast';
+
 import * as Actions from '../modules/state-actions';
 import {Database, DatabaseError} from '../database/database';
 import {DbModel, DbEntry} from '../database/db-types';
-import {OxyInput} from '../oxygen/oxy-input';
-import {OxyToast} from '../oxygen/oxy-toast';
 import {FpDbEntry} from './fp-db-entry';
 import {State} from '../modules/state-types';
 import {StateMixin} from '../mixins/state-mixin';
 import {EventsMixin} from '../mixins/events-mixin';
 import {devConfig} from '../config/development';
 import {sharedStyles} from './fp-styles'
-import '../oxygen/oxy-button';
-import '../oxygen/oxy-icon';
-import '../oxygen/oxy-input';
-import '../oxygen/oxy-tab';
-import '../oxygen/oxy-toast';
 import './fp-db-entry';
 
 @customElement('fp-db-view')

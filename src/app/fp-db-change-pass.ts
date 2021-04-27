@@ -1,11 +1,12 @@
 import {LitElement, css, html} from 'lit';
 import {customElement, property, query} from 'lit/decorators';
 
+import {OxyInput} from 'oxygen-mdc/oxy-input'
+import 'oxygen-mdc/oxy-button';
+import 'oxygen-mdc/oxy-input'
+
 import {Database, DatabaseError} from '../database/database';
-import {OxyInput} from '../oxygen/oxy-input'
 import {sharedStyles} from './fp-styles'
-import '../oxygen/oxy-button';
-import '../oxygen/oxy-input'
 
 @customElement('fp-db-change-pass')
 export class FpDbChangePass extends LitElement {

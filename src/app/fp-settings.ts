@@ -1,10 +1,11 @@
 import {LitElement, css, html} from 'lit';
 import {property, customElement} from 'lit/decorators';
 
+import 'oxygen-mdc/oxy-button';
+
 import * as Actions from '../modules/state-actions';
 import {EventsMixin} from '../mixins/events-mixin';
 import {sharedStyles} from './fp-styles'
-import '../oxygen/oxy-button';
 
 @customElement('fp-settings')
 export class FpSettings extends EventsMixin(LitElement) {

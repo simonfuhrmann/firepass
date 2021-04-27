@@ -1,6 +1,11 @@
 import {LitElement, css, html} from 'lit';
 import {property, query, customElement} from 'lit/decorators';
 
+import 'oxygen-mdc/oxy-button';
+import 'oxygen-mdc/oxy-icon';
+import 'oxygen-mdc/oxy-icons-base';
+import 'oxygen-mdc/oxy-icons-communication';
+
 import {EventsMixin} from '../mixins/events-mixin';
 import {State} from '../modules/state-types';
 import {StateMixin} from '../mixins/state-mixin';
@@ -8,11 +13,7 @@ import {FpPassGenerator} from './fp-pass-generator';
 import {FpSettings} from './fp-settings';
 import {appConfig} from '../config/application';
 import {sharedStyles} from './fp-styles'
-import '../oxygen/oxy-button';
-import '../oxygen/oxy-icon';
-import '../oxygen/oxy-icons-base';
-import '../oxygen/oxy-icons-communication';
-import '../oxygen/oxy-icons-logos';
+import './fp-icons-logos';
 import './fp-pass-generator';
 import './fp-settings';
 

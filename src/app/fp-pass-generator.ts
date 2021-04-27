@@ -1,17 +1,18 @@
 import {LitElement, css, html} from 'lit';
 import {property, customElement} from 'lit/decorators';
 
-import {OxyCheckbox} from '../oxygen/oxy-checkbox';
-import {OxyDialog} from '../oxygen/oxy-dialog';
-import {OxyInput} from '../oxygen/oxy-input';
-import {OxyToast} from '../oxygen/oxy-toast';
+import {OxyCheckbox} from 'oxygen-mdc/oxy-checkbox';
+import {OxyDialog} from 'oxygen-mdc/oxy-dialog';
+import {OxyInput} from 'oxygen-mdc/oxy-input';
+import {OxyToast} from 'oxygen-mdc/oxy-toast';
+import 'oxygen-mdc/oxy-button';
+import 'oxygen-mdc/oxy-checkbox';
+import 'oxygen-mdc/oxy-dialog';
+import 'oxygen-mdc/oxy-icon';
+import 'oxygen-mdc/oxy-input';
+import 'oxygen-mdc/oxy-slider';
+
 import {sharedStyles} from './fp-styles';
-import '../oxygen/oxy-button';
-import '../oxygen/oxy-checkbox';
-import '../oxygen/oxy-dialog';
-import '../oxygen/oxy-icon';
-import '../oxygen/oxy-input';
-import '../oxygen/oxy-slider';
 
 // A password generator UI in a dialog window.
 // If the element has the `selected` attribute, the "Copy" button turns into

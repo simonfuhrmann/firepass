@@ -1,11 +1,13 @@
 import {LitElement, css, html} from 'lit';
 import {property, customElement} from 'lit/decorators';
 
-import {sharedStyles} from './fp-styles'
-import '../oxygen/oxy-button';
-import '../oxygen/oxy-dialog';
-import '../oxygen/oxy-icon';
-import '../oxygen/oxy-icons-all';
+import 'oxygen-mdc/oxy-button';
+import 'oxygen-mdc/oxy-dialog';
+import 'oxygen-mdc/oxy-icon';
+import 'oxygen-mdc/oxy-icons-all';
+
+import {sharedStyles} from './fp-styles';
+import './fp-icons-logos';
 
 @customElement('fp-db-entry-icons')
 export class FpDbEntryIcons extends LitElement {
