@@ -92,6 +92,7 @@ export class FpDbEntryIcons extends LitElement {
     'icons:settings',
     'icons:star-border',
     'icons:supervisor-account',
+    'av:games',
     'av:movie',
     'communication:business',
     'communication:chat-bubble',
