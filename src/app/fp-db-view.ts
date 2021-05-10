@@ -10,19 +10,19 @@ import 'oxygen-mdc/oxy-input';
 import 'oxygen-mdc/oxy-tab';
 import 'oxygen-mdc/oxy-toast';
 
+import {EventsController} from '../controllers/events-controller';
 import * as Actions from '../modules/state-actions';
 import {Database, DatabaseError} from '../database/database';
 import {DbModel, DbEntry} from '../database/db-types';
 import {FpDbEntry} from './fp-db-entry';
 import {State} from '../modules/state-types';
 import {StateMixin} from '../mixins/state-mixin';
-import {EventsMixin} from '../mixins/events-mixin';
 import {devConfig} from '../config/development';
 import {sharedStyles} from './fp-styles'
 import './fp-db-entry';
 
 @customElement('fp-db-view')
-export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
+export class FpDbView extends StateMixin(LitElement) {
   static get styles() {
     return css`
       ${sharedStyles}
@@ -163,6 +163,8 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
     `;
   }
 
+  private events = new EventsController(this);
+
   @query('#entry') private entryElement: FpDbEntry|undefined;
   @query('#filter') private filterInput: OxyInput|undefined;
   @query('#toast') private toastElement: OxyToast|undefined;
@@ -177,7 +179,7 @@ export class FpDbView extends StateMixin(EventsMixin(LitElement)) {
 
   connectedCallback() {
     super.connectedCallback();
-    this.addListener(this.HISTORY_POPSTATE, (event) => {
+    this.events.addListener(EventsController.HISTORY_POPSTATE, (event) => {
       const popstate = event as PopStateEvent;
       Actions.setSidebarVisible(!popstate.state || !popstate.state.showEntry);
     });

@@ -1,15 +1,16 @@
 import {LitElement} from 'lit';
 import {customElement} from 'lit/decorators';
 
+import {EventsController} from '../controllers/events-controller';
 import * as Actions from '../modules/state-actions';
-import {EventsMixin} from '../mixins/events-mixin';
 import {StateMixin} from '../mixins/state-mixin';
 import {appConfig} from '../config/application';
 
 @customElement('fp-idle-timeout')
-export class FpIdleTimeout extends StateMixin(EventsMixin(LitElement)) {
+export class FpIdleTimeout extends StateMixin(LitElement) {
   private readonly clickListener = this.registerActivity.bind(this);
   private readonly keydownListener = this.onKeydown.bind(this);
+  private events = new EventsController(this);
   private timeoutHandle = -1;
 
   connectedCallback() {
@@ -27,7 +28,7 @@ export class FpIdleTimeout extends StateMixin(EventsMixin(LitElement)) {
   }
 
   private onKeydown(event: KeyboardEvent) {
-    const ignore = ['Alt', 'Shift', 'Control', 'Meta',, 'CapsLock'];
+    const ignore = ['Alt', 'Shift', 'Control', 'Meta', 'CapsLock'];
     if (ignore.includes(event.key)) return;
     this.registerActivity();
   }
@@ -50,6 +51,6 @@ export class FpIdleTimeout extends StateMixin(EventsMixin(LitElement)) {
   }
 
   private lockDatabase() {
-    this.dispatch(this.DB_LOCK);
+    this.events.dispatch(EventsController.DB_LOCK);
   }
 }

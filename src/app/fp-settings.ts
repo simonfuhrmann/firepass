@@ -3,12 +3,12 @@ import {property, customElement} from 'lit/decorators';
 
 import 'oxygen-mdc/oxy-button';
 
+import {EventsController} from '../controllers/events-controller';
 import * as Actions from '../modules/state-actions';
-import {EventsMixin} from '../mixins/events-mixin';
 import {sharedStyles} from './fp-styles'
 
 @customElement('fp-settings')
-export class FpSettings extends EventsMixin(LitElement) {
+export class FpSettings extends LitElement {
   static get styles() {
     return css`
       ${sharedStyles}
@@ -51,6 +51,8 @@ export class FpSettings extends EventsMixin(LitElement) {
     `;
   }
 
+  private events = new EventsController(this);
+
   @property({type: Boolean}) opened = false;
 
   render() {
@@ -78,11 +80,11 @@ export class FpSettings extends EventsMixin(LitElement) {
   }
 
   private onExport() {
-    this.dispatch(this.DB_EXPORT);
+    this.events.dispatch(EventsController.DB_EXPORT);
   }
 
   private onChangePassword() {
-    this.dispatch(this.DB_LOCK);
+    this.events.dispatch(EventsController.DB_LOCK);
     Actions.setChangePassword(true);
   }
 }

@@ -4,16 +4,16 @@ import {customElement, query, state} from 'lit/decorators';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 
+import {EventsController} from '../controllers/events-controller';
 import * as Actions from '../modules/state-actions';
 import {AuthState, State} from '../modules/state-types';
-import {EventsMixin} from '../mixins/events-mixin';
 import {StateMixin} from '../mixins/state-mixin';
 import {FpAuthLogin} from './fp-auth-login';
 import {sharedStyles} from './fp-styles'
 import './fp-auth-login';
 
 @customElement('fp-authentication')
-export class FpAuthentication extends StateMixin(EventsMixin(LitElement)) {
+export class FpAuthentication extends StateMixin(LitElement) {
   static get styles() {
     return css`
       ${sharedStyles}
@@ -50,6 +50,8 @@ export class FpAuthentication extends StateMixin(EventsMixin(LitElement)) {
     `;
   }
 
+  private events = new EventsController(this);
+
   @query('#login') loginElement: FpAuthLogin|undefined;
   @state() private authState = AuthState.PENDING;
   @state() private errorCode = '';
@@ -57,7 +59,7 @@ export class FpAuthentication extends StateMixin(EventsMixin(LitElement)) {
 
   connectedCallback() {
     super.connectedCallback();
-    this.addListener(this.USER_SIGNOFF,
+    this.events.addListener(EventsController.USER_SIGNOFF,
         this.onUserSignoff.bind(this) as EventListener);
   }
 

@@ -6,7 +6,7 @@ import 'oxygen-mdc/oxy-icon';
 import 'oxygen-mdc/oxy-icons-base';
 import 'oxygen-mdc/oxy-icons-communication';
 
-import {EventsMixin} from '../mixins/events-mixin';
+import {EventsController} from '../controllers/events-controller';
 import {State} from '../modules/state-types';
 import {StateMixin} from '../mixins/state-mixin';
 import {FpPassGenerator} from './fp-pass-generator';
@@ -18,7 +18,7 @@ import './fp-pass-generator';
 import './fp-settings';
 
 @customElement('fp-app-toolbar')
-export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
+export class FpAppToolbar extends StateMixin(LitElement) {
   static get styles() {
     return css`
       ${sharedStyles}
@@ -83,6 +83,7 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
     `;
   }
 
+  private events = new EventsController(this);
   private idleTimeoutIntervalHandle: number = -1;
 
   @query('fp-pass-generator') generator: FpPassGenerator|undefined;
@@ -177,11 +178,11 @@ export class FpAppToolbar extends StateMixin(EventsMixin(LitElement)) {
   }
 
   private onLogout() {
-    this.dispatch(this.USER_SIGNOFF);
+    this.events.dispatch(EventsController.USER_SIGNOFF);
   }
 
   private onLock() {
-    this.dispatch(this.DB_LOCK);
+    this.events.dispatch(EventsController.DB_LOCK);
   }
 
   private resetIdleTimeoutInterval() {

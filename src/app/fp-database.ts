@@ -1,10 +1,10 @@
 import {LitElement, css, html, nothing} from 'lit';
 import {customElement, query, state} from 'lit/decorators';
 
+import {EventsController} from '../controllers/events-controller';
 import * as Actions from '../modules/state-actions';
 import {State} from '../modules/state-types';
 import {Database, DbState, DatabaseError} from '../database/database';
-import {EventsMixin} from '../mixins/events-mixin';
 import {FpDbUnlock} from './fp-db-unlock';
 import {StateMixin} from '../mixins/state-mixin';
 import {devConfig} from '../config/development';
@@ -17,7 +17,7 @@ import './fp-db-unlock';
 import './fp-db-view';
 
 @customElement('fp-database')
-export class FpDatabase extends StateMixin(EventsMixin(LitElement)) {
+export class FpDatabase extends StateMixin(LitElement) {
   static get styles() {
     return css`
       ${sharedStyles}
@@ -54,6 +54,7 @@ export class FpDatabase extends StateMixin(EventsMixin(LitElement)) {
   }
 
   private readonly stateListener = this.onDbStateChanged.bind(this);
+  private events = new EventsController(this);
   private database: Database = new Database();
   private autoUnlockFailed = false;
 
@@ -65,9 +66,9 @@ export class FpDatabase extends StateMixin(EventsMixin(LitElement)) {
 
   connectedCallback() {
     super.connectedCallback();
-    this.addListener(this.DB_LOCK,
+    this.events.addListener(EventsController.DB_LOCK,
         this.onLockDb.bind(this) as EventListener);
-    this.addListener(this.DB_EXPORT,
+    this.events.addListener(EventsController.DB_EXPORT,
         this.onExportDb.bind(this) as EventListener);
     this.database.addStateListener(this.stateListener);
     this.downloadDatabase();
