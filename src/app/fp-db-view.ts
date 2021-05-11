@@ -11,18 +11,17 @@ import 'oxygen-mdc/oxy-tab';
 import 'oxygen-mdc/oxy-toast';
 
 import {EventsController} from '../controllers/events-controller';
+import {StateController, State} from '../controllers/state-controller';
 import * as Actions from '../modules/state-actions';
 import {Database, DatabaseError} from '../database/database';
 import {DbModel, DbEntry} from '../database/db-types';
 import {FpDbEntry} from './fp-db-entry';
-import {State} from '../modules/state-types';
-import {StateMixin} from '../mixins/state-mixin';
 import {devConfig} from '../config/development';
 import {sharedStyles} from './fp-styles'
 import './fp-db-entry';
 
 @customElement('fp-db-view')
-export class FpDbView extends StateMixin(LitElement) {
+export class FpDbView extends LitElement {
   static get styles() {
     return css`
       ${sharedStyles}
@@ -176,6 +175,11 @@ export class FpDbView extends StateMixin(LitElement) {
   @state() private filteredEntries: DbEntry[]|null = null;
   @state() private selectedEntry: DbEntry|null = null;
   @state() private decryptedEntry: DbEntry|null = null;
+
+  constructor() {
+    super();
+    new StateController(this, this.stateChanged.bind(this));
+  }
 
   connectedCallback() {
     super.connectedCallback();

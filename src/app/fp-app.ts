@@ -2,15 +2,15 @@ import {LitElement, css, html} from 'lit';
 import {customElement, state} from 'lit/decorators';
 import firebase from 'firebase/app';
 
-import {firebaseConfig} from '../config/firebase';
-import {AuthState, State} from '../modules/state-types';
-import {StateMixin} from '../mixins/state-mixin';
 import {appConfig} from '../config/application';
+import {firebaseConfig} from '../config/firebase';
+import {StateController} from '../controllers/state-controller';
+import {AuthState, State} from '../modules/state-types';
 import './fp-authentication';
 import './fp-database';
 
 @customElement('fp-app')
-export class FpApp extends StateMixin(LitElement) {
+export class FpApp extends LitElement {
   static get styles() {
     return css`
       :host {
@@ -35,6 +35,7 @@ export class FpApp extends StateMixin(LitElement) {
 
   constructor() {
     super();
+    new StateController(this, this.stateChanged.bind(this));
     // Initialize the Firebase app.
     firebase.initializeApp(firebaseConfig);
   }

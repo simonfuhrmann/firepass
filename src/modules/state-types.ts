@@ -1,4 +1,4 @@
-import {StateManager} from './state-manager';
+import {StateManager, StateListener as StateListenerT} from './state-manager';
 
 // State of the user authentication.
 export enum AuthState {
@@ -27,3 +27,4 @@ export function getInitialState(): State {
 }
 
 export const stateManager = new StateManager(getInitialState());
+export type StateListener = StateListenerT<State>;

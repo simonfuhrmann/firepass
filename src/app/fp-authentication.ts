@@ -5,15 +5,15 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 
 import {EventsController} from '../controllers/events-controller';
+import {StateController} from '../controllers/state-controller';
 import * as Actions from '../modules/state-actions';
 import {AuthState, State} from '../modules/state-types';
-import {StateMixin} from '../mixins/state-mixin';
 import {FpAuthLogin} from './fp-auth-login';
 import {sharedStyles} from './fp-styles'
 import './fp-auth-login';
 
 @customElement('fp-authentication')
-export class FpAuthentication extends StateMixin(LitElement) {
+export class FpAuthentication extends LitElement {
   static get styles() {
     return css`
       ${sharedStyles}
@@ -56,6 +56,11 @@ export class FpAuthentication extends StateMixin(LitElement) {
   @state() private authState = AuthState.PENDING;
   @state() private errorCode = '';
   @state() private errorMessage = '';
+
+  constructor() {
+    super();
+    new StateController(this, this.stateChanged.bind(this));
+  }
 
   connectedCallback() {
     super.connectedCallback();

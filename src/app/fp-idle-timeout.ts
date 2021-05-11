@@ -3,11 +3,10 @@ import {customElement} from 'lit/decorators';
 
 import {EventsController} from '../controllers/events-controller';
 import * as Actions from '../modules/state-actions';
-import {StateMixin} from '../mixins/state-mixin';
 import {appConfig} from '../config/application';
 
 @customElement('fp-idle-timeout')
-export class FpIdleTimeout extends StateMixin(LitElement) {
+export class FpIdleTimeout extends LitElement {
   private readonly clickListener = this.registerActivity.bind(this);
   private readonly keydownListener = this.onKeydown.bind(this);
   private events = new EventsController(this);

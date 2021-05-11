@@ -31,7 +31,7 @@ export type StateAction<State> = (state: State) => State;
 //   }
 //
 // This basic usage of registering and removing listeners can be tedious.
-// The recommended StateMixin cuts down on this boilerplate code.
+// The recommended StateController cuts down on this boilerplate code.
 export class StateManager<State> {
   private listeners: StateListener<State>[] = [];
   private state: State;

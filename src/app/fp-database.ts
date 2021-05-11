@@ -2,11 +2,10 @@ import {LitElement, css, html, nothing} from 'lit';
 import {customElement, query, state} from 'lit/decorators';
 
 import {EventsController} from '../controllers/events-controller';
+import {StateController, State} from '../controllers/state-controller';
 import * as Actions from '../modules/state-actions';
-import {State} from '../modules/state-types';
 import {Database, DbState, DatabaseError} from '../database/database';
 import {FpDbUnlock} from './fp-db-unlock';
-import {StateMixin} from '../mixins/state-mixin';
 import {devConfig} from '../config/development';
 import {downloadText} from '../modules/download';
 import {sharedStyles} from './fp-styles'
@@ -17,7 +16,7 @@ import './fp-db-unlock';
 import './fp-db-view';
 
 @customElement('fp-database')
-export class FpDatabase extends StateMixin(LitElement) {
+export class FpDatabase extends LitElement {
   static get styles() {
     return css`
       ${sharedStyles}
@@ -63,6 +62,11 @@ export class FpDatabase extends StateMixin(LitElement) {
   @state() private changePassword: boolean = false;
   @state() private errorCode: string = '';
   @state() private errorMessage: string = '';
+
+  constructor() {
+    super();
+    new StateController(this, this.stateChanged.bind(this));
+  }
 
   connectedCallback() {
     super.connectedCallback();
