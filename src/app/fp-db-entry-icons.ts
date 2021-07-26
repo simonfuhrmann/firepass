@@ -32,7 +32,6 @@ export class FpDbEntryIcons extends LitElement {
         padding: 6px;
         background-color: rgba(0, 0, 0, 0.25);
         --oxy-button-hover-color: var(--theme-color-ice3);
-        --oxy-button-focus-color: var(--theme-color-ice3);
         --oxy-button-active-color: var(--theme-color-ice3);
       }
     `;

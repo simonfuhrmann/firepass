@@ -26,10 +26,10 @@ export class FpPassGenerator extends LitElement {
         align-self: stretch;
         margin: 16px 32px 0 32px;
         font-size: 0.9em;
-        --oxy-input-background-color: rgba(0, 0, 0, 0.1);
-        --oxy-input-background-color-focused: rgba(0, 0, 0, 0.1);
-        --oxy-input-border-color: var(--separator-color-faint);
-        --oxy-input-border-color-focused: var(--separator-color-faint);
+        --oxy-input-background: rgba(0, 0, 0, 0.1);
+        --oxy-input-background-focused: rgba(0, 0, 0, 0.1);
+        --oxy-input-border: 1px solid var(--separator-color-faint);
+        --oxy-input-border-focused: 1px solid var(--separator-color-faint);
         --oxy-input-box-shadow: none;
         --oxy-input-box-shadow-focused: none;
       }
@@ -38,7 +38,7 @@ export class FpPassGenerator extends LitElement {
         padding: 8px;
         border-radius: 0;
       }
-      oxy-input oxy-button[active] {
+      oxy-input oxy-button[toggled] {
         color: var(--theme-color-fire3);
       }
       oxy-input oxy-button oxy-icon {
@@ -155,7 +155,7 @@ export class FpPassGenerator extends LitElement {
           <div slot="after" class="layout horizontal">
             <oxy-button
                 title="Show password"
-                ?active=${this.showPassword}
+                ?toggled=${this.showPassword}
                 @click=${this.onShowPassword}>
               <oxy-icon icon="icons:visibility"></oxy-icon>
             </oxy-button>

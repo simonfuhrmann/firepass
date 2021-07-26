@@ -22,23 +22,23 @@ export const sharedStyles = css`
     --theme-color-ice3: #1fafdb;
 
     --oxy-input-text-color: white;
-    --oxy-input-background-color: rgba(0, 0, 0, 0.2);
-    --oxy-input-background-color-focused: rgba(0, 0, 0, 0.3);
-    --oxy-input-border-color: var(--separator-color);
-    --oxy-input-border-color-focused: var(--theme-color-fire3);
+    --oxy-input-background: rgba(0, 0, 0, 0.2);
+    --oxy-input-background-focused: rgba(0, 0, 0, 0.3);
+    --oxy-input-border: 1px solid var(--separator-color);
+    --oxy-input-border-focused: 1px solid var(--theme-color-fire3);
     --oxy-input-box-shadow: 0 2px 7px black inset;
     --oxy-input-box-shadow-focused:
         var(--oxy-input-box-shadow), 0 0 5px var(--theme-color-fire2);
 
     --oxy-tab-indicator-color: var(--theme-color-fire3);
     --oxy-tab-animation-duration: 200ms;
-    --oxy-tabs-border-color: var(--separator-color);
+    --oxy-tabs-border: 1px solid var(--separator-color);
 
     --oxy-textarea-text-color: white;
-    --oxy-textarea-background-color: rgba(0, 0, 0, 0.2);
-    --oxy-textarea-background-color-focused: rgba(0, 0, 0, 0.3);
-    --oxy-textarea-border-color: var(--separator-color);
-    --oxy-textarea-border-color-focused: var(--theme-color-fire3);
+    --oxy-textarea-background: rgba(0, 0, 0, 0.2);
+    --oxy-textarea-background-focused: rgba(0, 0, 0, 0.3);
+    --oxy-textarea-border: 1px solid var(--separator-color);
+    --oxy-textarea-border-focused: 1px solid var(--theme-color-fire3);
     --oxy-textarea-box-shadow: 0 2px 7px black inset;
     --oxy-textarea-box-shadow-focused:
         var(--oxy-input-box-shadow), 0 0 5px var(--theme-color-fire2);

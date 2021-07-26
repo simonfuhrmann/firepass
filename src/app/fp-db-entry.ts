@@ -57,8 +57,8 @@ export class FpDbEntry extends LitElement {
         flex-grow: 1;
       }
       #header oxy-input[readonly] {
-        --oxy-input-border-color: transparent;
-        --oxy-input-border-color-focused: transparent;
+        --oxy-input-border: 1px solid transparent;
+        --oxy-input-border-focused: 1px solid transparent;
       }
 
       #button-bar {
@@ -102,10 +102,10 @@ export class FpDbEntry extends LitElement {
         width: 100%;
       }
       oxy-input[readonly] {
-        --oxy-input-background-color: transparent;
-        --oxy-input-background-color-focused: transparent;
-        --oxy-input-border-color: var(--separator-color-faint);
-        --oxy-input-border-color-focused: var(--separator-color-faint);
+        --oxy-input-background: transparent;
+        --oxy-input-background-focused: transparent;
+        --oxy-input-border: 1px solid var(--separator-color-faint);
+        --oxy-input-border-focused: 1px solid var(--separator-color-faint);
         --oxy-input-box-shadow: none;
         --oxy-input-box-shadow-focused: none;
       }
@@ -124,10 +124,10 @@ export class FpDbEntry extends LitElement {
         margin: 4px 0;
       }
       oxy-textarea[readonly] {
-        --oxy-textarea-background-color: transparent;
-        --oxy-textarea-background-color-focused: transparent;
-        --oxy-textarea-border-color: var(--separator-color-faint);
-        --oxy-textarea-border-color-focused: var(--separator-color-faint);
+        --oxy-textarea-background: transparent;
+        --oxy-textarea-background-focused: transparent;
+        --oxy-textarea-border: 1px solid var(--separator-color-faint);
+        --oxy-textarea-border-focused: 1px solid var(--separator-color-faint);
         --oxy-textarea-box-shadow: none;
         --oxy-textarea-box-shadow-focused: none;
       }

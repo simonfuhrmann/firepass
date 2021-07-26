@@ -39,7 +39,7 @@ export class FpDbChangePass extends LitElement {
         justify-content: flex-end;
       }
       oxy-button {
-        background-color: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.1);
       }
       oxy-input {
         margin-bottom: 8px;

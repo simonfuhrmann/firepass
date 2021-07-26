@@ -15,7 +15,7 @@
     "@webcomponents/webcomponentsjs": "^2.5.0",
     "firebase": "^8.3.1",
     "lit": "^2.0.0-rc.1",
-    "oxygen-mdc": "^0.1.1"
+    "oxygen-mdc": "^1.0.0"
   },
   "devDependencies": {
     "parcel-bundler": "^1.12.5",

@@ -46,12 +46,13 @@ export class FpDbView extends LitElement {
         flex-grow: 1;
         margin: 0;
         --oxy-input-text-padding: 8px;
-        --oxy-input-border-width: 0;
+        --oxy-input-border: none;
+        --oxy-input-border-focused: none;
         --oxy-input-border-radius: 0;
         --oxy-input-box-shadow: none;
         --oxy-input-box-shadow-focused: none;
-        --oxy-input-background-color: transparent;
-        --oxy-input-background-color-focused: transparent;
+        --oxy-input-background: transparent;
+        --oxy-input-background-focused: transparent;
       }
       #actions oxy-input oxy-icon {
         color: var(--disabled-text-color);
