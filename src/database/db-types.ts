@@ -8,6 +8,7 @@ export interface DbEntry {
   url: string;
   email: string;
   login: string;
+  keywords: string;
   aesIv: string;  // Base64 encoded AES IV for below fields.
   password: string;  // Encrypted, even in the unencrypted DB.
   notes: string;  // Encrypted, even in the unencrypted DB.

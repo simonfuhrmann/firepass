@@ -89,7 +89,7 @@ export class FpAuthentication extends LitElement {
     try {
       firebaseAuth = firebase.auth();
     } catch (error) {
-      this.errorCode = error.code;
+      this.errorCode = (error as firebase.auth.AuthError).code;
       this.errorMessage = 'Missing Firebase config or authentication setup';
       Actions.setAuthState(AuthState.ERROR);
       return;

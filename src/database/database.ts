@@ -259,7 +259,7 @@ export class Database {
         this.dbData.setDocument(doc);
       } catch (error) {
         const code = 'db/unexpected-format';
-        const message = error.message;
+        const message = (error as Error).message;
         reject({code, message});
       }
 
@@ -294,7 +294,7 @@ export class Database {
   private uploadDatabase(iv: ArrayBuffer): Promise<void> {
     console.log('Database.uploadDatabase()');
     return new Promise((resolve, reject) => {
-      const model = this.dbData.getModel();
+      const model = this.getModel();
       this.dbCrypto.encrypt(model, iv)
           .then(buffer => {
             this.dbData.setPayload(buffer, iv);
@@ -321,6 +321,7 @@ export class Database {
       url: 'https://amazon.com',
       email: 'test@tester.com',
       login: '',
+      keywords: 'amazon shopping',
       aesIv: '',
       password: 'pass123',
       notes: '',
@@ -331,6 +332,7 @@ export class Database {
       url: 'https://ebay.com',
       email: 'test@tester.com',
       login: 'tester',
+      keywords: 'shopping',
       aesIv: '',
       password: 'pass321',
       notes: 'Never buy from user bigcheat16 again!',
@@ -341,6 +343,7 @@ export class Database {
       url: 'https://gmail.com',
       email: 'tester@gmail.com',
       login: '',
+      keywords: 'google email',
       aesIv: '',
       password: 'pass213',
       notes: '',

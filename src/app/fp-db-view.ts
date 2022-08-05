@@ -323,6 +323,7 @@ export class FpDbView extends LitElement {
       url: '',
       email: '',
       login: '',
+      keywords: '',
       aesIv: '',
       password: '',
       notes: '',
@@ -417,7 +418,8 @@ export class FpDbView extends LitElement {
       return entry.name.toLowerCase().search(filter) >= 0 ||
           entry.url.toLowerCase().search(filter) >= 0 ||
           entry.email.toLowerCase().search(filter) >= 0 ||
-          entry.login.toLowerCase().search(filter) >= 0;
+          entry.login.toLowerCase().search(filter) >= 0 ||
+          entry.keywords.toLowerCase().search(filter) >= 0;
     });
   }
 

@@ -17,6 +17,7 @@ export class DbData {
   // Sets the decrypted database model, e.g., after unlocking and decrypting.
   setModel(model: DbModel): void {
     this.model = model;
+    this.updateDbModel(this.model);
   }
 
   // Clears all decrypted data, e.g., on database lock.
@@ -120,6 +121,14 @@ export class DbData {
   sortEntries(): void {
     if (!this.model) throw new Error('Model not initialized');
     this.model.entries.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  // Updates all entries in the model. For example, if new fields are added,
+  // they will be undefined. Assign a default.
+  private updateDbModel(model: DbModel): void {
+    for (const entry of model.entries) {
+      if (entry.keywords === undefined) entry.keywords = '';
+    }
   }
 
   private convertDataFormat(doc: DbDocument): DbDocument {

@@ -1,5 +1,5 @@
 import {LitElement, css, html, nothing} from 'lit';
-import {customElement, property} from 'lit/decorators';
+import {customElement, property, query} from 'lit/decorators';
 
 import {OxyDialog} from 'oxygen-mdc/oxy-dialog';
 import {OxyInput} from 'oxygen-mdc/oxy-input';
@@ -151,6 +151,14 @@ export class FpDbEntry extends LitElement {
   private deleteDialog: OxyDialog|null = null;
   private toast: OxyToast|null = null;
 
+  @query('#name') nameInput: OxyInput|undefined;
+  @query('#url') urlInput: OxyInput|undefined;
+  @query('#email') emailInput: OxyInput|undefined;
+  @query('#login') loginInput: OxyInput|undefined;
+  @query('#keywords') keywordsInput: OxyInput|undefined;
+  @query('#password') passwordInput: OxyInput|undefined;
+  @query('#notes') notesInput: OxyTextarea|undefined;
+
   @property({type: Object}) entry: DbEntry|null = null;
   @property({type: Boolean}) editing: boolean = false;
   @property({type: Boolean}) showPassword: boolean = false;
@@ -276,6 +284,13 @@ export class FpDbEntry extends LitElement {
                 </oxy-button>
               </div>
             </oxy-input>
+          </td>
+        </tr>
+
+        <tr>
+          <th>Keywords</th>
+          <td>
+            <oxy-input id="keywords" ?readonly=${!this.editing}></oxy-input>
           </td>
         </tr>
 
@@ -463,42 +478,29 @@ export class FpDbEntry extends LitElement {
   }
 
   private copyEntryToInputs() {
-    this.copyBetweenEntryAndInputs(/*entryToInputs=*/true);
+    if (!this.entry) return;
+    this.entryIcon = this.entry.icon;
+    this.nameInput!.value = this.entry.name;
+    this.urlInput!.value = this.entry.url;
+    this.emailInput!.value = this.entry.email;
+    this.loginInput!.value = this.entry.login;
+    this.keywordsInput!.value = this.entry.keywords;
+    this.passwordInput!.value = this.entry.password;
+    this.notesInput!.value = this.entry.notes;
   }
 
   private copyInputsToEntry() {
-    this.copyBetweenEntryAndInputs(/*entryToInputs=*/false);
-  }
-
-  private copyBetweenEntryAndInputs(entryToInputs: boolean) {
     if (!this.entry) return;
-    if (!this.shadowRoot) return;
-    const nameInput = this.shadowRoot.getElementById('name') as OxyInput;
-    const urlInput = this.shadowRoot.getElementById('url') as OxyInput;
-    const emailInput = this.shadowRoot.getElementById('email') as OxyInput;
-    const loginInput = this.shadowRoot.getElementById('login') as OxyInput;
-    const passInput = this.shadowRoot.getElementById('password') as OxyInput;
-    const notesInput = this.shadowRoot.getElementById('notes') as OxyTextarea;
-
-    if (entryToInputs) {
-      this.entryIcon = this.entry.icon;
-      nameInput.value = this.entry.name;
-      urlInput.value = this.entry.url;
-      emailInput.value = this.entry.email;
-      loginInput.value = this.entry.login;
-      passInput.value = this.entry.password;
-      notesInput.value = this.entry.notes;
-    } else {
-      this.entry = {
-        name: nameInput.value,
-        icon: this.entryIcon,
-        url: urlInput.value,
-        email: emailInput.value,
-        login: loginInput.value,
-        aesIv: '',
-        password: passInput.value,
-        notes: notesInput.value,
-      };
-    }
+    this.entry = {
+      name: this.nameInput?.value || '',
+      icon: this.entryIcon,
+      url: this.urlInput?.value || '',
+      email: this.emailInput?.value || '',
+      login: this.loginInput?.value || '',
+      keywords: this.keywordsInput?.value || '',
+      aesIv: '',
+      password: this.passwordInput?.value || '',
+      notes: this.notesInput?.value || '',
+    };
   }
 }
