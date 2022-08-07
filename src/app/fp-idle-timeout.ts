@@ -1,5 +1,5 @@
 import {LitElement} from 'lit';
-import {customElement} from 'lit/decorators';
+import {customElement} from 'lit/decorators.js';
 
 import {EventsController} from '../controllers/events-controller';
 import * as Actions from '../modules/state-actions';

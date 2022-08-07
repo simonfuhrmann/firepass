@@ -1,5 +1,5 @@
 import {LitElement, css, html} from 'lit';
-import {customElement, property, query, state} from 'lit/decorators';
+import {customElement, property, query, state} from 'lit/decorators.js';
 
 import 'oxygen-mdc/oxy-button';
 import 'oxygen-mdc/oxy-icon';

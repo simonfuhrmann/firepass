@@ -1,5 +1,5 @@
 import {LitElement, css, html, nothing} from 'lit';
-import {customElement, query, state} from 'lit/decorators';
+import {customElement, query, state} from 'lit/decorators.js';
 
 import {EventsController} from '../controllers/events-controller';
 import {StateController, State} from '../controllers/state-controller';

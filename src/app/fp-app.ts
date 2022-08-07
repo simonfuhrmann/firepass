@@ -1,5 +1,5 @@
 import {LitElement, css, html} from 'lit';
-import {customElement, state} from 'lit/decorators';
+import {customElement, state} from 'lit/decorators.js';
 import firebase from 'firebase/app';
 
 import {appConfig} from '../config/application';

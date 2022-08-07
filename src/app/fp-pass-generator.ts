@@ -1,5 +1,5 @@
 import {LitElement, css, html} from 'lit';
-import {property, customElement} from 'lit/decorators';
+import {property, customElement} from 'lit/decorators.js';
 
 import {OxyCheckbox} from 'oxygen-mdc/oxy-checkbox';
 import {OxyDialog} from 'oxygen-mdc/oxy-dialog';
