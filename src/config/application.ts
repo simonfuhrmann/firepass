@@ -9,7 +9,7 @@ export const appConfig = {
   refetchTimeoutMs: 1000 * 60 * 1,  // 1 Minute
 
   // The version of the application. This is mainly informal.
-  appVersion: '1.0.0',
+  appVersion: '1.0.1',
 
   // The data version the app supports. BEWARE. Only change this if necessary,
   // i.e., if the data format in db-types.ts has to change. To handle data
