@@ -1,9 +1,8 @@
 import {LitElement, css, html} from 'lit';
 import {customElement, query, state} from 'lit/decorators.js';
+import * as Auth from 'firebase/auth';
 
-import firebase from 'firebase/app';
-import 'firebase/auth';
-
+import {firebaseApp} from '../config/firebase';
 import {EventsController} from '../controllers/events-controller';
 import {StateController} from '../controllers/state-controller';
 import * as Actions from '../modules/state-actions';
@@ -51,6 +50,7 @@ export class FpAuthentication extends LitElement {
   }
 
   private events = new EventsController(this);
+  private auth: Auth.Auth|null = null;
 
   @query('#login') loginElement: FpAuthLogin|undefined;
   @state() private authState = AuthState.PENDING;
@@ -85,16 +85,15 @@ export class FpAuthentication extends LitElement {
   firstUpdated() {
     // Get access to the auth module. If the Firebase API key is invalid,
     // or Firebase is not initialized, this will fail.
-    let firebaseAuth = null;
     try {
-      firebaseAuth = firebase.auth();
+      this.auth = Auth.getAuth(firebaseApp);
     } catch (error) {
-      this.errorCode = (error as firebase.auth.AuthError).code;
+      this.errorCode = (error as Auth.AuthError).code;
       this.errorMessage = 'Missing Firebase config or authentication setup';
       Actions.setAuthState(AuthState.ERROR);
       return;
     }
-    firebaseAuth.onAuthStateChanged((user: any) => {
+    this.auth.onAuthStateChanged((user: any) => {
       Actions.setAuthState(!!user ? AuthState.SIGNED_ON : AuthState.SIGNED_OFF);
     });
   }
@@ -121,11 +120,13 @@ export class FpAuthentication extends LitElement {
   }
 
   private onUserSignoff() {
+    if (!this.auth) return;
     Actions.resetAppState();
-    firebase.auth().signOut();
+    this.auth.signOut();
   }
 
   private onUserSignon(event: CustomEvent) {
+    if (!this.auth) return;
     const loginElement = this.loginElement;
     if (!loginElement) return;
 
@@ -133,7 +134,7 @@ export class FpAuthentication extends LitElement {
     loginElement.errorMessage = '';
     const email: string = event.detail.email;
     const pass: string = event.detail.pass;
-    firebase.auth().signInWithEmailAndPassword(email, pass)
+    Auth.signInWithEmailAndPassword(this.auth, email, pass)
         .catch((error: any) => {
           loginElement.disabled = false;
           loginElement.errorMessage = error.code;

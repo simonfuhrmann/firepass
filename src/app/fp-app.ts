@@ -1,9 +1,7 @@
 import {LitElement, css, html} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
-import firebase from 'firebase/app';
 
 import {appConfig} from '../config/application';
-import {firebaseConfig} from '../config/firebase';
 import {StateController} from '../controllers/state-controller';
 import {AuthState, State} from '../modules/state-types';
 import './fp-authentication';
@@ -36,8 +34,6 @@ export class FpApp extends LitElement {
   constructor() {
     super();
     new StateController(this, this.stateChanged.bind(this));
-    // Initialize the Firebase app.
-    firebase.initializeApp(firebaseConfig);
   }
 
   stateChanged(newState: State, oldState: State|null) {

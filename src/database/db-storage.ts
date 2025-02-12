@@ -1,7 +1,7 @@
-import firebase from 'firebase/app';
-import 'firebase/auth';
-import 'firebase/firestore';
+import * as Auth from 'firebase/auth';
+import * as Store from 'firebase/firestore';
 
+import {firebaseApp} from '../config/firebase';
 import {DbDocument} from './db-types';
 
 // Error type for all rejected Promises in this class.
@@ -12,10 +12,13 @@ export interface DbStorageError {
 
 // Internal storage backend for Firebase.
 class DbStorageFirebase {
+  private auth = Auth.getAuth(firebaseApp);
+  private store = Store.getFirestore(firebaseApp);
+
   upload(doc: DbDocument): Promise<void> {
     return new Promise((resolve, reject) => {
       const docRef = this.getDocRef();
-      docRef.set(doc)
+      Store.setDoc(docRef, doc)
           .then(() => resolve())
           .catch(error => {
             const code = 'db/' + error.code;
@@ -28,24 +31,24 @@ class DbStorageFirebase {
   download(): Promise<DbDocument|null> {
     return new Promise((resolve, reject) => {
       const docRef = this.getDocRef();
-      docRef.get().then(doc => {
-        if (!doc.exists) resolve(null);
-        resolve(doc.data() as DbDocument);
-      })
-      .catch(error => {
-        const code = 'db/' + error.code;
-        const message = error.message;
-        reject({code, message});
-      });
+      Store.getDoc(docRef)
+          .then(doc => {
+            if (!doc.exists) resolve(null);
+            resolve(doc.data() as DbDocument);
+          })
+          .catch(error => {
+            const code = 'db/' + error.code;
+            const message = error.message;
+            reject({code, message});
+          });
     });
   }
 
-  private getDocRef() {
-    const user = firebase.auth().currentUser;
+  private getDocRef(): Store.DocumentReference {
+    const user = this.auth.currentUser;
     if (!user) throw 'Not authenticated with Firebase';
     const userId = user.uid;
-    const firestore = firebase.firestore();
-    return firestore.collection('users').doc(userId);
+    return Store.doc(this.store, 'users/', userId);
   }
 }
 

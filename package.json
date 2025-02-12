@@ -2,7 +2,6 @@
   "name": "firepass",
   "version": "0.1.0",
   "description": "Firepass - Password manager",
-  "main": "index.html",
   "author": "Simon Fuhrmann",
   "license": "BSD-3-Clause",
   "repository": "github:simonfuhrmann/firepass",
@@ -13,12 +12,16 @@
   },
   "dependencies": {
     "@webcomponents/webcomponentsjs": "^2.5.0",
-    "firebase": "^8.3",
-    "lit": "^2.2",
-    "oxygen-mdc": "^1.0"
+    "firebase": "^11.0.0",
+    "lit": "^3.0.0",
+    "oxygen-mdc": "^1.1.0"
   },
   "devDependencies": {
-    "parcel-bundler": "^1.12.5",
-    "typescript": "^4.7"
+    "@parcel/packager-raw-url": "^2.13.3",
+    "@parcel/transformer-webmanifest": "^2.13.3",
+    "buffer": "^6.0.3",
+    "parcel": "^2.13.0",
+    "process": "^0.11.10",
+    "typescript": "^5.7.3"
   }
 }

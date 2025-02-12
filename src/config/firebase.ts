@@ -1,3 +1,5 @@
+import * as FirebaseApp from 'firebase/app';
+
 // Your firebase configuration goes here.
 //
 // Here is how you get your config:
@@ -12,3 +14,5 @@ export const firebaseConfig = {
   databaseURL: '',
   projectId: '',
 };
+
+export const firebaseApp = FirebaseApp.initializeApp(firebaseConfig);
