@@ -4,13 +4,13 @@
 export const devConfig = {
   // Login email address and password.
   // The values will be auto-filled in the login component.
-  loginEmail: '',
-  loginPassword: '',
+  loginEmail: '',     // For demo app: 'demo@demo.com'
+  loginPassword: '',  // For demo app: 'demo123'
 
   // Unlock password for the database.
   // If provided, the database is auto-unlocked after download.
   unlockPassword: '',
 
   // Skip uploading the database after saving an entry.
-  skipUpload: false,
+  skipUpload: false,  // For demo app: true
 };
