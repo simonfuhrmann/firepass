@@ -10,10 +10,10 @@ instance and take control of your data. See "Installation" below for details.
 
 Want to play with a demo?
 
-* Visit https://firepass-demo.web.app/
-* Login: demo@demo.com (supports local modifications only)
-* Login password: demo123
-* Database password: demo321
+* Visit [https://firepass-demo.web.app/](https://firepass-demo.web.app/)
+* Login: `demo@demo.com` (supports local modifications only)
+* Login password: `demo123`
+* Database password: `demo321`
 
 Firepass uses username/password authentication to restrict access to your
 database. If your login credentials get compromised, your database is
@@ -80,7 +80,7 @@ signed in, Firepass uses the "Cloud Firestore" database backend to host your
 Add the following database security rules under the "Rules" tab in the
 "Database" menu, which restricts users to accessing their own data only.
 
-```
+```text
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -102,7 +102,7 @@ Google Firebase can also host your Firepass instance (optional).
 * Create a production build (`npm run clean && npm run build`)
 * Deploy the build (`firebase deploy`)
 
-Your website is now served from http://PROJECT-ID.web.app. Even though Google
+Your website is now served from `http://PROJECT-ID.web.app`. Even though Google
 Firebase hosts your website, you can access the website from a domain of your
 choice. To do so, select "Add custom domain" from the "Hosting" menu in the
 Google Firebase console and follow the instructions.
