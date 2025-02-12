@@ -1,6 +1,8 @@
-.firebaserc
 .cache/
 .firebase/
-node_modules/
+.firebaserc
+.parcel-cache/
 dev_images/
 dist/
+node_modules/
+package-lock.json
