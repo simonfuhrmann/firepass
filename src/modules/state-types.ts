@@ -1,4 +1,5 @@
 import {StateManager, StateListener as StateListenerT} from './state-manager';
+import {DbState} from '../database/database';
 
 // State of the user authentication.
 export enum AuthState {
@@ -11,6 +12,7 @@ export enum AuthState {
 // Declaration of the global state structure.
 export interface State {
   authState: AuthState;
+  dbState: DbState;
   lastActivityMs: number;
   sidebarVisible: boolean;
   changePassword: boolean;
@@ -20,6 +22,7 @@ export interface State {
 export function getInitialState(): State {
   return {
     authState: AuthState.PENDING,
+    dbState: DbState.INITIAL,
     lastActivityMs: Date.now(),
     sidebarVisible: true,
     changePassword: false,

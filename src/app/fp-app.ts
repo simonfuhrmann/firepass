@@ -4,6 +4,7 @@ import {customElement, state} from 'lit/decorators.js';
 import {appConfig} from '../config/application';
 import {StateController} from '../controllers/state-controller';
 import {AuthState, State} from '../modules/state-types';
+import {DbState} from '../database/database';
 import './fp-authentication';
 import './fp-database';
 
@@ -23,13 +24,14 @@ export class FpApp extends LitElement {
         position: fixed;
         left: 2px;
         bottom: 2px;
-        color: #333;
+        color: #666;
         font-size: 0.7em;
       }
     `;
   }
 
   @state() private isAuthenticated = false;
+  @state() private showVersion = true;
 
   constructor() {
     super();
@@ -38,25 +40,22 @@ export class FpApp extends LitElement {
 
   stateChanged(newState: State) {
     this.isAuthenticated = newState.authState === AuthState.SIGNED_ON;
+    this.showVersion = newState.dbState !== DbState.UNLOCKED;
   }
 
   render() {
     return html`
       <fp-authentication></fp-authentication>
       ${this.isAuthenticated ? this.renderDatabase() : ''}
-      ${!this.isAuthenticated ? this.renderVersion() : ''}
+      ${this.showVersion ? this.renderVersion() : ''}
     `;
   }
 
   private renderDatabase() {
-    return html`
-      <fp-database></fp-database>
-    `;
+    return html`<fp-database></fp-database>`;
   }
 
   private renderVersion() {
-    return html`
-      <div id="version">v${appConfig.appVersion}</div>
-    `;
+    return html`<div id="version">v${appConfig.appVersion}</div>`;
   }
 }

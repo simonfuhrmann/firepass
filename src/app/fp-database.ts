@@ -52,10 +52,10 @@ export class FpDatabase extends LitElement {
     `;
   }
 
-  private readonly stateListener = this.onDbStateChanged.bind(this);
+  private readonly dbStateListener = this.onDbStateChanged.bind(this);
   private events = new EventsController(this);
   private database: Database = new Database();
-  private autoUnlockFailed = false;
+  private autoUnlockAttempted = false;
 
   @query('fp-db-unlock') unlockElem: FpDbUnlock | undefined;
   @state() private dbState: DbState = DbState.INITIAL;
@@ -74,17 +74,18 @@ export class FpDatabase extends LitElement {
       this.onLockDb.bind(this) as EventListener);
     this.events.addListener(EventsController.DB_EXPORT,
       this.onExportDb.bind(this) as EventListener);
-    this.database.addStateListener(this.stateListener);
+    this.database.addStateListener(this.dbStateListener);
     this.downloadDatabase();
   }
 
-  stateChanged(newState: State, _oldState: State | null) {
+  stateChanged(newState: State) {
+    this.dbState = newState.dbState;
     this.changePassword = newState.changePassword;
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this.database.removeStateListener(this.stateListener);
+    this.database.removeStateListener(this.dbStateListener);
   }
 
   render() {
@@ -151,12 +152,12 @@ export class FpDatabase extends LitElement {
   }
 
   private onDbStateChanged(state: DbState) {
-    this.dbState = state;
+    Actions.setDbState(state);
 
     // Development feature: Auto-unlock.
-    if (!!devConfig.unlockPassword && !this.autoUnlockFailed &&
+    if (!!devConfig.unlockPassword && !this.autoUnlockAttempted &&
       state === DbState.LOCKED) {
-      this.autoUnlockFailed = true;
+      this.autoUnlockAttempted = true;
       const detail = {detail: devConfig.unlockPassword};
       this.onUnlockDb(new CustomEvent('unlock', detail));
     }

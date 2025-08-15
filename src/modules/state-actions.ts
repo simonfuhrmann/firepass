@@ -1,10 +1,20 @@
 import {State, AuthState, getInitialState, stateManager} from './state-types';
+import {DbState} from '../database/database';
 
 // Sets the user authentication state.
 export function setAuthState(authState: AuthState) {
   const action = (state: State) => {
     if (state.authState === authState) return state;
     return {...state, authState};
+  };
+  stateManager.processAction(action);
+}
+
+// Sets the database state.
+export function setDbState(dbState: DbState) {
+  const action = (state: State) => {
+    if (state.dbState === dbState) return state;
+    return {...state, dbState};
   };
   stateManager.processAction(action);
 }
