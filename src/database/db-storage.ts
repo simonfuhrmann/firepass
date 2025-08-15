@@ -15,38 +15,37 @@ class DbStorageFirebase {
   private auth = Auth.getAuth(firebaseApp);
   private store = Store.getFirestore(firebaseApp);
 
-  upload(doc: DbDocument): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const docRef = this.getDocRef();
-      Store.setDoc(docRef, doc)
-          .then(() => resolve())
-          .catch(error => {
-            const code = 'db/' + error.code;
-            const message = error.message;
-            reject({code, message});
-          });
-    });
+  async upload(doc: DbDocument): Promise<void> {
+    const docRef = this.getDocRef();
+    try {
+      await Store.setDoc(docRef, doc);
+    } catch (error: any) {
+      const code = 'db/' + (error?.code ?? 'unknown');
+      const message = error?.message ?? 'Unknown upload error';
+      throw {code, message} as DbStorageError;
+    }
   }
 
-  download(): Promise<DbDocument|null> {
-    return new Promise((resolve, reject) => {
-      const docRef = this.getDocRef();
-      Store.getDoc(docRef)
-          .then(doc => {
-            if (!doc.exists) resolve(null);
-            resolve(doc.data() as DbDocument);
-          })
-          .catch(error => {
-            const code = 'db/' + error.code;
-            const message = error.message;
-            reject({code, message});
-          });
-    });
+  async download(): Promise<DbDocument | null> {
+    const docRef = this.getDocRef();
+    try {
+      const docSnap = await Store.getDoc(docRef);
+      if (!docSnap.exists) return null;
+      return docSnap.data() as DbDocument;
+    } catch (error: any) {
+      const code = 'db/' + (error?.code ?? 'unknown');
+      const message = error?.message ?? 'Unknown download error';
+      throw {code, message} as DbStorageError;
+    }
   }
 
   private getDocRef(): Store.DocumentReference {
     const user = this.auth.currentUser;
-    if (!user) throw 'Not authenticated with Firebase';
+    if (!user) {
+      const code = 'db/missing-auth';
+      const message = 'Not authenticated with Firebase';
+      throw {code, message} as DbStorageError;
+    }
     const userId = user.uid;
     return Store.doc(this.store, 'users/', userId);
   }
@@ -63,7 +62,7 @@ export class DbStorage extends DbStorageFirebase {
   // Downloads the database document from the storage provider.
   // Returns a promise the resolves with the database on success, or with `null`
   // if the database is not available (new user), or throws with error.
-  download(): Promise<DbDocument|null> {
+  download(): Promise<DbDocument | null> {
     return super.download();
   }
 }
