@@ -6,6 +6,7 @@
   "license": "BSD-3-Clause",
   "repository": "github:simonfuhrmann/firepass",
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "start": "parcel index.html --no-cache",
     "build": "parcel build index.html",
     "clean": "rm -rf .cache/ dist/"

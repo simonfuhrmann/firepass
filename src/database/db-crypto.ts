@@ -1,5 +1,5 @@
 export class DbCrypto {
-  private masterKey: CryptoKey|null = null;
+  private masterKey: CryptoKey | null = null;
 
   // Computes the AES key from the master password and salt. The salt can be
   // stored without encryption, but should be randomized every time a new
@@ -15,14 +15,14 @@ export class DbCrypto {
         return;
       }
       this.importKey(password)
-          .then(baseKey => {
-            this.deriveKey(baseKey, salt).then(
-                masterKey => {
-                  this.masterKey = masterKey;
-                  resolve();
-                },
-                () => reject('crypto/derive-key-failed'));
-          },
+        .then(baseKey => {
+          this.deriveKey(baseKey, salt).then(
+            masterKey => {
+              this.masterKey = masterKey;
+              resolve();
+            },
+            () => reject('crypto/derive-key-failed'));
+        },
           () => reject('crypto/import-key-failed'));
     });
   }
@@ -52,7 +52,7 @@ export class DbCrypto {
       return Promise.resolve(new ArrayBuffer(0));
     }
     const encoded = new TextEncoder().encode(decrypted);
-    return this.encryptRaw(encoded, iv);
+    return this.encryptRaw(encoded.buffer, iv);
   }
 
   // Decrypts the given binary data and then JSON-parsing it.
@@ -60,15 +60,15 @@ export class DbCrypto {
   decrypt(encrypted: ArrayBuffer, iv: ArrayBuffer): Promise<object> {
     return new Promise((resolve, reject) => {
       this.decryptString(encrypted, iv)
-          .then(decoded => {
-            try {
-              const database = JSON.parse(decoded);
-              resolve(database);
-            } catch(syntaxError) {
-              reject('crypto/wrong-password');
-            }
-          })
-          .catch(error => reject(error));
+        .then(decoded => {
+          try {
+            const database = JSON.parse(decoded);
+            resolve(database);
+          } catch (syntaxError) {
+            reject('crypto/wrong-password');
+          }
+        })
+        .catch(error => reject(error));
     });
   }
 
@@ -81,10 +81,10 @@ export class DbCrypto {
     }
     return new Promise((resolve, reject) => {
       this.decryptRaw(encrypted, iv)
-          .then(decrypted => {
-            resolve(new TextDecoder().decode(decrypted));
-          })
-          .catch(() => reject('crypto/wrong-password'));
+        .then(decrypted => {
+          resolve(new TextDecoder().decode(decrypted));
+        })
+        .catch(() => reject('crypto/wrong-password'));
     });
   }
 
@@ -100,8 +100,8 @@ export class DbCrypto {
       }
       const algo = { name: 'AES-CBC', iv: iv };
       crypto.subtle.encrypt(algo, this.masterKey, data).then(
-          encrypted => resolve(encrypted),
-          error => reject(error));
+        encrypted => resolve(encrypted),
+        error => reject(error));
     });
   }
 
@@ -117,8 +117,8 @@ export class DbCrypto {
       }
       const algo = { name: 'AES-CBC', iv: iv };
       crypto.subtle.decrypt(algo, this.masterKey, data).then(
-          decrypted => resolve(decrypted),
-          error => reject(error));
+        decrypted => resolve(decrypted),
+        error => reject(error));
     });
   }
 

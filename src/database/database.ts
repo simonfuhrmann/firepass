@@ -1,8 +1,8 @@
-import {Base64} from '../modules/base64';
-import {DbCrypto} from './db-crypto';
-import {DbData} from './db-data';
-import {DbStorage, DbStorageError} from './db-storage';
-import {DbDocument, DbModel, DbEntry} from './db-types';
+import { Base64 } from '../modules/base64';
+import { DbCrypto } from './db-crypto';
+import { DbData } from './db-data';
+import { DbStorage, DbStorageError } from './db-storage';
+import { DbDocument, DbModel, DbEntry } from './db-types';
 
 export enum DbState {
   INITIAL,  // Initial state before fetching for the first time.
@@ -69,24 +69,23 @@ export class Database {
 
     return new Promise((resolve, reject) => {
       this.dbStorage.download()
-          .then(doc => {
-            if (!doc) {
-              this.setState(DbState.MISSING);
-              resolve();
-              return;
-            }
-            this.assignDocument(doc)
-                .then(() => resolve())
-                .catch(error => reject(error));
-          })
-          .catch((error: DbStorageError) => reject(error));
+        .then(doc => {
+          if (!doc) {
+            this.setState(DbState.MISSING);
+            resolve();
+            return;
+          }
+          this.assignDocument(doc)
+            .then(() => resolve())
+            .catch(error => reject(error));
+        })
+        .catch((error: DbStorageError) => reject(error));
     });
   }
 
   upload(): Promise<void> {
     console.log('Database.upload()');
-    const iv = new Uint8Array(16);
-    crypto.getRandomValues(iv);
+    const iv = crypto.getRandomValues(new Uint8Array(16)).buffer;
     return this.uploadDatabase(iv);
   }
 
@@ -111,15 +110,15 @@ export class Database {
     return new Promise((resolve, reject) => {
       const salt = this.dbData.getPasswordSalt();
       this.dbCrypto.setMasterPassword(password, salt)
-          .then(() => {
-            this.decryptDatabase()
-                .then(() => resolve())
-                .catch(error => reject(error));
-          })
-          .catch(code => {
-            const message = 'Setting master password failed';
-            reject({code, message});
-          });
+        .then(() => {
+          this.decryptDatabase()
+            .then(() => resolve())
+            .catch(error => reject(error));
+        })
+        .catch(code => {
+          const message = 'Setting master password failed';
+          reject({ code, message });
+        });
     });
   }
 
@@ -127,24 +126,22 @@ export class Database {
     console.log('Database.create()');
     return new Promise((resolve, reject) => {
       // Randomize a new password salt and AES init vector.
-      const salt = new Uint8Array(32);
-      const iv = new Uint8Array(16);
-      crypto.getRandomValues(salt);
-      crypto.getRandomValues(iv);
+      const salt = crypto.getRandomValues(new Uint8Array(32)).buffer;
+      const iv = crypto.getRandomValues(new Uint8Array(16)).buffer;
 
       // Set master password.
       this.dbCrypto.setMasterPassword(password, salt)
-          .then(() => {
-            this.createNewDatabase(salt, iv)
-                .then(() => this.uploadDatabase(iv))
-                .then(() => this.decryptDatabase())
-                .then(() => resolve())
-                .catch(error => reject(error));
-          })
-          .catch(code => {
-            const message = 'Setting master password failed';
-            reject({code, message});
-          });
+        .then(() => {
+          this.createNewDatabase(salt, iv)
+            .then(() => this.uploadDatabase(iv))
+            .then(() => this.decryptDatabase())
+            .then(() => resolve())
+            .catch(error => reject(error));
+        })
+        .catch(code => {
+          const message = 'Setting master password failed';
+          reject({ code, message });
+        });
     });
   }
 
@@ -178,15 +175,14 @@ export class Database {
         resolve(newEntry);
       }).catch(code => {
         const message = 'Decrypting entry failed';
-        reject({code, message});
+        reject({ code, message });
       });
     });
   }
 
   encryptEntry(entry: DbEntry): Promise<DbEntry> {
     return new Promise((resolve, reject) => {
-      const iv = new Uint8Array(16);
-      crypto.getRandomValues(iv);
+      const iv = crypto.getRandomValues(new Uint8Array(16)).buffer;
       Promise.all([
         this.dbCrypto.encryptString(entry.password, iv),
         this.dbCrypto.encryptString(entry.notes, iv),
@@ -198,7 +194,7 @@ export class Database {
         resolve(newEntry);
       }).catch(code => {
         const message = 'Encrypting entry failed';
-        reject({code, message});
+        reject({ code, message });
       });
     });
   }
@@ -236,19 +232,17 @@ export class Database {
     // Decrypt all entries.
     const oldModel = this.getModel();
     const decryptedEntries = await Promise.all(
-        oldModel.entries.map((entry) => this.decryptEntry(entry)));
+      oldModel.entries.map((entry) => this.decryptEntry(entry)));
     // Change master password, randomize a new salt and AES init vector.
-    const salt = new Uint8Array(32);
-    crypto.getRandomValues(salt);
+    const salt = crypto.getRandomValues(new Uint8Array(32)).buffer;
     await this.dbCrypto.setMasterPassword(newPass, salt);
     // Encrypt all entries.
     const encryptedEntries = await Promise.all(
-        decryptedEntries.map((entry) => this.encryptEntry(entry)));
+      decryptedEntries.map((entry) => this.encryptEntry(entry)));
     // Create a new database and assign entires.
-    const iv = new Uint8Array(16);
-    crypto.getRandomValues(iv);
+    const iv = crypto.getRandomValues(new Uint8Array(16)).buffer;
     this.dbData.createNewDatabase(salt, iv);
-    this.dbData.setModel({...oldModel, entries: encryptedEntries});
+    this.dbData.setModel({ ...oldModel, entries: encryptedEntries });
     return Promise.resolve();
   }
 
@@ -260,7 +254,7 @@ export class Database {
       } catch (error) {
         const code = 'db/unexpected-format';
         const message = (error as Error).message;
-        reject({code, message});
+        reject({ code, message });
       }
 
       if (this.dbCrypto.hasMasterPassword()) {
@@ -278,16 +272,16 @@ export class Database {
     const payload = this.dbData.getPayload();
     return new Promise((resolve, reject) => {
       this.dbCrypto.decrypt(payload, iv)
-          .then(model => {
-            this.dbData.setModel(model as DbModel);
-            this.setState(DbState.UNLOCKED);
-            resolve();
-          })
-          .catch(code => {
-            this.lock();
-            const message = 'Decrypting database failed';
-            reject({code, message});
-          });
+        .then(model => {
+          this.dbData.setModel(model as DbModel);
+          this.setState(DbState.UNLOCKED);
+          resolve();
+        })
+        .catch(code => {
+          this.lock();
+          const message = 'Decrypting database failed';
+          reject({ code, message });
+        });
     });
   }
 
@@ -296,18 +290,18 @@ export class Database {
     return new Promise((resolve, reject) => {
       const model = this.getModel();
       this.dbCrypto.encrypt(model, iv)
-          .then(buffer => {
-            this.dbData.setPayload(buffer, iv);
-            const doc = this.dbData.getDocument();
-            this.dbStorage.upload(doc)
-                .then(() => resolve())
-                .catch((error: DbStorageError) => reject(error));
-          })
-          .catch(code => {
-            console.log('Error encrypting', code);
-            const message = 'Failed to encrypt database';
-            reject({code, message});
-          });
+        .then(buffer => {
+          this.dbData.setPayload(buffer, iv);
+          const doc = this.dbData.getDocument();
+          this.dbStorage.upload(doc)
+            .then(() => resolve())
+            .catch((error: DbStorageError) => reject(error));
+        })
+        .catch(code => {
+          console.log('Error encrypting', code);
+          const message = 'Failed to encrypt database';
+          reject({ code, message });
+        });
     });
   }
 
