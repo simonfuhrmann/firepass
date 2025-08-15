@@ -1,6 +1,6 @@
 import {LitElement, css, html, nothing} from 'lit';
 import {customElement, property, query, state} from 'lit/decorators.js';
-import {repeat} from 'lit/directives/repeat';
+import {repeat} from 'lit/directives/repeat.js';
 
 import {OxyInput} from 'oxygen-mdc/oxy-input';
 import {OxyToast} from 'oxygen-mdc/oxy-toast';
