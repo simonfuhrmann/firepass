@@ -83,7 +83,7 @@ export class FpDbChangePass extends LitElement {
             @keydown=${this.onNewPassKeydown}>
         </oxy-input>
 
-        <div class="label">Repeat</div>
+        <div class="label">Repeat new password</div>
         <oxy-input
             id="repeat-pass"
             type="password"

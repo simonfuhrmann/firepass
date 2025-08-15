@@ -1,8 +1,8 @@
-import { Base64 } from '../modules/base64';
-import { DbCrypto } from './db-crypto';
-import { DbData } from './db-data';
-import { DbStorage, DbStorageError } from './db-storage';
-import { DbDocument, DbModel, DbEntry } from './db-types';
+import {Base64} from '../modules/base64';
+import {DbCrypto} from './db-crypto';
+import {DbData} from './db-data';
+import {DbStorage} from './db-storage';
+import {DbDocument, DbModel, DbEntry} from './db-types';
 
 export enum DbState {
   INITIAL,  // Initial state before fetching for the first time.
@@ -61,26 +61,18 @@ export class Database {
 
   // Attempts to download the database. Transitions to the FETCHING state
   // if requested. Returns a promise.
-  download(setState: boolean): Promise<void> {
+  async download(setState: boolean): Promise<void> {
     console.log('Database.download()');
     if (setState) {
       this.setState(DbState.FETCHING);
     }
 
-    return new Promise((resolve, reject) => {
-      this.dbStorage.download()
-        .then(doc => {
-          if (!doc) {
-            this.setState(DbState.MISSING);
-            resolve();
-            return;
-          }
-          this.assignDocument(doc)
-            .then(() => resolve())
-            .catch(error => reject(error));
-        })
-        .catch((error: DbStorageError) => reject(error));
-    });
+    const doc = await this.dbStorage.download();
+    if (!doc) {
+      this.setState(DbState.MISSING);
+      return;
+    }
+    await this.assignDocument(doc);
   }
 
   upload(): Promise<void> {
@@ -91,58 +83,44 @@ export class Database {
 
   // Locks the database and transitions to LOCKED. If the database is in
   // any other state than UNLOCKED, this function does nothing.
-  lock(): Promise<void> {
-    if (this.dbState !== DbState.UNLOCKED) {
-      return Promise.resolve();
-    }
+  async lock(): Promise<void> {
+    if (this.dbState !== DbState.UNLOCKED) return;
+
     console.log('Database.lock()');
-    return new Promise((resolve, /*reject*/) => {
-      this.dbData.clearModel();
-      this.dbCrypto.clear();
-      this.setState(DbState.LOCKED);
-      resolve();
-    });
+    this.dbData.clearModel();
+    this.dbCrypto.clear();
+    this.setState(DbState.LOCKED);
   }
 
   // Unlocks the database. Transitions to UNLOCKED.
-  unlock(password: string): Promise<void> {
+  async unlock(password: string): Promise<void> {
     console.log('Database.unlock()');
-    return new Promise((resolve, reject) => {
-      const salt = this.dbData.getPasswordSalt();
-      this.dbCrypto.setMasterPassword(password, salt)
-        .then(() => {
-          this.decryptDatabase()
-            .then(() => resolve())
-            .catch(error => reject(error));
-        })
-        .catch(code => {
-          const message = 'Setting master password failed';
-          reject({ code, message });
-        });
-    });
+    const salt = this.dbData.getPasswordSalt();
+    try {
+      await this.dbCrypto.setMasterPassword(password, salt);
+    } catch (code) {
+      throw {code, message: 'Setting master password failed'};
+    }
+    await this.decryptDatabase();
   }
 
-  create(password: string): Promise<void> {
+  async create(password: string): Promise<void> {
     console.log('Database.create()');
-    return new Promise((resolve, reject) => {
-      // Randomize a new password salt and AES init vector.
-      const salt = crypto.getRandomValues(new Uint8Array(32)).buffer;
-      const iv = crypto.getRandomValues(new Uint8Array(16)).buffer;
 
-      // Set master password.
-      this.dbCrypto.setMasterPassword(password, salt)
-        .then(() => {
-          this.createNewDatabase(salt, iv)
-            .then(() => this.uploadDatabase(iv))
-            .then(() => this.decryptDatabase())
-            .then(() => resolve())
-            .catch(error => reject(error));
-        })
-        .catch(code => {
-          const message = 'Setting master password failed';
-          reject({ code, message });
-        });
-    });
+    // Randomize a new password salt and AES init vector.
+    const salt = crypto.getRandomValues(new Uint8Array(32)).buffer;
+    const iv = crypto.getRandomValues(new Uint8Array(16)).buffer;
+
+    try {
+      await this.dbCrypto.setMasterPassword(password, salt);
+    } catch (code) {
+      throw {code, message: 'Setting master password failed'};
+    }
+
+    // Create, upload, and decrypt the database.
+    await this.createNewDatabase(salt, iv);
+    await this.uploadDatabase(iv);
+    await this.decryptDatabase();
   }
 
   deleteEntry(entry: DbEntry) {
@@ -160,43 +138,39 @@ export class Database {
     this.dbData.updateEntry(oldEntry, newEntry);
   }
 
-  decryptEntry(entry: DbEntry): Promise<DbEntry> {
-    return new Promise((resolve, reject) => {
-      const iv = Base64.decode(entry.aesIv);
-      const encryptedPassword = Base64.decode(entry.password);
-      const encryptedNotes = Base64.decode(entry.notes);
-      Promise.all([
+  async decryptEntry(entry: DbEntry): Promise<DbEntry> {
+    const iv = Base64.decode(entry.aesIv);
+    const encryptedPassword = Base64.decode(entry.password);
+    const encryptedNotes = Base64.decode(entry.notes);
+
+    try {
+      const [password, notes] = await Promise.all([
         this.dbCrypto.decryptString(encryptedPassword, iv),
         this.dbCrypto.decryptString(encryptedNotes, iv),
-      ]).then(([password, notes]) => {
-        const newEntry = Object.assign({}, entry) as DbEntry;
-        newEntry.password = password;
-        newEntry.notes = notes;
-        resolve(newEntry);
-      }).catch(code => {
-        const message = 'Decrypting entry failed';
-        reject({ code, message });
-      });
-    });
+      ]);
+      return {...entry, password, notes};
+    } catch (code) {
+      throw {code, message: 'Decrypting entry failed'};
+    }
   }
 
-  encryptEntry(entry: DbEntry): Promise<DbEntry> {
-    return new Promise((resolve, reject) => {
-      const iv = crypto.getRandomValues(new Uint8Array(16)).buffer;
-      Promise.all([
+  async encryptEntry(entry: DbEntry): Promise<DbEntry> {
+    // Create new AES init vector and encrypt password and notes.
+    const iv = crypto.getRandomValues(new Uint8Array(16)).buffer;
+    try {
+      const [encryptedPassword, encryptedNotes] = await Promise.all([
         this.dbCrypto.encryptString(entry.password, iv),
         this.dbCrypto.encryptString(entry.notes, iv),
-      ]).then(([encryptedPassword, encryptedNotes]) => {
-        const newEntry = Object.assign(entry) as DbEntry;
-        newEntry.aesIv = Base64.encode(iv);
-        newEntry.password = Base64.encode(encryptedPassword);
-        newEntry.notes = Base64.encode(encryptedNotes);
-        resolve(newEntry);
-      }).catch(code => {
-        const message = 'Encrypting entry failed';
-        reject({ code, message });
-      });
-    });
+      ]);
+      return {
+        ...entry,
+        aesIv: Base64.encode(iv),
+        password: Base64.encode(encryptedPassword),
+        notes: Base64.encode(encryptedNotes),
+      };
+    } catch (code) {
+      throw {code, message: 'Encrypting entry failed'};
+    }
   }
 
   sortEntries() {
@@ -206,151 +180,137 @@ export class Database {
 
   async changePassword(oldPass: string, newPass: string): Promise<void> {
     if (!oldPass || !newPass) {
-      const error: DatabaseError = {
+      throw {
         code: 'db/invalid-password',
-        message: 'Password is empty',
-      };
-      return Promise.reject(error);
+        message: 'Password is empty'
+      } as DatabaseError;
     }
     if (this.getState() === DbState.UNLOCKED) {
-      const error: DatabaseError = {
+      throw {
         code: 'db/invalid-state',
         message: 'Database must be locked',
-      };
-      return Promise.reject(error);
+      } as DatabaseError;
     }
     if (this.getState() !== DbState.LOCKED) {
-      const error: DatabaseError = {
+      throw {
         code: 'db/invalid-state',
         message: 'Database unavailable',
-      };
-      return Promise.reject(error);
+      } as DatabaseError;
     }
 
     // Decrypt the database.
     await this.unlock(oldPass);
+
     // Decrypt all entries.
     const oldModel = this.getModel();
     const decryptedEntries = await Promise.all(
-      oldModel.entries.map((entry) => this.decryptEntry(entry)));
-    // Change master password, randomize a new salt and AES init vector.
+      oldModel.entries.map((entry) => this.decryptEntry(entry))
+    );
+
+    // Change master password with a new randomized salt.
     const salt = crypto.getRandomValues(new Uint8Array(32)).buffer;
     await this.dbCrypto.setMasterPassword(newPass, salt);
-    // Encrypt all entries.
+
+    // Encrypt all entries with the new password.
     const encryptedEntries = await Promise.all(
-      decryptedEntries.map((entry) => this.encryptEntry(entry)));
+      decryptedEntries.map((entry) => this.encryptEntry(entry))
+    );
+
     // Create a new database and assign entires.
     const iv = crypto.getRandomValues(new Uint8Array(16)).buffer;
     this.dbData.createNewDatabase(salt, iv);
-    this.dbData.setModel({ ...oldModel, entries: encryptedEntries });
-    return Promise.resolve();
+    this.dbData.setModel({...oldModel, entries: encryptedEntries});
   }
 
-  private assignDocument(doc: DbDocument): Promise<void> {
+  private async assignDocument(doc: DbDocument): Promise<void> {
     console.log('Database.assignDocument()');
-    return new Promise((resolve, reject) => {
-      try {
-        this.dbData.setDocument(doc);
-      } catch (error) {
-        const code = 'db/unexpected-format';
-        const message = (error as Error).message;
-        reject({ code, message });
-      }
+    try {
+      this.dbData.setDocument(doc);
+    } catch (error) {
+      throw {code: 'db/unexpected-format', message: (error as Error).message};
+    }
 
-      if (this.dbCrypto.hasMasterPassword()) {
-        this.decryptDatabase();
-      } else {
-        this.setState(DbState.LOCKED);
-      }
-      resolve();
-    });
+    if (this.dbCrypto.hasMasterPassword()) {
+      await this.decryptDatabase();
+    } else {
+      this.setState(DbState.LOCKED);
+    }
   }
 
-  private decryptDatabase(): Promise<void> {
+  private async decryptDatabase(): Promise<void> {
     console.log('Database.decryptDatabase()');
     const iv = this.dbData.getAesIv();
     const payload = this.dbData.getPayload();
-    return new Promise((resolve, reject) => {
-      this.dbCrypto.decrypt(payload, iv)
-        .then(model => {
-          this.dbData.setModel(model as DbModel);
-          this.setState(DbState.UNLOCKED);
-          resolve();
-        })
-        .catch(code => {
-          this.lock();
-          const message = 'Decrypting database failed';
-          reject({ code, message });
-        });
-    });
+
+    try {
+      const model = await this.dbCrypto.decrypt(payload, iv);
+      this.dbData.setModel(model as DbModel);
+      this.setState(DbState.UNLOCKED);
+    } catch (code) {
+      await this.lock();
+      throw {code, message: 'Decrypting database failed'};
+    }
   }
 
-  private uploadDatabase(iv: ArrayBuffer): Promise<void> {
+  private async uploadDatabase(iv: ArrayBuffer): Promise<void> {
     console.log('Database.uploadDatabase()');
-    return new Promise((resolve, reject) => {
-      const model = this.getModel();
-      this.dbCrypto.encrypt(model, iv)
-        .then(buffer => {
-          this.dbData.setPayload(buffer, iv);
-          const doc = this.dbData.getDocument();
-          this.dbStorage.upload(doc)
-            .then(() => resolve())
-            .catch((error: DbStorageError) => reject(error));
-        })
-        .catch(code => {
-          console.log('Error encrypting', code);
-          const message = 'Failed to encrypt database';
-          reject({ code, message });
-        });
-    });
+    const model = this.getModel();
+    try {
+      const buffer = await this.dbCrypto.encrypt(model, iv);
+      this.dbData.setPayload(buffer, iv);
+      const doc = this.dbData.getDocument();
+      await this.dbStorage.upload(doc);
+    } catch (error: any) {
+      if (!!error?.code && !!error?.message) throw error;
+      throw {code: error, message: 'Failed to encrypt database'};
+    }
   }
 
-  private createNewDatabase(salt: ArrayBuffer, iv: ArrayBuffer): Promise<void> {
+  private async createNewDatabase(salt: ArrayBuffer, iv: ArrayBuffer): Promise<void> {
     console.log('Database.createNewDatabase()');
     this.dbData.createNewDatabase(salt, iv);
 
-    const amazon: DbEntry = {
-      name: 'Amazon',
-      icon: 'icons:shopping-cart',
-      url: 'https://amazon.com',
-      email: 'test@tester.com',
-      login: '',
-      keywords: 'amazon shopping',
-      aesIv: '',
-      password: 'pass123',
-      notes: '',
-    };
-    const ebay: DbEntry = {
-      name: 'E-Bay',
-      icon: 'icons:shopping-cart',
-      url: 'https://ebay.com',
-      email: 'test@tester.com',
-      login: 'tester',
-      keywords: 'shopping',
-      aesIv: '',
-      password: 'pass321',
-      notes: 'Never buy from user bigcheat16 again!',
-    };
-    const gmail: DbEntry = {
-      name: 'Gmail',
-      icon: 'communication:email',
-      url: 'https://gmail.com',
-      email: 'tester@gmail.com',
-      login: '',
-      keywords: 'google email',
-      aesIv: '',
-      password: 'pass213',
-      notes: '',
-    };
+    const entries: DbEntry[] = [
+      {
+        name: 'Amazon',
+        icon: 'icons:shopping-cart',
+        url: 'https://amazon.com',
+        email: 'test@tester.com',
+        login: '',
+        keywords: 'amazon shopping',
+        aesIv: '',
+        password: 'pass123',
+        notes: '',
+      },
+      {
+        name: 'E-Bay',
+        icon: 'icons:shopping-cart',
+        url: 'https://ebay.com',
+        email: 'test@tester.com',
+        login: 'tester',
+        keywords: 'shopping',
+        aesIv: '',
+        password: 'pass321',
+        notes: 'Never buy from user bigcheat16 again!',
+      },
+      {
+        name: 'Gmail',
+        icon: 'communication:email',
+        url: 'https://gmail.com',
+        email: 'tester@gmail.com',
+        login: '',
+        keywords: 'google email',
+        aesIv: '',
+        password: 'pass213',
+        notes: '',
+      },
+    ];
 
-    return Promise.all([
-      this.encryptEntry(amazon),
-      this.encryptEntry(ebay),
-      this.encryptEntry(gmail),
-    ]).then(([encAmazon, encEbay, encGmail]) => {
-      this.addEntry(encAmazon);
-      this.addEntry(encEbay);
-      this.addEntry(encGmail);
+    const encryptedEntries = await Promise.all(
+      entries.map((entry) => this.encryptEntry(entry))
+    );
+    encryptedEntries.forEach((entry) => {
+      this.addEntry(entry);
     });
   }
 
