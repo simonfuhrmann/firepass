@@ -146,20 +146,20 @@ export class FpDbEntry extends LitElement {
     `;
   }
 
-  private iconSelector: FpDbEntryIcons|null = null;
-  private passGenerator: FpPassGenerator|null = null;
-  private deleteDialog: OxyDialog|null = null;
-  private toast: OxyToast|null = null;
+  private iconSelector: FpDbEntryIcons | null = null;
+  private passGenerator: FpPassGenerator | null = null;
+  private deleteDialog: OxyDialog | null = null;
+  private toast: OxyToast | null = null;
 
-  @query('#name') nameInput: OxyInput|undefined;
-  @query('#url') urlInput: OxyInput|undefined;
-  @query('#email') emailInput: OxyInput|undefined;
-  @query('#login') loginInput: OxyInput|undefined;
-  @query('#keywords') keywordsInput: OxyInput|undefined;
-  @query('#password') passwordInput: OxyInput|undefined;
-  @query('#notes') notesInput: OxyTextarea|undefined;
+  @query('#name') nameInput: OxyInput | undefined;
+  @query('#url') urlInput: OxyInput | undefined;
+  @query('#email') emailInput: OxyInput | undefined;
+  @query('#login') loginInput: OxyInput | undefined;
+  @query('#keywords') keywordsInput: OxyInput | undefined;
+  @query('#password') passwordInput: OxyInput | undefined;
+  @query('#notes') notesInput: OxyTextarea | undefined;
 
-  @property({type: Object}) entry: DbEntry|null = null;
+  @property({type: Object}) entry: DbEntry | null = null;
   @property({type: Boolean}) editing: boolean = false;
   @property({type: Boolean}) showPassword: boolean = false;
   @property({type: String}) entryIcon: string = '';
@@ -167,11 +167,11 @@ export class FpDbEntry extends LitElement {
   firstUpdated() {
     if (!this.shadowRoot) return;
     this.iconSelector =
-        this.shadowRoot.getElementById('icon-selector') as FpDbEntryIcons;
+      this.shadowRoot.getElementById('icon-selector') as FpDbEntryIcons;
     this.deleteDialog =
-        this.shadowRoot.getElementById('delete-dialog') as OxyDialog;
+      this.shadowRoot.getElementById('delete-dialog') as OxyDialog;
     this.passGenerator =
-        this.shadowRoot.getElementById('generator') as FpPassGenerator;
+      this.shadowRoot.getElementById('generator') as FpPassGenerator;
     this.toast = this.shadowRoot.getElementById('toast') as OxyToast;
   }
 

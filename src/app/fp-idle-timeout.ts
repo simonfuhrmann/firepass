@@ -40,7 +40,7 @@ export class FpIdleTimeout extends LitElement {
 
   private setTimeout() {
     this.timeoutHandle = window.setTimeout(
-        this.lockDatabase.bind(this), appConfig.idleTimeoutMs);
+      this.lockDatabase.bind(this), appConfig.idleTimeoutMs);
   }
 
   private clearTimeout() {

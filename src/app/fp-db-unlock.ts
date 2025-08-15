@@ -37,9 +37,9 @@ export class FpDbUnlock extends LitElement {
     `;
   }
 
-  private passInput: OxyInput|undefined;
-  private repeatInput: OxyInput|undefined;
-  private visibilityChangedFn = () => { this.onVisibilityChanged(); }
+  private passInput: OxyInput | undefined;
+  private repeatInput: OxyInput | undefined;
+  private visibilityChangedFn = () => {this.onVisibilityChanged();}
   private lastDbFetchMs: number = Date.now();
 
   @property({type: Boolean}) createDb = false;

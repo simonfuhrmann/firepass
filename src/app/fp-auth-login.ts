@@ -34,8 +34,8 @@ export class FpAuthLogin extends LitElement {
     `;
   }
 
-  private emailInput: OxyInput|null = null;
-  private passwordInput: OxyInput|null = null;
+  private emailInput: OxyInput | null = null;
+  private passwordInput: OxyInput | null = null;
 
   @property({type: Boolean, reflect: true}) disabled = false;
   @property({type: String}) errorMessage = '';

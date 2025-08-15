@@ -73,13 +73,13 @@ export class FpPassGenerator extends LitElement {
     `;
   }
 
-  private dialog: OxyDialog|null = null;
-  private input: OxyInput|null = null;
-  private toast: OxyToast|null = null;
-  private uppercase: OxyCheckbox|null = null;
-  private lowercase: OxyCheckbox|null = null;
-  private numbers: OxyCheckbox|null = null;
-  private special: OxyCheckbox|null = null;
+  private dialog: OxyDialog | null = null;
+  private input: OxyInput | null = null;
+  private toast: OxyToast | null = null;
+  private uppercase: OxyCheckbox | null = null;
+  private lowercase: OxyCheckbox | null = null;
+  private numbers: OxyCheckbox | null = null;
+  private special: OxyCheckbox | null = null;
 
   @property({type: Number}) passwordLength: number = 16;
   @property({type: Number}) blockLength: number = 0;

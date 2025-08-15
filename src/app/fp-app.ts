@@ -36,10 +36,8 @@ export class FpApp extends LitElement {
     new StateController(this, this.stateChanged.bind(this));
   }
 
-  stateChanged(newState: State, oldState: State|null) {
-    if (!oldState || newState.authState !== oldState.authState) {
-      this.isAuthenticated = newState.authState === AuthState.SIGNED_ON;
-    }
+  stateChanged(newState: State) {
+    this.isAuthenticated = newState.authState === AuthState.SIGNED_ON;
   }
 
   render() {

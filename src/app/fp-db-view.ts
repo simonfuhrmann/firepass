@@ -165,17 +165,17 @@ export class FpDbView extends LitElement {
 
   private events = new EventsController(this);
 
-  @query('#entry') private entryElement: FpDbEntry|undefined;
-  @query('#filter') private filterInput: OxyInput|undefined;
-  @query('#toast') private toastElement: OxyToast|undefined;
+  @query('#entry') private entryElement: FpDbEntry | undefined;
+  @query('#filter') private filterInput: OxyInput | undefined;
+  @query('#toast') private toastElement: OxyToast | undefined;
 
-  @property({type: Object}) database: Database|null = null;
+  @property({type: Object}) database: Database | null = null;
   @property({type: Boolean, reflect: true}) sidebar: boolean = true;
-  @state() private databaseError: DatabaseError|null = null;
-  @state() private model: DbModel|null = null;
-  @state() private filteredEntries: DbEntry[]|null = null;
-  @state() private selectedEntry: DbEntry|null = null;
-  @state() private decryptedEntry: DbEntry|null = null;
+  @state() private databaseError: DatabaseError | null = null;
+  @state() private model: DbModel | null = null;
+  @state() private filteredEntries: DbEntry[] | null = null;
+  @state() private selectedEntry: DbEntry | null = null;
+  @state() private decryptedEntry: DbEntry | null = null;
 
   constructor() {
     super();
@@ -196,15 +196,15 @@ export class FpDbView extends LitElement {
     }
   }
 
-  stateChanged(newState: State, _oldState: State|null) {
+  stateChanged(newState: State, _oldState: State | null) {
     this.sidebar = newState.sidebarVisible;
   }
 
   render() {
     // Display filtered entries, or all entries from the model.
     const entries = !!this.filteredEntries
-        ? this.filteredEntries
-        : (this.model ? this.model.entries : []);
+      ? this.filteredEntries
+      : (this.model ? this.model.entries : []);
 
     return html`
       <div id="sidebar">
@@ -227,8 +227,8 @@ export class FpDbView extends LitElement {
         </div>
         <div id="items" class="scrollable">
           ${repeat(entries,
-              entry => entry.name,
-              entry => this.renderEntry(entry))}
+      entry => entry.name,
+      entry => this.renderEntry(entry))}
           ${this.renderNoItems()}
         </div>
       </div>
@@ -330,38 +330,38 @@ export class FpDbView extends LitElement {
     };
 
     this.database.encryptEntry(entry)
-        .then((encryptedEntry) => {
-          if (!this.database) {
-            const message = 'The database was invalidated';
-            throw {code: 'db/unavailable', message};
-          }
-          this.database.addEntry(encryptedEntry);
-          this.updateModel();
-          this.selectEntry(encryptedEntry);
-          this.startEditingEntry();
-        })
-        .catch(error => this.setDatabaseError(error));
+      .then((encryptedEntry) => {
+        if (!this.database) {
+          const message = 'The database was invalidated';
+          throw {code: 'db/unavailable', message};
+        }
+        this.database.addEntry(encryptedEntry);
+        this.updateModel();
+        this.selectEntry(encryptedEntry);
+        this.startEditingEntry();
+      })
+      .catch(error => this.setDatabaseError(error));
   }
 
   private onEntrySave(event: CustomEvent<DbEntry>) {
     if (!this.database) return;
     const newEntry = event.detail;
     this.database.encryptEntry(newEntry)
-        .then(encryptedEntry => {
-          if (!this.database || !this.selectedEntry) {
-            const message = 'The database was invalidated';
-            throw {code: 'db/unavailable', message};
-          }
-          this.database.updateEntry(this.selectedEntry, encryptedEntry);
-          this.database.sortEntries();
-          this.updateModel();
-          this.selectEntry(encryptedEntry);
-          this.uploadDatabase();
-        })
-        .catch(error => this.setDatabaseError(error));
+      .then(encryptedEntry => {
+        if (!this.database || !this.selectedEntry) {
+          const message = 'The database was invalidated';
+          throw {code: 'db/unavailable', message};
+        }
+        this.database.updateEntry(this.selectedEntry, encryptedEntry);
+        this.database.sortEntries();
+        this.updateModel();
+        this.selectEntry(encryptedEntry);
+        this.uploadDatabase();
+      })
+      .catch(error => this.setDatabaseError(error));
   }
 
-  private onEntryDelete(entry: DbEntry|null) {
+  private onEntryDelete(entry: DbEntry | null) {
     if (!this.database || !entry) return;
     this.selectEntry(null);
     this.database.deleteEntry(entry);
@@ -371,7 +371,7 @@ export class FpDbView extends LitElement {
     this.showToast(`Entry "${entry.name}" deleted`);
   }
 
-  private selectEntry(entry: DbEntry|null) {
+  private selectEntry(entry: DbEntry | null) {
     // Clear previous errors.
     this.databaseError = null;
 
@@ -384,18 +384,18 @@ export class FpDbView extends LitElement {
 
     // Decrypt selected entry.
     this.database.decryptEntry(entry)
-        .then(decryptedEntry => {
-          this.selectedEntry = entry;
-          this.decryptedEntry = decryptedEntry;
-          // Hide sidebar on mobile.
-          Actions.setSidebarVisible(false);
-          // Push history state so that the back button can be used.
-          // Ignore if the top of the stack is already the same state.
-          if (!window.history.state || !window.history.state.showEntry) {
-            window.history.pushState({showEntry: true}, 'Entry');
-          }
-        })
-        .catch(error => this.setDatabaseError(error));
+      .then(decryptedEntry => {
+        this.selectedEntry = entry;
+        this.decryptedEntry = decryptedEntry;
+        // Hide sidebar on mobile.
+        Actions.setSidebarVisible(false);
+        // Push history state so that the back button can be used.
+        // Ignore if the top of the stack is already the same state.
+        if (!window.history.state || !window.history.state.showEntry) {
+          window.history.pushState({showEntry: true}, 'Entry');
+        }
+      })
+      .catch(error => this.setDatabaseError(error));
   }
 
   private onFilterClear() {
@@ -416,10 +416,10 @@ export class FpDbView extends LitElement {
     filter = filter.toLowerCase();
     this.filteredEntries = this.model.entries.filter(entry => {
       return entry.name.toLowerCase().search(filter) >= 0 ||
-          entry.url.toLowerCase().search(filter) >= 0 ||
-          entry.email.toLowerCase().search(filter) >= 0 ||
-          entry.login.toLowerCase().search(filter) >= 0 ||
-          entry.keywords.toLowerCase().search(filter) >= 0;
+        entry.url.toLowerCase().search(filter) >= 0 ||
+        entry.email.toLowerCase().search(filter) >= 0 ||
+        entry.login.toLowerCase().search(filter) >= 0 ||
+        entry.keywords.toLowerCase().search(filter) >= 0;
     });
   }
 
@@ -435,12 +435,12 @@ export class FpDbView extends LitElement {
   private copyEntryPassword(entry: DbEntry) {
     if (!this.database) return;
     this.database.decryptEntry(entry)
-        .then(decryptedEntry => {
-          navigator.clipboard.writeText(decryptedEntry.password)
-              .then(() => this.showToast('Password copied to clipboard'))
-              .catch(() => this.showToast('Failed to copy to clipboard'));
-        })
-        .catch(error => this.setDatabaseError(error));
+      .then(decryptedEntry => {
+        navigator.clipboard.writeText(decryptedEntry.password)
+          .then(() => this.showToast('Password copied to clipboard'))
+          .catch(() => this.showToast('Failed to copy to clipboard'));
+      })
+      .catch(error => this.setDatabaseError(error));
   }
 
   private startEditingEntry() {
@@ -460,7 +460,7 @@ export class FpDbView extends LitElement {
       return;
     }
     this.database.upload()
-        .catch((error) => this.setDatabaseError(error));
+      .catch((error) => this.setDatabaseError(error));
   }
 
   private setDatabaseError(error: DatabaseError) {

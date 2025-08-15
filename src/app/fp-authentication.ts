@@ -50,9 +50,9 @@ export class FpAuthentication extends LitElement {
   }
 
   private events = new EventsController(this);
-  private auth: Auth.Auth|null = null;
+  private auth: Auth.Auth | null = null;
 
-  @query('#login') loginElement: FpAuthLogin|undefined;
+  @query('#login') loginElement: FpAuthLogin | undefined;
   @state() private authState = AuthState.PENDING;
   @state() private errorCode = '';
   @state() private errorMessage = '';
@@ -65,13 +65,11 @@ export class FpAuthentication extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     this.events.addListener(EventsController.USER_SIGNOFF,
-        this.onUserSignoff.bind(this) as EventListener);
+      this.onUserSignoff.bind(this) as EventListener);
   }
 
-  stateChanged(newState: State, oldState: State|null) {
-    if (!oldState || newState.authState !== oldState.authState) {
-      this.authState = newState.authState;
-    }
+  stateChanged(newState: State) {
+    this.authState = newState.authState;
   }
 
   render() {
@@ -113,10 +111,8 @@ export class FpAuthentication extends LitElement {
 
   private renderSignon() {
     return html`
-      <fp-auth-login
-          id="login"
-          @signon=${this.onUserSignon}>
-      </fp-auth-login>`;
+      <fp-auth-login id="login" @signon=${this.onUserSignon}></fp-auth-login>
+    `;
   }
 
   private onUserSignoff() {
@@ -135,12 +131,12 @@ export class FpAuthentication extends LitElement {
     const email: string = event.detail.email;
     const pass: string = event.detail.pass;
     Auth.signInWithEmailAndPassword(this.auth, email, pass)
-        .catch((error: any) => {
-          loginElement.disabled = false;
-          loginElement.errorMessage = error.code;
-          loginElement.focusPassword();
-          Actions.resetAppState();
-          Actions.setAuthState(AuthState.SIGNED_OFF);
-        });
+      .catch((error: any) => {
+        loginElement.disabled = false;
+        loginElement.errorMessage = error.code;
+        loginElement.focusPassword();
+        Actions.resetAppState();
+        Actions.setAuthState(AuthState.SIGNED_OFF);
+      });
   }
 }

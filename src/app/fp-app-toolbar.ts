@@ -86,8 +86,8 @@ export class FpAppToolbar extends LitElement {
   private state = new StateController(this, this.stateChanged.bind(this));
   private idleTimeoutIntervalHandle: number = -1;
 
-  @query('fp-pass-generator') generator: FpPassGenerator|undefined;
-  @query('fp-settings') settings: FpSettings|undefined;
+  @query('fp-pass-generator') generator: FpPassGenerator | undefined;
+  @query('fp-settings') settings: FpSettings | undefined;
 
   @property({type: Boolean}) dbUnlocked = false;
   @property({type: Boolean, reflect: true}) sidebar = false;
@@ -109,7 +109,7 @@ export class FpAppToolbar extends LitElement {
     }
   }
 
-  stateChanged(newState: State, oldState: State|null) {
+  stateChanged(newState: State, oldState: State | null) {
     if (!oldState || newState.lastActivityMs !== oldState.lastActivityMs) {
       this.resetIdleTimeoutInterval();
     }
@@ -188,7 +188,7 @@ export class FpAppToolbar extends LitElement {
   private resetIdleTimeoutInterval() {
     this.clearIdleTimeoutInterval();
     this.idleTimeoutIntervalHandle = window.setInterval(
-          this.updateIdleTimeout.bind(this), 1000);
+      this.updateIdleTimeout.bind(this), 1000);
     this.updateIdleTimeout();
   }
 

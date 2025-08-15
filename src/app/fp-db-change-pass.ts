@@ -54,9 +54,9 @@ export class FpDbChangePass extends LitElement {
     `;
   }
 
-  @query('#old-pass') oldPassElem: OxyInput|undefined;
-  @query('#new-pass') newPassElem: OxyInput|undefined;
-  @query('#repeat-pass') repeatPassElem: OxyInput|undefined;
+  @query('#old-pass') oldPassElem: OxyInput | undefined;
+  @query('#new-pass') newPassElem: OxyInput | undefined;
+  @query('#repeat-pass') repeatPassElem: OxyInput | undefined;
   @property({type: Boolean, reflect: true}) disabled: boolean = false;
   @state() private errorMessage: string = '';
 
