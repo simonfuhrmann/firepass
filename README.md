@@ -53,9 +53,10 @@ and all unencrypted data are cleared from the client.
 ## Installation
 
 * Run `npm install` from the Firepass root to install all dependencies.
+* RUn `npm bundle` to create the final app in the `static/` directory.
 * Setup a Google Firebase project (see "Firebase Setup" below for details).
 * Enter your Google Firebase config in `src/config/firebase.ts`.
-* Optional: Run `npm run start` to run a local development server.
+* Optional: Run `npm run watch` to run a local development server.
 * Optional: Host your Firepass instance on Google Firebase (read below).
 
 ## Firebase Setup
@@ -99,7 +100,7 @@ Google Firebase can also host your Firepass instance (optional).
 * Click "Get Started" and follow the instructions (install the Firebase tools)
 * Login from the command line (`firebase login`)
 * DO NOT run `firebase init`, a `firebase.json` is already provided
-* Create a production build (`npm run clean && npm run build`)
+* Create a production build (`npm run clean && npm run bundle`)
 * Deploy the build (`firebase deploy`)
 
 Your website is now served from `http://PROJECT-ID.web.app`. Even though Google
