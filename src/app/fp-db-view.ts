@@ -40,6 +40,7 @@ export class FpDbView extends LitElement {
         display: flex;
         flex-shrink: 0;
         align-items: center;
+        background-color: rgba(0, 0, 0, 0.2);
         border-bottom: 1px solid var(--separator-color);
       }
       #actions oxy-input {
@@ -79,18 +80,26 @@ export class FpDbView extends LitElement {
         margin: 32px;
       }
       oxy-tab {
-        padding: 8px 8px 8px 12px;
         min-height: 48px;
         display: flex;
         align-items: center;
         flex-shrink: 0;
+        opacity: 0.7;
+      }
+      oxy-tab:hover, oxy-tab[selected] {
+        opacity: 1.0;
+      }
+      oxy-tab::part(button) {
+        padding: 8px 8px 8px 12px;
+        flex-grow: 1;
+        font-weight: normal;
+        border-radius: 0;
+        --oxy-button-hover-color: transparent;
+        --oxy-button-active-color: transparent;
       }
       oxy-tab > oxy-icon {
         margin-right: 8px;
         flex-shrink: 0;
-      }
-      oxy-tab[selected] {
-        background-image: linear-gradient(to right, rgba(195, 7, 63, 0.2), transparent);
       }
       oxy-tab .entry-text {
         display: flex;
@@ -110,6 +119,11 @@ export class FpDbView extends LitElement {
       oxy-tab oxy-button {
         color: var(--tertiary-text-color);
         padding: 4px;
+        --oxy-button-hover-color: white;
+        --oxy-button-active-color: white;
+      }
+      oxy-tab[selected] {
+        background-image: linear-gradient(to right, rgba(195, 7, 63, 0.2), transparent);
       }
 
       #empty, #error, #entry {
