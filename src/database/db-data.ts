@@ -1,12 +1,12 @@
-import {DbModel, DbEntry, DbSettings, DbDocument} from './db-types';
+import {DbModel, DbEntry, DbSettings, DbSettingsEncoded, DbDocument} from './db-types';
 import {Base64} from '../modules/base64';
 import {appConfig} from '../config/application';
 
 // The in-memory representation of the database.
 export class DbData {
-  private payload: ArrayBuffer|null = null;  // The encrypted database.
-  private settings: DbSettings|null = null;  // The database settings.
-  private model: DbModel|null = null;  // The decrypted database.
+  private payload: ArrayBuffer | null = null;  // The encrypted database.
+  private settings: DbSettings | null = null;  // The database settings.
+  private model: DbModel | null = null;  // The decrypted database.
 
   // Returns the decrypted database model. Throws if not set before.
   getModel(): DbModel {
@@ -32,12 +32,14 @@ export class DbData {
       throw new Error('Document format not recognized');
     }
     doc = this.convertDataFormat(doc);
+    const dbSettingsEnc: DbSettingsEncoded = doc.settings;
+
     this.payload = Base64.decode(doc.payload);
     this.settings = {
-      passSalt: Base64.decode(doc.settings.passSalt),
-      aesIv: Base64.decode(doc.settings.aesIv),
-      dataVersion: doc.settings.dataVersion,
-    };
+      passSalt: Base64.decode(dbSettingsEnc.passSalt),
+      aesIv: Base64.decode(dbSettingsEnc.aesIv),
+      dataVersion: dbSettingsEnc.dataVersion,
+    } as DbSettings;
   }
 
   // Returns the database document with base64 encoded settings and payload.
@@ -45,7 +47,7 @@ export class DbData {
   getDocument(): DbDocument {
     if (!this.settings) throw new Error('Settings not initialized');
     if (!this.payload) throw new Error('Payload not initialized');
-    const settings = {
+    const settings: DbSettingsEncoded = {
       passSalt: Base64.encode(this.settings.passSalt),
       aesIv: Base64.encode(this.settings.aesIv),
       dataVersion: appConfig.dataVersion,
@@ -94,7 +96,7 @@ export class DbData {
   // entry is created. If the new entry is null, the old entry is deleted.
   // If both entries are null, an exception is thrown.
   // Note: Only encrypted entries must be added.
-  updateEntry(oldEntry: DbEntry|null, newEntry: DbEntry|null): void {
+  updateEntry(oldEntry: DbEntry | null, newEntry: DbEntry | null): void {
     if (!this.model) throw new Error('Model not initialized');
     if (!oldEntry && !newEntry) throw new Error('Both entries are null');
 
@@ -132,11 +134,11 @@ export class DbData {
   }
 
   private convertDataFormat(doc: DbDocument): DbDocument {
-    // Application can not handle unknown versions.
+    // Application cannot handle unknown versions.
     if (!doc.settings.dataVersion) {
       throw new Error('Document version unspecified');
     }
-    // Application can not handle newer versions.
+    // Application cannot handle more recent versions.
     if (doc.settings.dataVersion > appConfig.dataVersion) {
       throw new Error('Document version unsupported');
     }

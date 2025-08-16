@@ -5,22 +5,11 @@ export class DbCrypto {
   // stored without encryption, but should be randomized every time a new
   // password is chosen.
   async setMasterPassword(password: string, salt: ArrayBuffer): Promise<void> {
-    if (!password) {
-      throw 'crypto/empty-password';
-    }
-    if (salt.byteLength != 32) {
-      throw 'crypto/invalid-salt';
-    }
-
-    let baseKey: CryptoKey;
-    try {
-      baseKey = await this.importKey(password);
-    } catch {
-      throw 'crypto/import-key-failed';
-    }
+    if (!password) throw 'crypto/empty-password';
+    if (salt.byteLength != 32) throw 'crypto/invalid-salt';
 
     try {
-      this.masterKey = await this.deriveKey(baseKey, salt);
+      this.masterKey = await this.deriveKey(password, salt);
     } catch {
       throw 'crypto/derive-key-failed';
     }
@@ -95,25 +84,29 @@ export class DbCrypto {
     return crypto.subtle.decrypt(algo, this.masterKey, data);
   }
 
-  private importKey(password: string): Promise<CryptoKey> {
-    const format = 'raw';
-    const key = new TextEncoder().encode(password);
-    const algo = 'PBKDF2';
-    const extract = false;
-    const usage: KeyUsage[] = ['deriveKey'];
-    return crypto.subtle.importKey(format, key, algo, extract, usage);
-  }
+  // TODO: Refactor this with more flexible options.
+  // - Key algorithm (PBKDF2) should be a parameter
+  // - Hash algorithm (SHA-256) should be a parameter
+  // - Block cipher mode (AES-CBC) should be a paramter
+  // - Iteration could should be a paramter
+  // The new default should be PBKDF2, SHA-256, AES-GCM, and 600k iterations.
+  // When switching to AES-GCM, the IV must be 12 bytes only.
+  private async deriveKey(password: string, salt: ArrayBuffer)
+    : Promise<CryptoKey> {
+    const keyAlgo = 'PBKDF2';
+    const hashAlgo = 'SHA-256';
 
-  private deriveKey(key: CryptoKey, salt: ArrayBuffer): Promise<CryptoKey> {
-    const algo = {
-      name: 'PBKDF2',
-      hash: 'SHA-256',
-      iterations: 2048,
-      salt: salt,
-    };
+    // Import the password into a CryptoKey.
+    const keyData = new TextEncoder().encode(password);
+    const importKeyUsage: KeyUsage[] = ['deriveKey'];
+    const baseKey: CryptoKey = await crypto.subtle.importKey(/*format=*/'raw',
+      keyData, keyAlgo, /*extractable=*/false, importKeyUsage);
+
+    // Derive the master key from the password with AES.
+    const algo = {name: keyAlgo, hash: hashAlgo, iterations: 2048, salt};
     const type = {name: 'AES-CBC', length: 256, };
-    const extract = false;
-    const usage: KeyUsage[] = ['encrypt', 'decrypt'];
-    return crypto.subtle.deriveKey(algo, key, type, extract, usage);
+    const deriveKeyUsage: KeyUsage[] = ['encrypt', 'decrypt'];
+    return await crypto.subtle.deriveKey(algo, baseKey, type,
+        /*extractable=*/false, deriveKeyUsage);
   }
 }
