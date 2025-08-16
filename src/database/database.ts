@@ -88,7 +88,7 @@ export class Database {
 
     console.log('Database.lock()');
     this.dbData.clearModel();
-    this.dbCrypto.clear();
+    this.dbCrypto.clearMasterKey();
     this.setState(DbState.LOCKED);
   }
 
@@ -97,7 +97,7 @@ export class Database {
     console.log('Database.unlock()');
     const salt = this.dbData.getPasswordSalt();
     try {
-      await this.dbCrypto.setMasterPassword(password, salt);
+      await this.dbCrypto.setMasterKey(password, salt);
     } catch (code) {
       throw {code, message: 'Setting master password failed'};
     }
@@ -112,7 +112,7 @@ export class Database {
     const iv = crypto.getRandomValues(new Uint8Array(16)).buffer;
 
     try {
-      await this.dbCrypto.setMasterPassword(password, salt);
+      await this.dbCrypto.setMasterKey(password, salt);
     } catch (code) {
       throw {code, message: 'Setting master password failed'};
     }
@@ -209,7 +209,7 @@ export class Database {
 
     // Change master password with a new randomized salt.
     const salt = crypto.getRandomValues(new Uint8Array(32)).buffer;
-    await this.dbCrypto.setMasterPassword(newPass, salt);
+    await this.dbCrypto.setMasterKey(newPass, salt);
 
     // Encrypt all entries with the new password.
     const encryptedEntries = await Promise.all(
@@ -230,7 +230,7 @@ export class Database {
       throw {code: 'db/unexpected-format', message: (error as Error).message};
     }
 
-    if (this.dbCrypto.hasMasterPassword()) {
+    if (this.dbCrypto.hasMasterKey()) {
       await this.decryptDatabase();
     } else {
       this.setState(DbState.LOCKED);

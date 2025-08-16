@@ -1,10 +1,23 @@
+// A container to derive the master key from a password/salt, and to execute
+// the symmetric cipher (encrypt, decrypt) with the master key.
+//
+// - The master key is generated from a user-provided password string, and a
+//   password salt. See `setMasterKey()` for more information on the salt.
+// - The encrypt/decrypt operations require an initialization vector (IV) that
+//   is 16 bytes for AES-CBC, and 12 bytes for AES-GCM. Decryption requires the
+//   same IV used for encryption.
+//
+// Both, the salt and the IV, must be stored in plain text alongside the
+// encrypted database.
 export class DbCrypto {
   private masterKey: CryptoKey | null = null;
 
-  // Computes the AES key from the master password and salt. The salt can be
-  // stored without encryption, but should be randomized every time a new
-  // password is chosen.
-  async setMasterPassword(password: string, salt: ArrayBuffer): Promise<void> {
+  // Computes the master key (AES key) from the master password and salt.
+  // The salt is mixed into the password before the hash/iteration process, to
+  // ensure that two users with the same password get different derived keys.
+  // The salt is stored without encryption, but must be randomized every time a
+  // new password is chosen. The salt is 32 bytes.
+  async setMasterKey(password: string, salt: ArrayBuffer): Promise<void> {
     if (!password) throw 'crypto/empty-password';
     if (salt.byteLength != 32) throw 'crypto/invalid-salt';
 
@@ -15,34 +28,39 @@ export class DbCrypto {
     }
   }
 
-  hasMasterPassword(): boolean {
+  // Returns true if the master key is set.
+  hasMasterKey(): boolean {
     return !!this.masterKey;
   }
 
   // Removes the master password from memory.
-  // TODO: Overwrite password.
-  clear(): void {
+  clearMasterKey(): void {
+    // TODO: Overwrite password.
     this.masterKey = null;
   }
 
-  // Encrypts the given object by calling JSON-stringify on it first.
-  // The initialization vector `iv` must be 16 bytes.
+  // Encrypts the given object by calling JSON-stringify on it first. The
+  // initialization vector (IV) is used for encryption (AES-CBC, AES-GCM), and
+  // is mixed into the first AES block so that encrypting the same plaintext
+  // with the same key does not produce the same ciphertext.
+  // The IV must be 16 bytes for AES-CBC, and 12 bytes for AES-GCM.
   async encrypt(decrypted: object, iv: ArrayBuffer): Promise<ArrayBuffer> {
     const json = JSON.stringify(decrypted);
     return this.encryptString(json, iv);
   }
 
   // Encrypts the given string by encoding it to an ArrayBuffer first. If the
-  // string is empty, an ArrayBuffer of size 0 is returned.
-  // The initialization vector `iv` must be 16 bytes.
+  // string is empty, an ArrayBuffer of size 0 is returned. See encrypt().
   async encryptString(plain: string, iv: ArrayBuffer): Promise<ArrayBuffer> {
     if (plain === '') return new ArrayBuffer(0);
     const encoded = new TextEncoder().encode(plain);
     return this.encryptRaw(encoded.buffer, iv);
   }
 
-  // Decrypts the given binary data and then JSON-parsing it.
-  // The initialization vector `iv` must be 16 bytes.
+  // Decrypts the given binary data and JSON-parsing it. The initialization
+  // vector (IV) is used for decryption, mixed into the first AES block, and
+  // must be the same IV used for encryption, to recover the same plain text.
+  // The IV must be 16 bytes for AES-CBC, and 12 bytes for AES-GCM.
   async decrypt(encrypted: ArrayBuffer, iv: ArrayBuffer): Promise<object> {
     const decoded = await this.decryptString(encrypted, iv);
     try {
@@ -53,8 +71,7 @@ export class DbCrypto {
   }
 
   // Decrypts the given binary data to a string. If the ArrayBuffer is empty,
-  // an empty string is returned.
-  // The initialization vector `iv` must be 16 bytes.
+  // an empty string is returned. See decrypt().
   async decryptString(encrypted: ArrayBuffer, iv: ArrayBuffer)
     : Promise<string> {
     if (encrypted.byteLength === 0) return '';
