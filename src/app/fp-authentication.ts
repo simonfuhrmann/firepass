@@ -2,6 +2,7 @@ import {LitElement, css, html} from 'lit';
 import {customElement, query, state} from 'lit/decorators.js';
 import * as Auth from 'firebase/auth';
 
+import {DbState} from '../database/database';
 import {firebaseApp} from '../config/firebase';
 import {EventsController} from '../controllers/events-controller';
 import {StateController} from '../controllers/state-controller';
@@ -117,8 +118,11 @@ export class FpAuthentication extends LitElement {
 
   private onUserSignoff() {
     if (!this.auth) return;
-    Actions.resetAppState();
     this.auth.signOut();
+    Actions.setAuthState(AuthState.SIGNED_OFF);
+    Actions.setDbState(DbState.INITIAL);
+    Actions.setSidebarVisible(true);
+    Actions.setChangePassword(false);
   }
 
   private onUserSignon(event: CustomEvent) {
@@ -135,7 +139,6 @@ export class FpAuthentication extends LitElement {
         loginElement.disabled = false;
         loginElement.errorMessage = error.code;
         loginElement.focusPassword();
-        Actions.resetAppState();
         Actions.setAuthState(AuthState.SIGNED_OFF);
       });
   }

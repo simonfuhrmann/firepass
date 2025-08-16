@@ -165,7 +165,9 @@ export class FpDatabase extends LitElement {
 
   private onDbChangePassFinished() {
     this.database.reset();
-    Actions.resetAppState();
+    Actions.setChangePassword(false);
+    Actions.setDbState(DbState.FETCHING);
+    Actions.setSidebarVisible(true);
     this.downloadDatabase();
   }
 
@@ -177,7 +179,7 @@ export class FpDatabase extends LitElement {
 
   private onUnlockDb(event: CustomEvent<string>) {
     if (this.dbState !== DbState.LOCKED) return;
-    Actions.resetAppState();
+    Actions.setSidebarVisible(true);
     this.database.unlock(event.detail)
       .catch(error => this.onUnlockFailure(error));
   }
