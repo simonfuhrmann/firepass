@@ -4,27 +4,26 @@ export class DbCrypto {
   // Computes the AES key from the master password and salt. The salt can be
   // stored without encryption, but should be randomized every time a new
   // password is chosen.
-  setMasterPassword(password: string, salt: ArrayBuffer): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (!password) {
-        reject('crypto/empty-password');
-        return;
-      }
-      if (salt.byteLength != 32) {
-        reject('crypto/invalid-salt');
-        return;
-      }
-      this.importKey(password)
-        .then(baseKey => {
-          this.deriveKey(baseKey, salt).then(
-            masterKey => {
-              this.masterKey = masterKey;
-              resolve();
-            },
-            () => reject('crypto/derive-key-failed'));
-        },
-          () => reject('crypto/import-key-failed'));
-    });
+  async setMasterPassword(password: string, salt: ArrayBuffer): Promise<void> {
+    if (!password) {
+      throw 'crypto/empty-password';
+    }
+    if (salt.byteLength != 32) {
+      throw 'crypto/invalid-salt';
+    }
+
+    let baseKey: CryptoKey;
+    try {
+      baseKey = await this.importKey(password);
+    } catch {
+      throw 'crypto/import-key-failed';
+    }
+
+    try {
+      this.masterKey = await this.deriveKey(baseKey, salt);
+    } catch {
+      throw 'crypto/derive-key-failed';
+    }
   }
 
   hasMasterPassword(): boolean {
@@ -39,7 +38,7 @@ export class DbCrypto {
 
   // Encrypts the given object by calling JSON-stringify on it first.
   // The initialization vector `iv` must be 16 bytes.
-  encrypt(decrypted: object, iv: ArrayBuffer): Promise<ArrayBuffer> {
+  async encrypt(decrypted: object, iv: ArrayBuffer): Promise<ArrayBuffer> {
     const json = JSON.stringify(decrypted);
     return this.encryptString(json, iv);
   }
@@ -47,82 +46,56 @@ export class DbCrypto {
   // Encrypts the given string by encoding it to an ArrayBuffer first. If the
   // string is empty, an ArrayBuffer of size 0 is returned.
   // The initialization vector `iv` must be 16 bytes.
-  encryptString(decrypted: string, iv: ArrayBuffer): Promise<ArrayBuffer> {
-    if (decrypted === '') {
-      return Promise.resolve(new ArrayBuffer(0));
-    }
-    const encoded = new TextEncoder().encode(decrypted);
+  async encryptString(plain: string, iv: ArrayBuffer): Promise<ArrayBuffer> {
+    if (plain === '') return new ArrayBuffer(0);
+    const encoded = new TextEncoder().encode(plain);
     return this.encryptRaw(encoded.buffer, iv);
   }
 
   // Decrypts the given binary data and then JSON-parsing it.
   // The initialization vector `iv` must be 16 bytes.
-  decrypt(encrypted: ArrayBuffer, iv: ArrayBuffer): Promise<object> {
-    return new Promise((resolve, reject) => {
-      this.decryptString(encrypted, iv)
-        .then(decoded => {
-          try {
-            const database = JSON.parse(decoded);
-            resolve(database);
-          } catch (syntaxError) {
-            reject('crypto/wrong-password');
-          }
-        })
-        .catch(error => reject(error));
-    });
+  async decrypt(encrypted: ArrayBuffer, iv: ArrayBuffer): Promise<object> {
+    const decoded = await this.decryptString(encrypted, iv);
+    try {
+      return JSON.parse(decoded);
+    } catch {
+      throw 'crypto/wrong-password';
+    }
   }
 
   // Decrypts the given binary data to a string. If the ArrayBuffer is empty,
   // an empty string is returned.
   // The initialization vector `iv` must be 16 bytes.
-  decryptString(encrypted: ArrayBuffer, iv: ArrayBuffer): Promise<string> {
-    if (encrypted.byteLength === 0) {
-      return Promise.resolve('');
+  async decryptString(encrypted: ArrayBuffer, iv: ArrayBuffer)
+    : Promise<string> {
+    if (encrypted.byteLength === 0) return '';
+    try {
+      const decrypted = await this.decryptRaw(encrypted, iv);
+      return new TextDecoder().decode(decrypted);
+    } catch {
+      throw 'crypto/wrong-password';
     }
-    return new Promise((resolve, reject) => {
-      this.decryptRaw(encrypted, iv)
-        .then(decrypted => {
-          resolve(new TextDecoder().decode(decrypted));
-        })
-        .catch(() => reject('crypto/wrong-password'));
-    });
   }
 
-  private encryptRaw(data: ArrayBuffer, iv: ArrayBuffer): Promise<ArrayBuffer> {
-    return new Promise((resolve, reject) => {
-      if (!this.masterKey) {
-        reject('crypto/no-master-key');
-        return;
-      }
-      if (iv.byteLength != 16) {
-        reject('crypto/invalid-iv');
-        return;
-      }
-      const algo = { name: 'AES-CBC', iv: iv };
-      crypto.subtle.encrypt(algo, this.masterKey, data).then(
-        encrypted => resolve(encrypted),
-        error => reject(error));
-    });
+  // Uses `async` because it throws to yield a rejected promise.
+  private async encryptRaw(data: ArrayBuffer, iv: ArrayBuffer)
+    : Promise<ArrayBuffer> {
+    if (!this.masterKey) throw 'crypto/no-master-key';
+    if (iv.byteLength != 16) throw 'crypto/invalid-iv';
+    const algo = {name: 'AES-CBC', iv: iv};
+    return crypto.subtle.encrypt(algo, this.masterKey, data);
   }
 
-  private decryptRaw(data: ArrayBuffer, iv: ArrayBuffer): Promise<ArrayBuffer> {
-    return new Promise((resolve, reject) => {
-      if (!this.masterKey) {
-        reject('crypto/no-master-key');
-        return;
-      }
-      if (iv.byteLength != 16) {
-        reject('crypto/invalid-iv');
-        return;
-      }
-      const algo = { name: 'AES-CBC', iv: iv };
-      crypto.subtle.decrypt(algo, this.masterKey, data).then(
-        decrypted => resolve(decrypted),
-        error => reject(error));
-    });
+  // Uses `async` because it throws to yield a rejected promise.
+  private async decryptRaw(data: ArrayBuffer, iv: ArrayBuffer)
+    : Promise<ArrayBuffer> {
+    if (!this.masterKey) throw 'crypto/no-master-key';
+    if (iv.byteLength != 16) throw 'crypto/invalid-iv';
+    const algo = {name: 'AES-CBC', iv: iv};
+    return crypto.subtle.decrypt(algo, this.masterKey, data);
   }
 
-  private importKey(password: string): PromiseLike<CryptoKey> {
+  private importKey(password: string): Promise<CryptoKey> {
     const format = 'raw';
     const key = new TextEncoder().encode(password);
     const algo = 'PBKDF2';
@@ -131,14 +104,14 @@ export class DbCrypto {
     return crypto.subtle.importKey(format, key, algo, extract, usage);
   }
 
-  private deriveKey(key: CryptoKey, salt: ArrayBuffer): PromiseLike<CryptoKey> {
+  private deriveKey(key: CryptoKey, salt: ArrayBuffer): Promise<CryptoKey> {
     const algo = {
       name: 'PBKDF2',
       hash: 'SHA-256',
       iterations: 2048,
       salt: salt,
     };
-    const type = { name: 'AES-CBC', length: 256, };
+    const type = {name: 'AES-CBC', length: 256, };
     const extract = false;
     const usage: KeyUsage[] = ['encrypt', 'decrypt'];
     return crypto.subtle.deriveKey(algo, key, type, extract, usage);
