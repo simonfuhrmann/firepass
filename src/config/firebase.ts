@@ -9,6 +9,11 @@ import * as FirebaseApp from 'firebase/app';
 //
 // See here for more information:
 // https://support.google.com/firebase/answer/7015592
+//
+// The demo app uses:
+//   apiKey: 'AIzaSyDrRYY_R3yw4_0nGzsLkP0Ue_2IS5dOX7Y',
+//   databaseURL: 'https://firepass-demo.firebaseio.com',
+//   projectId: 'firepass-demo',
 export const firebaseConfig = {
   apiKey: '',
   databaseURL: '',
