@@ -91,8 +91,7 @@ export class FpDatabase extends LitElement {
   render() {
     const hasError = !!this.errorCode || !!this.errorMessage;
     return html`
-      <fp-app-toolbar .dbUnlocked=${this.dbState === DbState.UNLOCKED}>
-      </fp-app-toolbar>
+      <fp-app-toolbar></fp-app-toolbar>
       ${hasError ? this.renderDbError() : this.renderDbState()}
     `;
   }

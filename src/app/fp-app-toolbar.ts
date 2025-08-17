@@ -6,15 +6,16 @@ import 'oxygen-mdc/oxy-icon';
 import 'oxygen-mdc/oxy-icons-base';
 import 'oxygen-mdc/oxy-icons-communication';
 
-import {EventsController} from '../controllers/events-controller';
-import {StateController, State} from '../controllers/state-controller';
-import {FpPassGenerator} from './fp-pass-generator';
-import {FpSettings} from './fp-settings';
-import {appConfig} from '../config/application';
-import {sharedStyles} from './fp-styles'
 import './fp-icons-logos';
 import './fp-pass-generator';
 import './fp-settings';
+import {appConfig} from '../config/application';
+import {DbState} from '../database/database';
+import {EventsController} from '../controllers/events-controller';
+import {FpPassGenerator} from './fp-pass-generator';
+import {FpSettings} from './fp-settings';
+import {sharedStyles} from './fp-styles'
+import {StateController, State} from '../controllers/state-controller';
 
 @customElement('fp-app-toolbar')
 export class FpAppToolbar extends LitElement {
@@ -89,8 +90,8 @@ export class FpAppToolbar extends LitElement {
   @query('fp-pass-generator') generator: FpPassGenerator | undefined;
   @query('fp-settings') settings: FpSettings | undefined;
 
-  @property({type: Boolean}) dbUnlocked = false;
   @property({type: Boolean, reflect: true}) sidebar = false;
+  @state() private dbUnlocked = false;
   @state() private idleTimeout = '';
 
   connectedCallback() {
@@ -103,17 +104,15 @@ export class FpAppToolbar extends LitElement {
     this.clearIdleTimeoutInterval();
   }
 
-  updated(changedProps: Map<string, unknown>) {
-    if (changedProps.has('dbUnlocked')) {
-      this.resetIdleTimeoutInterval();
-    }
-  }
-
   stateChanged(newState: State, oldState: State | null) {
+    this.dbUnlocked = newState.dbState === DbState.UNLOCKED;
+    this.sidebar = newState.sidebarVisible;
     if (!oldState || newState.lastActivityMs !== oldState.lastActivityMs) {
       this.resetIdleTimeoutInterval();
     }
-    this.sidebar = newState.sidebarVisible;
+    if (!oldState || newState.dbState !== oldState.dbState) {
+      this.resetIdleTimeoutInterval();
+    }
   }
 
   render() {

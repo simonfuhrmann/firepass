@@ -9,7 +9,8 @@ interface EventReference {
 // Controller to dispatch and listen to global events.
 // https://lit.dev/docs/composition/controllers/
 export class EventsController implements ReactiveController {
-  // Available global events.
+  // Available global events. NOTE: The 'popstate' event is fired by the
+  // browser itself when the history state is modified.
   static DB_LOCK: string = 'db-lock';
   static DB_EXPORT: string = 'db-export';
   static USER_SIGNOFF: string = 'user-signoff';

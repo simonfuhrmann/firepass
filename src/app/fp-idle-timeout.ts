@@ -7,7 +7,7 @@ import {appConfig} from '../config/application';
 
 @customElement('fp-idle-timeout')
 export class FpIdleTimeout extends LitElement {
-  private readonly clickListener = this.registerActivity.bind(this);
+  private readonly clickListener = this.resetTimeout.bind(this);
   private readonly keydownListener = this.onKeydown.bind(this);
   private events = new EventsController(this);
   private timeoutHandle = -1;
@@ -16,7 +16,7 @@ export class FpIdleTimeout extends LitElement {
     super.connectedCallback();
     window.addEventListener('click', this.clickListener);
     window.addEventListener('keydown', this.keydownListener);
-    this.registerActivity();
+    this.resetTimeout();
   }
 
   disconnectedCallback() {
@@ -29,16 +29,12 @@ export class FpIdleTimeout extends LitElement {
   private onKeydown(event: KeyboardEvent) {
     const ignore = ['Alt', 'Shift', 'Control', 'Meta', 'CapsLock'];
     if (ignore.includes(event.key)) return;
-    this.registerActivity();
+    this.resetTimeout();
   }
 
-  private registerActivity() {
+  private resetTimeout() {
     this.clearTimeout();
-    this.setTimeout();
     Actions.setLastActivityMs(Date.now());
-  }
-
-  private setTimeout() {
     this.timeoutHandle = window.setTimeout(
       this.lockDatabase.bind(this), appConfig.idleTimeoutMs);
   }

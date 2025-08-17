@@ -403,10 +403,11 @@ export class FpDbView extends LitElement {
         this.decryptedEntry = decryptedEntry;
         // Hide sidebar on mobile.
         Actions.setSidebarVisible(false);
-        // Push history state so that the back button can be used.
-        // Ignore if the top of the stack is already the same state.
-        if (!window.history.state || !window.history.state.showEntry) {
-          window.history.pushState({showEntry: true}, 'Entry');
+        // Push history state so that the back button can be used. Ignore if
+        // the top of the stack is already the same state. The unused parameter
+        // is required for historical reasons (see API docs).
+        if (window.history.state?.showEntry !== true) {
+          window.history.pushState({showEntry: true}, /*unused=*/'');
         }
       })
       .catch(error => this.setDatabaseError(error));
