@@ -182,7 +182,7 @@ export class FpDbChangePass extends LitElement {
   private async changePassword(oldPass: string, newPass: string): Promise<void> {
     console.log('Downloading database...');
     const database = new Database();
-    await database.download(true);
+    await database.download();
     console.log('Changing database password...');
     await database.changePassword(oldPass, newPass);
     console.log('Uploading database...');

@@ -61,12 +61,9 @@ export class Database {
 
   // Attempts to download the database. Transitions to the FETCHING state
   // if requested. Returns a promise.
-  async download(setState: boolean): Promise<void> {
+  async download(): Promise<void> {
     console.log('Database.download()');
-    if (setState) {
-      this.setState(DbState.FETCHING);
-    }
-
+    this.setState(DbState.FETCHING);
     const doc = await this.dbStorage.download();
     if (!doc) {
       this.setState(DbState.MISSING);
@@ -315,6 +312,7 @@ export class Database {
   }
 
   private setState(state: DbState) {
+    if (this.dbState === state) return;
     this.dbState = state;
     this.stateListeners.forEach(cb => cb(this.dbState));
   }

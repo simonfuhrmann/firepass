@@ -146,8 +146,7 @@ export class FpDatabase extends LitElement {
   }
 
   private downloadDatabase() {
-    this.database.download(/*setState=*/true)
-      .catch(error => this.onDownloadError(error));
+    this.database.download().catch(error => this.onDownloadError(error));
   }
 
   private onDbStateChanged(state: DbState) {
