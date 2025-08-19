@@ -110,7 +110,7 @@ export class FpDbUnlock extends LitElement {
   }
 
   private onPassKeydown(event: KeyboardEvent) {
-    if (event.keyCode != 13) return;
+    if (event.key != 'Enter') return;
 
     this.errorMessage = '';
     if (this.createDb) {
@@ -129,7 +129,8 @@ export class FpDbUnlock extends LitElement {
   }
 
   private onRepeatKeydown(event: KeyboardEvent) {
-    if (event.keyCode != 13) return;
+    if (event.key != 'Enter') return;
+
     if (!this.passInput || !this.repeatInput) return;
     if (this.passInput.value != this.repeatInput.value) {
       this.passInput.clear();

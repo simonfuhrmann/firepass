@@ -116,21 +116,21 @@ export class FpDbChangePass extends LitElement {
   }
 
   private onOldPassKeydown(event: KeyboardEvent) {
-    if (event.keyCode != 13) return;
+    if (event.key != 'Enter') return;
     const newPassElem = this.newPassElem;
     if (!newPassElem) return;
     newPassElem.focus();
   }
 
   private onNewPassKeydown(event: KeyboardEvent) {
-    if (event.keyCode != 13) return;
+    if (event.key != 'Enter') return;
     const repeatPassElem = this.repeatPassElem;
     if (!repeatPassElem) return;
     repeatPassElem.focus();
   }
 
   private onRepeatPassKeydown(event: KeyboardEvent) {
-    if (event.keyCode != 13) return;
+    if (event.key != 'Enter') return;
     this.onContinue();
   }
 
