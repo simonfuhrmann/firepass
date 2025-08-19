@@ -170,8 +170,8 @@ export class FpDatabase extends LitElement {
   }
 
   private onCreateDb(event: CustomEvent<string>) {
-    if (this.dbState !== DbState.MISSING) return;
-    this.database.create(event.detail)
+    const password = event.detail;
+    this.database.create(password)
       .catch(error => this.onUnlockFailure(error));
   }
 

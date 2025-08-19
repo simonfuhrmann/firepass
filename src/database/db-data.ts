@@ -1,6 +1,61 @@
-import {DbModel, DbEntry, DbSettings, DbSettingsEncoded, DbDocument} from './db-types';
+import {DbModel, DbEntry, DbSettings, DbSettingsEncoded, DbDocument, CryptoParams} from './db-types';
 import {Base64} from '../modules/base64';
 import {appConfig} from '../config/application';
+
+// Returns the default CryptoParams for new databases.
+export function getDefaultCryptoParams(): CryptoParams {
+  return {
+    deriveAlgo: 'PBKDF2',
+    hashAlgo: 'SHA-256',
+    cipherMode: 'AES-GCM',
+    iterations: 600_000,
+  };
+}
+
+// Returns the legacy CryptoParams before cipher was changed from AES-CBC to
+// AES-GCM with the old, low iteration count.
+function getLegacyCryptoParams(): CryptoParams {
+  return {
+    deriveAlgo: 'PBKDF2',
+    hashAlgo: 'SHA-256',
+    cipherMode: 'AES-CBC',
+    iterations: 2048,
+  };
+}
+
+function encodeDbSettings(settings: DbSettings): DbSettingsEncoded {
+  return {
+    cryptoParams: settings.cryptoParams,
+    passSalt: Base64.encode(settings.passSalt),
+    aesIv: Base64.encode(settings.aesIv),
+    dataVersion: appConfig.dataVersion,
+  };
+}
+
+function decodeDbSettings(settingsEnc: DbSettingsEncoded): DbSettings {
+  return {
+    cryptoParams: settingsEnc.cryptoParams,
+    passSalt: Base64.decode(settingsEnc.passSalt),
+    aesIv: Base64.decode(settingsEnc.aesIv),
+    dataVersion: settingsEnc.dataVersion,
+  };
+}
+
+function validateDbSettings(settings: DbSettings) {
+  if (settings.cryptoParams.deriveAlgo != 'PBKDF2') {
+    throw new Error('Only PBKDF2 is supported');
+  }
+  if (settings.cryptoParams.hashAlgo != 'SHA-256') {
+    throw new Error('Only SHA-256 is supported');
+  }
+  if (settings.cryptoParams.cipherMode != 'AES-CBC' &&
+    settings.cryptoParams.cipherMode != 'AES-GCM') {
+    throw new Error('Only AES-CBC or AES-GCM is supported');
+  }
+  if (settings.cryptoParams.iterations < 2048) {
+    throw new Error('Key derivation iterations is too low');
+  }
+}
 
 // The in-memory representation of the database.
 export class DbData {
@@ -33,13 +88,11 @@ export class DbData {
     }
     doc = this.convertDataFormat(doc);
     const dbSettingsEnc: DbSettingsEncoded = doc.settings;
+    const dbSettings = decodeDbSettings(dbSettingsEnc);
+    validateDbSettings(dbSettings);
 
     this.payload = Base64.decode(doc.payload);
-    this.settings = {
-      passSalt: Base64.decode(dbSettingsEnc.passSalt),
-      aesIv: Base64.decode(dbSettingsEnc.aesIv),
-      dataVersion: dbSettingsEnc.dataVersion,
-    } as DbSettings;
+    this.settings = dbSettings;
   }
 
   // Returns the database document with base64 encoded settings and payload.
@@ -47,11 +100,7 @@ export class DbData {
   getDocument(): DbDocument {
     if (!this.settings) throw new Error('Settings not initialized');
     if (!this.payload) throw new Error('Payload not initialized');
-    const settings: DbSettingsEncoded = {
-      passSalt: Base64.encode(this.settings.passSalt),
-      aesIv: Base64.encode(this.settings.aesIv),
-      dataVersion: appConfig.dataVersion,
-    };
+    const settings: DbSettingsEncoded = encodeDbSettings(this.settings);
     const payload = Base64.encode(this.payload);
     return {settings, payload};
   }
@@ -82,9 +131,17 @@ export class DbData {
     return this.settings.aesIv;
   }
 
+  // Retuns the CryptoParams for the database.
+  getCryptoParams(): CryptoParams {
+    if (!this.settings) throw new Error('Settings not initialized');
+    return this.settings.cryptoParams;
+  }
+
   // Creates a new, empty database with the given crypto parameters.
-  createNewDatabase(salt: ArrayBuffer, iv: ArrayBuffer): void {
+  createNewDatabase(salt: ArrayBuffer, iv: ArrayBuffer, params: CryptoParams)
+    : void {
     this.settings = {
+      cryptoParams: params,
       passSalt: salt,
       aesIv: iv,
       dataVersion: appConfig.dataVersion,
@@ -140,11 +197,20 @@ export class DbData {
     }
     // Application cannot handle more recent versions.
     if (doc.settings.dataVersion > appConfig.dataVersion) {
-      throw new Error('Document version unsupported');
+      const dv = doc.settings.dataVersion;
+      throw new Error(`Document version ${dv} unsupported`);
     }
 
-    // Handle any conversions here.
-    // There is currently only version 1.
+    // Conversion from v1 to v2: If cryptoParams is missing (which it should
+    // in all v1 versions), assume the legacy defaults. Then update version.
+    if (doc.settings.dataVersion === 1) {
+      if (!doc.settings.cryptoParams) {
+        doc.settings.cryptoParams = getLegacyCryptoParams();
+      }
+      doc.settings.dataVersion = 2;
+    }
+
+    // Conversion from v2 to v3: Nothing here, app is at v2.
 
     // Application could not handle older version.
     if (doc.settings.dataVersion < appConfig.dataVersion) {

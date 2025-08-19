@@ -30,25 +30,35 @@ for more information.
 
 ## Cryptographic Notes
 
-Firepass encrypts the database with AES-256 in CBC operation mode. The 128 bit
-initialization vector for CBC is randomized every time the database is
-encrypted, and stored along with the encrypted database. The symmetric AES key
-is derived from your master password using PBKDF2 with 2048 iterations and a
-256 bit salt which is randomized whenever the master password is changed. The
-salt is stored along with the encrypted database.
+Firepass encrypts the database with AES-256 in GCM or CBC mode (GCM is the
+recommended default). The initialization vector (96 bits for GCM, 128 bits for
+CBC) is randomized every time the database is encrypted, and stored alongside
+the encrypted database. (Initialization vectors are mixed into the first AES
+block so that encrypting the same plaintext with the same key does not produce
+the same ciphertext.)
+
+The symmetric AES key is derived from the master password using
+PBKDF2-HMAC-SHA-256 with 600k iterations and a 256-bit password salt which is
+randomized whenever the master password is changed. The salt is also stored
+alongside the encrypted database. (Password salts are mixed into the hashing
+and iteration process so that users have different encryption keys even if they
+chose the same password, and to prevent using pre-computed rainbow tables
+against the encrypted database.)
 
 All cryptographic operations are implemented locally in the client using the
-Web Crypto API (`SubtleCrypto`). Your plain text password is never stored in
-JavaScript; it is used immediately to derive the master password using PBKDF2
-and then stored in a `CryptoKey` object, which is administered by the browser
-implementation.
+Web Crypto API (`SubtleCrypto`). Your plaintext password is never stored. It is
+immediately used to derive the AES master key via PBKDF2, after which only a
+`CryptoKey` object is kept in memory, managed by the browser's cryptographic
+implementation, and never leaves the client.
 
 For storage, the database is encrypted in its entirety into one opaque binary
-blob as opposed to individually encrypted entries. No information about the
-database contents is revealed in storage or transit. The byte size of the
-encrypted database may, however, correlate with the number of entries in the
-database. After a certain idle period the local database is locked, your AES key
-and all unencrypted data are cleared from the client.
+blob rather than as individually encrypted entries. No information about the
+database contents is revealed in storage or transit. However, the total size of
+the encrypted database may still correlate with the number of entries it
+contains.
+
+After an idle period, the local database is automatically locked, and both the
+AES key and all decrypted data are cleared from the client.
 
 ## Installation
 

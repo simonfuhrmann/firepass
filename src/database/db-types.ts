@@ -9,9 +9,9 @@ export interface DbEntry {
   email: string;
   login: string;
   keywords: string;
-  aesIv: string;  // Base64 encoded AES IV for below fields.
-  password: string;  // Encrypted, even in the unencrypted DB.
-  notes: string;  // Encrypted, even in the unencrypted DB.
+  aesIv: string;     // Base64 encoded AES IV for below fields.
+  password: string;  // Encrypted, even in the decrypted DB.
+  notes: string;     // Encrypted, even in the decrypted DB.
 }
 
 // The database that will be fully encrypted.
@@ -19,19 +19,29 @@ export interface DbModel {
   entries: DbEntry[];
 }
 
+// Cryptographic parameters for key derivation, encryption and decryption.
+export interface CryptoParams {
+  deriveAlgo: string;  // Default: PBKDF2
+  hashAlgo: string;    // Default: SHA-256
+  cipherMode: string;  // Default: AES-GCM
+  iterations: number;  // Default: 600000
+}
+
 // Database settings that will not be encrypted.
 // This contains cryptographic information and may in future contain data
 // that is required for the unlock screen, such as a website theme.
 export interface DbSettings {
-  passSalt: ArrayBuffer;
-  aesIv: ArrayBuffer;
+  cryptoParams: CryptoParams;
+  passSalt: ArrayBuffer;  // 32 bytes for AES-256.
+  aesIv: ArrayBuffer;     // 16 bytes for AES-CBC, 12 bytes for AES-GCM.
   dataVersion: number;
 }
 
 // Same as DbSettings, but uses primitive types only.
 export interface DbSettingsEncoded {
-  passSalt: string;  // Base64 encoded.
-  aesIv: string;  // Base64 encoded.
+  cryptoParams: CryptoParams;  // May be unset on old DBs.
+  passSalt: string;            // Base64 encoded.
+  aesIv: string;               // Base64 encoded.
   dataVersion: number;
 }
 

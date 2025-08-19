@@ -15,5 +15,5 @@ export const appConfig = {
   // i.e., if the data format in db-types.ts has to change. To handle data
   // formats with older versions, data version converters in db-data.ts must be
   // implemented.
-  dataVersion: 1,  // Integer, incrementing.
+  dataVersion: 2,  // Integer, incrementing.
 };

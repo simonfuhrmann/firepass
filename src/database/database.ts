@@ -1,8 +1,8 @@
 import {Base64} from '../modules/base64';
 import {DbCrypto} from './db-crypto';
-import {DbData} from './db-data';
+import {DbData, getDefaultCryptoParams} from './db-data';
 import {DbStorage} from './db-storage';
-import {DbDocument, DbModel, DbEntry} from './db-types';
+import {DbDocument, DbModel, DbEntry, CryptoParams} from './db-types';
 
 export enum DbState {
   INITIAL,  // Initial state before fetching for the first time.
@@ -72,10 +72,16 @@ export class Database {
     await this.assignDocument(doc);
   }
 
-  upload(): Promise<void> {
+  async upload(): Promise<void> {
     console.log('Database.upload()');
-    const iv = crypto.getRandomValues(new Uint8Array(16)).buffer;
-    return this.uploadDatabase(iv);
+    let iv: ArrayBuffer;
+    try {
+      const cryptoParams = this.dbData.getCryptoParams();
+      iv = this.dbCrypto.makeRandomInitVector(cryptoParams);
+    } catch (code) {
+      throw {code, message: 'Failed to create init vector'};
+    }
+    await this.uploadDatabase(iv);
   }
 
   // Locks the database and transitions to LOCKED. If the database is in
@@ -93,29 +99,43 @@ export class Database {
   async unlock(password: string): Promise<void> {
     console.log('Database.unlock()');
     const salt = this.dbData.getPasswordSalt();
+    const cryptoParams = this.dbData.getCryptoParams();
     try {
-      await this.dbCrypto.setMasterKey(password, salt);
+      await this.dbCrypto.setMasterKey(password, salt, cryptoParams);
     } catch (code) {
       throw {code, message: 'Setting master password failed'};
     }
     await this.decryptDatabase();
   }
 
+  // Creates a new database. Transitions to UNLOCKED.
   async create(password: string): Promise<void> {
     console.log('Database.create()');
 
-    // Randomize a new password salt and AES init vector.
-    const salt = crypto.getRandomValues(new Uint8Array(32)).buffer;
-    const iv = crypto.getRandomValues(new Uint8Array(16)).buffer;
+    // Sanity check. Database must be missing.
+    if (this.dbState != DbState.MISSING) {
+      throw {code: 'db/invalid-state', message: 'Database must be missing'};
+    }
 
+    // Randomize a new password salt and AES init vector.
+    const cryptoParams = getDefaultCryptoParams();
+    let salt: ArrayBuffer, iv: ArrayBuffer;
     try {
-      await this.dbCrypto.setMasterKey(password, salt);
+      salt = this.dbCrypto.makeRandomPasswordSalt(cryptoParams);
+      iv = this.dbCrypto.makeRandomInitVector(cryptoParams);
+    } catch (code) {
+      throw {code, message: 'Failed to generate salt or IV'};
+    }
+
+    // Generate a new master key.
+    try {
+      await this.dbCrypto.setMasterKey(password, salt, cryptoParams);
     } catch (code) {
       throw {code, message: 'Setting master password failed'};
     }
 
     // Create, upload, and decrypt the database.
-    await this.createNewDatabase(salt, iv);
+    await this.createNewDatabase(salt, iv, cryptoParams);
     await this.uploadDatabase(iv);
     await this.decryptDatabase();
   }
@@ -136,38 +156,13 @@ export class Database {
   }
 
   async decryptEntry(entry: DbEntry): Promise<DbEntry> {
-    const iv = Base64.decode(entry.aesIv);
-    const encryptedPassword = Base64.decode(entry.password);
-    const encryptedNotes = Base64.decode(entry.notes);
-
-    try {
-      const [password, notes] = await Promise.all([
-        this.dbCrypto.decryptString(encryptedPassword, iv),
-        this.dbCrypto.decryptString(encryptedNotes, iv),
-      ]);
-      return {...entry, password, notes};
-    } catch (code) {
-      throw {code, message: 'Decrypting entry failed'};
-    }
+    const cryptoParams = this.dbData.getCryptoParams();
+    return await this.decryptEntryInternal(entry, cryptoParams);
   }
 
   async encryptEntry(entry: DbEntry): Promise<DbEntry> {
-    // Create new AES init vector and encrypt password and notes.
-    const iv = crypto.getRandomValues(new Uint8Array(16)).buffer;
-    try {
-      const [encryptedPassword, encryptedNotes] = await Promise.all([
-        this.dbCrypto.encryptString(entry.password, iv),
-        this.dbCrypto.encryptString(entry.notes, iv),
-      ]);
-      return {
-        ...entry,
-        aesIv: Base64.encode(iv),
-        password: Base64.encode(encryptedPassword),
-        notes: Base64.encode(encryptedNotes),
-      };
-    } catch (code) {
-      throw {code, message: 'Encrypting entry failed'};
-    }
+    const cryptoParams = this.dbData.getCryptoParams();
+    return await this.encryptEntryInternal(entry, cryptoParams);
   }
 
   sortEntries() {
@@ -176,6 +171,17 @@ export class Database {
   }
 
   async changePassword(oldPass: string, newPass: string): Promise<void> {
+    const newParams = this.dbData.getCryptoParams();
+    await this.convertDatabase(oldPass, newPass, newParams);
+  }
+
+  async updateCryptoParams(password: string): Promise<void> {
+    const newParams = getDefaultCryptoParams();
+    await this.convertDatabase(password, password, newParams);
+  }
+
+  private async convertDatabase(oldPass: string, newPass: string,
+    newParams: CryptoParams): Promise<void> {
     if (!oldPass || !newPass) {
       throw {
         code: 'db/invalid-password',
@@ -195,27 +201,32 @@ export class Database {
       } as DatabaseError;
     }
 
-    // Decrypt the database.
+    // Decrypt the database (with the CryptoParams in memory).
     await this.unlock(oldPass);
 
-    // Decrypt all entries.
+    // Decrypt all entries (also with the CryptoParams in memory).
     const oldModel = this.getModel();
     const decryptedEntries = await Promise.all(
       oldModel.entries.map((entry) => this.decryptEntry(entry))
     );
 
-    // Change master password with a new randomized salt.
-    const salt = crypto.getRandomValues(new Uint8Array(32)).buffer;
-    await this.dbCrypto.setMasterKey(newPass, salt);
+    // Randomize a new salt and init vector for the database.
+    let salt: ArrayBuffer, iv: ArrayBuffer;
+    try {
+      salt = this.dbCrypto.makeRandomPasswordSalt(newParams);
+      iv = this.dbCrypto.makeRandomInitVector(newParams);
+    } catch (code) {
+      throw {code, message: 'Failed to generate salt or IV'};
+    }
 
-    // Encrypt all entries with the new password.
+    // Generate a new master key and encrypt all entries.
+    await this.dbCrypto.setMasterKey(newPass, salt, newParams);
     const encryptedEntries = await Promise.all(
-      decryptedEntries.map((entry) => this.encryptEntry(entry))
+      decryptedEntries.map((entry) => this.encryptEntryInternal(entry, newParams))
     );
 
     // Create a new database and assign entires.
-    const iv = crypto.getRandomValues(new Uint8Array(16)).buffer;
-    this.dbData.createNewDatabase(salt, iv);
+    this.dbData.createNewDatabase(salt, iv, newParams);
     this.dbData.setModel({...oldModel, entries: encryptedEntries});
   }
 
@@ -236,11 +247,12 @@ export class Database {
 
   private async decryptDatabase(): Promise<void> {
     console.log('Database.decryptDatabase()');
+    const cryptoParams = this.dbData.getCryptoParams();
     const iv = this.dbData.getAesIv();
     const payload = this.dbData.getPayload();
 
     try {
-      const model = await this.dbCrypto.decrypt(payload, iv);
+      const model = await this.dbCrypto.decrypt(payload, iv, cryptoParams);
       this.dbData.setModel(model as DbModel);
       this.setState(DbState.UNLOCKED);
     } catch (code) {
@@ -251,9 +263,10 @@ export class Database {
 
   private async uploadDatabase(iv: ArrayBuffer): Promise<void> {
     console.log('Database.uploadDatabase()');
+    const cryptoParams = this.dbData.getCryptoParams();
     const model = this.getModel();
     try {
-      const buffer = await this.dbCrypto.encrypt(model, iv);
+      const buffer = await this.dbCrypto.encrypt(model, iv, cryptoParams);
       this.dbData.setPayload(buffer, iv);
       const doc = this.dbData.getDocument();
       await this.dbStorage.upload(doc);
@@ -263,9 +276,10 @@ export class Database {
     }
   }
 
-  private async createNewDatabase(salt: ArrayBuffer, iv: ArrayBuffer): Promise<void> {
+  private async createNewDatabase(salt: ArrayBuffer, iv: ArrayBuffer,
+    params: CryptoParams): Promise<void> {
     console.log('Database.createNewDatabase()');
-    this.dbData.createNewDatabase(salt, iv);
+    this.dbData.createNewDatabase(salt, iv, params);
 
     const entries: DbEntry[] = [
       {
@@ -304,7 +318,7 @@ export class Database {
     ];
 
     const encryptedEntries = await Promise.all(
-      entries.map((entry) => this.encryptEntry(entry))
+      entries.map((entry) => this.encryptEntryInternal(entry, params))
     );
     encryptedEntries.forEach((entry) => {
       this.addEntry(entry);
@@ -315,5 +329,43 @@ export class Database {
     if (this.dbState === state) return;
     this.dbState = state;
     this.stateListeners.forEach(cb => cb(this.dbState));
+  }
+
+  private async decryptEntryInternal(entry: DbEntry,
+    cryptoParams: CryptoParams): Promise<DbEntry> {
+    // Load AES init vector and decode password and notes.
+    const iv = Base64.decode(entry.aesIv);
+    const encryptedPassword = Base64.decode(entry.password);
+    const encryptedNotes = Base64.decode(entry.notes);
+    // Decrypt password and notes.
+    try {
+      const [password, notes] = await Promise.all([
+        this.dbCrypto.decryptString(encryptedPassword, iv, cryptoParams),
+        this.dbCrypto.decryptString(encryptedNotes, iv, cryptoParams),
+      ]);
+      return {...entry, password, notes};
+    } catch (code) {
+      throw {code, message: 'Decrypting entry failed'};
+    }
+  }
+
+  private async encryptEntryInternal(entry: DbEntry,
+    cryptoParams: CryptoParams): Promise<DbEntry> {
+    // Create new AES init vector and encrypt password and notes.
+    try {
+      const iv = this.dbCrypto.makeRandomInitVector(cryptoParams);
+      const [encryptedPassword, encryptedNotes] = await Promise.all([
+        this.dbCrypto.encryptString(entry.password, iv, cryptoParams),
+        this.dbCrypto.encryptString(entry.notes, iv, cryptoParams),
+      ]);
+      return {
+        ...entry,
+        aesIv: Base64.encode(iv),
+        password: Base64.encode(encryptedPassword),
+        notes: Base64.encode(encryptedNotes),
+      };
+    } catch (code) {
+      throw {code, message: 'Encrypting entry failed'};
+    }
   }
 }
