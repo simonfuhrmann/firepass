@@ -1,12 +1,12 @@
 import {LitElement, css, html} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 
-import {appConfig} from '../config/application';
-import {StateController} from '../controllers/state-controller';
-import {AuthState, State} from '../modules/state-types';
-import {DbState} from '../database/database';
 import './fp-authentication';
 import './fp-database';
+import {appConfig} from '../config/application';
+import {AuthState, State} from '../modules/state-types';
+import {DbState} from '../database/database';
+import {StateController} from '../controllers/state-controller';
 
 @customElement('fp-app')
 export class FpApp extends LitElement {

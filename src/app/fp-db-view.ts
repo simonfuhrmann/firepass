@@ -2,23 +2,23 @@ import {LitElement, css, html, nothing} from 'lit';
 import {customElement, property, query, state} from 'lit/decorators.js';
 import {repeat} from 'lit/directives/repeat.js';
 
-import {OxyInput} from 'oxygen-mdc/oxy-input';
-import {OxyToast} from 'oxygen-mdc/oxy-toast';
 import 'oxygen-mdc/oxy-button';
 import 'oxygen-mdc/oxy-icon';
 import 'oxygen-mdc/oxy-input';
 import 'oxygen-mdc/oxy-tab';
 import 'oxygen-mdc/oxy-toast';
+import {OxyInput} from 'oxygen-mdc/oxy-input';
+import {OxyToast} from 'oxygen-mdc/oxy-toast';
 
-import {EventsController} from '../controllers/events-controller';
-import {StateController, State} from '../controllers/state-controller';
-import * as Actions from '../modules/state-actions';
+import './fp-db-entry';
 import {Database, DatabaseError} from '../database/database';
 import {DbModel, DbEntry} from '../database/db-types';
-import {FpDbEntry} from './fp-db-entry';
 import {devConfig} from '../config/development';
+import {EventsController} from '../controllers/events-controller';
+import {FpDbEntry} from './fp-db-entry';
 import {sharedStyles} from './fp-styles'
-import './fp-db-entry';
+import {StateController, State} from '../controllers/state-controller';
+import * as Actions from '../modules/state-actions';
 
 @customElement('fp-db-view')
 export class FpDbView extends LitElement {

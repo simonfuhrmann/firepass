@@ -1,16 +1,17 @@
 import {LitElement, css, html, nothing} from 'lit';
 import {customElement, query, property, state} from 'lit/decorators.js';
 
-import {Database, DatabaseError, equalCryptoParams} from '../database/database';
-import {EventsController} from '../controllers/events-controller';
-import {CryptoParams} from '../database/db-types';
-import {getDefaultCryptoParams} from '../database/db-data';
-import {OxyInput} from 'oxygen-mdc/oxy-input'
-import {sharedStyles} from './fp-styles'
-import 'oxygen-mdc/oxy-input'
 import 'oxygen-mdc/oxy-button';
 import 'oxygen-mdc/oxy-icon';
 import 'oxygen-mdc/oxy-icons-base';
+import 'oxygen-mdc/oxy-input'
+
+import {CryptoParams} from '../database/db-types';
+import {Database, DatabaseError, equalCryptoParams} from '../database/database';
+import {EventsController} from '../controllers/events-controller';
+import {getDefaultCryptoParams} from '../database/db-data';
+import {OxyInput} from 'oxygen-mdc/oxy-input'
+import {sharedStyles} from './fp-styles'
 
 // Assistant style flow with 3 pages.
 enum CryptoPage {

@@ -2,15 +2,15 @@ import {LitElement, css, html} from 'lit';
 import {customElement, query, state} from 'lit/decorators.js';
 import * as Auth from 'firebase/auth';
 
-import {DbState} from '../database/database';
-import {firebaseApp} from '../config/firebase';
-import {EventsController} from '../controllers/events-controller';
-import {StateController} from '../controllers/state-controller';
-import * as Actions from '../modules/state-actions';
+import './fp-auth-login';
 import {AuthState, State, DbView} from '../modules/state-types';
+import {DbState} from '../database/database';
+import {EventsController} from '../controllers/events-controller';
+import {firebaseApp} from '../config/firebase';
 import {FpAuthLogin} from './fp-auth-login';
 import {sharedStyles} from './fp-styles'
-import './fp-auth-login';
+import {StateController} from '../controllers/state-controller';
+import * as Actions from '../modules/state-actions';
 
 @customElement('fp-authentication')
 export class FpAuthentication extends LitElement {

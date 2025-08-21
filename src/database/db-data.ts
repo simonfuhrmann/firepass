@@ -1,6 +1,6 @@
-import {DbModel, DbEntry, DbSettings, DbSettingsEncoded, DbDocument, CryptoParams} from './db-types';
-import {Base64} from '../modules/base64';
 import {appConfig} from '../config/application';
+import {Base64} from '../modules/base64';
+import {DbModel, DbEntry, DbSettings, DbSettingsEncoded, DbDocument, CryptoParams} from './db-types';
 
 // Returns the default CryptoParams for new databases.
 export function getDefaultCryptoParams(): CryptoParams {

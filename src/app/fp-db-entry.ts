@@ -1,23 +1,23 @@
 import {LitElement, css, html, nothing} from 'lit';
 import {customElement, property, query} from 'lit/decorators.js';
 
-import {OxyDialog} from 'oxygen-mdc/oxy-dialog';
-import {OxyInput} from 'oxygen-mdc/oxy-input';
-import {OxyTextarea} from 'oxygen-mdc/oxy-textarea';
-import {OxyToast} from 'oxygen-mdc/oxy-toast';
 import 'oxygen-mdc/oxy-button';
 import 'oxygen-mdc/oxy-dialog';
 import 'oxygen-mdc/oxy-icon';
 import 'oxygen-mdc/oxy-input';
 import 'oxygen-mdc/oxy-textarea';
 import 'oxygen-mdc/oxy-toast';
+import {OxyDialog} from 'oxygen-mdc/oxy-dialog';
+import {OxyInput} from 'oxygen-mdc/oxy-input';
+import {OxyTextarea} from 'oxygen-mdc/oxy-textarea';
+import {OxyToast} from 'oxygen-mdc/oxy-toast';
 
+import './fp-db-entry-icons';
+import './fp-pass-generator';
 import {DbEntry} from '../database/db-types';
 import {FpDbEntryIcons} from './fp-db-entry-icons';
 import {FpPassGenerator} from './fp-pass-generator';
 import {sharedStyles} from './fp-styles'
-import './fp-db-entry-icons';
-import './fp-pass-generator';
 
 @customElement('fp-db-entry')
 export class FpDbEntry extends LitElement {

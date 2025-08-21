@@ -1,8 +1,8 @@
 import {Base64} from '../modules/base64';
 import {DbCrypto} from './db-crypto';
 import {DbData, getDefaultCryptoParams} from './db-data';
-import {DbStorage} from './db-storage';
 import {DbDocument, DbModel, DbEntry, CryptoParams} from './db-types';
+import {DbStorage} from './db-storage';
 
 export enum DbState {
   INITIAL,  // Initial state before fetching for the first time.

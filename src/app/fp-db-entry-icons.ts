@@ -6,8 +6,8 @@ import 'oxygen-mdc/oxy-dialog';
 import 'oxygen-mdc/oxy-icon';
 import 'oxygen-mdc/oxy-icons-all';
 
-import {sharedStyles} from './fp-styles';
 import './fp-icons-logos';
+import {sharedStyles} from './fp-styles';
 
 @customElement('fp-db-entry-icons')
 export class FpDbEntryIcons extends LitElement {

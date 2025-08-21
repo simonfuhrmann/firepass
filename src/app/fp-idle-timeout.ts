@@ -1,9 +1,9 @@
 import {LitElement} from 'lit';
 import {customElement} from 'lit/decorators.js';
 
+import {appConfig} from '../config/application';
 import {EventsController} from '../controllers/events-controller';
 import * as Actions from '../modules/state-actions';
-import {appConfig} from '../config/application';
 
 @customElement('fp-idle-timeout')
 export class FpIdleTimeout extends LitElement {

@@ -1,8 +1,8 @@
 import {LitElement, css, html} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 
-import {OxyInput} from 'oxygen-mdc/oxy-input'
 import 'oxygen-mdc/oxy-input'
+import {OxyInput} from 'oxygen-mdc/oxy-input'
 
 import {devConfig} from '../config/development';
 import {sharedStyles} from './fp-styles'

@@ -1,16 +1,16 @@
 import {LitElement, css, html} from 'lit';
 import {property, customElement} from 'lit/decorators.js';
 
-import {OxyCheckbox} from 'oxygen-mdc/oxy-checkbox';
-import {OxyDialog} from 'oxygen-mdc/oxy-dialog';
-import {OxyInput} from 'oxygen-mdc/oxy-input';
-import {OxyToast} from 'oxygen-mdc/oxy-toast';
 import 'oxygen-mdc/oxy-button';
 import 'oxygen-mdc/oxy-checkbox';
 import 'oxygen-mdc/oxy-dialog';
 import 'oxygen-mdc/oxy-icon';
 import 'oxygen-mdc/oxy-input';
 import 'oxygen-mdc/oxy-slider';
+import {OxyCheckbox} from 'oxygen-mdc/oxy-checkbox';
+import {OxyDialog} from 'oxygen-mdc/oxy-dialog';
+import {OxyInput} from 'oxygen-mdc/oxy-input';
+import {OxyToast} from 'oxygen-mdc/oxy-toast';
 
 import {sharedStyles} from './fp-styles';
 

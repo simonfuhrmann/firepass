@@ -1,21 +1,21 @@
 import {LitElement, css, html, nothing} from 'lit';
 import {customElement, query, state} from 'lit/decorators.js';
 
-import {EventsController} from '../controllers/events-controller';
-import {StateController, State} from '../controllers/state-controller';
-import * as Actions from '../modules/state-actions';
-import {DbView} from '../modules/state-types';
-import {Database, DbState, DatabaseError} from '../database/database';
-import {FpDbUnlock} from './fp-db-unlock';
-import {devConfig} from '../config/development';
-import {downloadText} from '../modules/download';
-import {sharedStyles} from './fp-styles'
 import './fp-app-toolbar';
-import './fp-idle-timeout';
 import './fp-db-change-crypto';
 import './fp-db-change-pass';
 import './fp-db-unlock';
 import './fp-db-view';
+import './fp-idle-timeout';
+import {Database, DbState, DatabaseError} from '../database/database';
+import {DbView} from '../modules/state-types';
+import {devConfig} from '../config/development';
+import {downloadText} from '../modules/download';
+import {EventsController} from '../controllers/events-controller';
+import {FpDbUnlock} from './fp-db-unlock';
+import {sharedStyles} from './fp-styles'
+import {StateController, State} from '../controllers/state-controller';
+import * as Actions from '../modules/state-actions';
 
 @customElement('fp-database')
 export class FpDatabase extends LitElement {

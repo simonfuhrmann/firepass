@@ -3,11 +3,11 @@ import {property, customElement, state} from 'lit/decorators.js';
 
 import 'oxygen-mdc/oxy-button';
 
+import {DbView} from '../modules/state-types';
 import {EventsController} from '../controllers/events-controller';
+import {sharedStyles} from './fp-styles'
 import {StateController, State} from '../controllers/state-controller';
 import * as Actions from '../modules/state-actions';
-import {DbView} from '../modules/state-types';
-import {sharedStyles} from './fp-styles'
 
 @customElement('fp-settings')
 export class FpSettings extends LitElement {
