@@ -160,7 +160,9 @@ export class FpDatabase extends LitElement {
   }
 
   private downloadDatabase() {
-    this.database.download().catch(error => this.onDownloadError(error));
+    this.database.download()
+      .then(() => this.checkUpdateSuggested())
+      .catch(error => this.onDownloadError(error));
   }
 
   private onDbStateChanged(state: DbState) {
@@ -175,6 +177,7 @@ export class FpDatabase extends LitElement {
     }
   }
 
+  // Called after changing password or upgrading database.
   private onChangeDatabaseFinished() {
     this.database.reset();
     Actions.setDbView(DbView.DATABASE_STATE);
@@ -220,6 +223,10 @@ export class FpDatabase extends LitElement {
     const unlockElem = this.unlockElem;
     if (!unlockElem) return;
     unlockElem.setErrorMessage(error.code);
+  }
+
+  private checkUpdateSuggested() {
+    Actions.setUpgradeDbSuggested(this.database.isUpgradeSuggested());
   }
 
   // Displays a permanent error, such as a database download error.

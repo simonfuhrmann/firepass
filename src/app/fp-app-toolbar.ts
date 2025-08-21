@@ -65,6 +65,9 @@ export class FpAppToolbar extends LitElement {
         padding: 12px;
         border-radius: 0;
       }
+      oxy-button[notification] {
+        color: var(--theme-color-ice3);
+      }
 
       @media screen and (max-width: 700px) {
         #logo > oxy-icon {
@@ -93,6 +96,7 @@ export class FpAppToolbar extends LitElement {
   @property({type: Boolean, reflect: true}) sidebar = false;
   @state() private dbUnlocked = false;
   @state() private idleTimeout = '';
+  @state() private upgradeDbSuggested = false;
 
   connectedCallback() {
     super.connectedCallback();
@@ -107,6 +111,7 @@ export class FpAppToolbar extends LitElement {
   stateChanged(newState: State, oldState: State | null) {
     this.dbUnlocked = newState.dbState === DbState.UNLOCKED;
     this.sidebar = newState.sidebarVisible;
+    this.upgradeDbSuggested = newState.upgradeDbSuggested;
     if (!oldState || newState.lastActivityMs !== oldState.lastActivityMs) {
       this.resetIdleTimeoutInterval();
     }
@@ -137,6 +142,7 @@ export class FpAppToolbar extends LitElement {
         </oxy-button>
         <oxy-button
             title="Settings"
+            ?notification=${this.upgradeDbSuggested}
             @click=${this.onOpenSettings}>
           <oxy-icon icon="icons:settings"></oxy-icon>
         </oxy-button>

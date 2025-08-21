@@ -1,7 +1,7 @@
 import {LitElement, css, html, nothing} from 'lit';
 import {customElement, query, property, state} from 'lit/decorators.js';
 
-import {Database, DatabaseError} from '../database/database';
+import {Database, DatabaseError, equalCryptoParams} from '../database/database';
 import {EventsController} from '../controllers/events-controller';
 import {CryptoParams} from '../database/db-types';
 import {getDefaultCryptoParams} from '../database/db-data';
@@ -17,14 +17,6 @@ enum CryptoPage {
   VIEW_CHANGE,
   MAKE_BACKUP,
   DB_UNLOCK,
-}
-
-// Only allow the upgrade if any parameter changed.
-function shouldUpgradeParams(oldParams: CryptoParams, newParams: CryptoParams) {
-  return oldParams.deriveAlgo !== newParams.deriveAlgo ||
-    oldParams.hashAlgo !== newParams.hashAlgo ||
-    oldParams.cipherMode !== newParams.cipherMode ||
-    oldParams.iterations !== newParams.iterations;
 }
 
 @customElement('fp-db-change-crypto')
@@ -114,7 +106,7 @@ export class FpDbChangeCrypto extends LitElement {
     if (!this.cryptoParams) return nothing;
     const oldParams = this.cryptoParams;
     const newParams = getDefaultCryptoParams();
-    const shouldUpgrade = shouldUpgradeParams(oldParams, newParams);
+    const shouldUpgrade = !equalCryptoParams(oldParams, newParams);
     if (!shouldUpgrade) {
       this.errorMessage = 'Already up-to-date';
     }

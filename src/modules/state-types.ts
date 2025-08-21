@@ -23,6 +23,7 @@ export interface State {
   dbState: DbState;
   lastActivityMs: number;
   sidebarVisible: boolean;
+  upgradeDbSuggested: boolean;
 }
 
 // Creates the global state with initial values.
@@ -33,6 +34,7 @@ export function getInitialState(): State {
     dbState: DbState.INITIAL,
     lastActivityMs: Date.now(),
     sidebarVisible: true,
+    upgradeDbSuggested: false,
   };
 }
 

@@ -45,3 +45,12 @@ export function setSidebarVisible(sidebarVisible: boolean) {
   };
   stateManager.processAction(action);
 }
+
+// Sets whether a database upgrade is suggested.
+export function setUpgradeDbSuggested(upgradeDbSuggested: boolean) {
+  const action = (state: State) => {
+    if (state.upgradeDbSuggested === upgradeDbSuggested) return state;
+    return {...state, upgradeDbSuggested};
+  };
+  stateManager.processAction(action);
+}

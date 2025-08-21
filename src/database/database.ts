@@ -63,6 +63,10 @@ export class Database {
     return this.dbData.getCryptoParams();
   }
 
+  isUpgradeSuggested(): boolean {
+    return !equalCryptoParams(this.getCryptoParams(), getDefaultCryptoParams());
+  }
+
   // Attempts to download the database. Transitions to the FETCHING state
   // if requested. Returns a promise.
   async download(): Promise<void> {
@@ -372,4 +376,12 @@ export class Database {
       throw {code, message: 'Encrypting entry failed'};
     }
   }
+}
+
+// Compares two CryptoParams objects, returns true if equal.
+export function equalCryptoParams(a: CryptoParams, b: CryptoParams): boolean {
+  return a.deriveAlgo === b.deriveAlgo &&
+         a.hashAlgo   === b.hashAlgo &&
+         a.cipherMode === b.cipherMode &&
+         a.iterations === b.iterations;
 }

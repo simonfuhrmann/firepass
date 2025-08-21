@@ -1,9 +1,10 @@
 import {LitElement, css, html} from 'lit';
-import {property, customElement} from 'lit/decorators.js';
+import {property, customElement, state} from 'lit/decorators.js';
 
 import 'oxygen-mdc/oxy-button';
 
 import {EventsController} from '../controllers/events-controller';
+import {StateController, State} from '../controllers/state-controller';
 import * as Actions from '../modules/state-actions';
 import {DbView} from '../modules/state-types';
 import {sharedStyles} from './fp-styles'
@@ -43,11 +44,20 @@ export class FpSettings extends LitElement {
         line-height: 1.2em;
         padding: 8px 16px;
       }
-      oxy-button .primary {
-      }
       oxy-button .secondary {
         color: var(--tertiary-text-color);
         font-size: 0.85em;
+      }
+      .notification-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: var(--theme-color-ice3);
+        margin: 1px 4px;
+      }
+      [hidden] {
+        display: none;
       }
     `;
   }
@@ -55,6 +65,16 @@ export class FpSettings extends LitElement {
   private events = new EventsController(this);
 
   @property({type: Boolean}) opened = false;
+  @state() private upgradeDbSuggested = false;
+
+  constructor() {
+    super();
+    new StateController(this, this.stateChanged.bind(this));
+  }
+
+  stateChanged(newState: State) {
+    this.upgradeDbSuggested = newState.upgradeDbSuggested;
+  }
 
   render() {
     return html`
@@ -68,8 +88,13 @@ export class FpSettings extends LitElement {
           <div class="primary">Change password</div>
           <div class="secondary">Change the database password</div>
         </oxy-button>
-        <oxy-button @click=${this.onChangeCrypto}>
-          <div class="primary">Upgrade database</div>
+        <oxy-button
+          @click=${this.onChangeCrypto}
+          ?hidden=${!this.upgradeDbSuggested}>
+          <div class="primary">
+            Upgrade database
+            <div class="notification-dot"></div>
+          </div>
           <div class="secondary">Use safer cryptographic settings</div>
         </oxy-button>
       </div>
