@@ -196,7 +196,11 @@ export class FpDbView extends LitElement {
     new StateController(this, this.stateChanged.bind(this));
   }
 
-  connectedCallback() {
+  stateChanged(newState: State, _oldState: State | null) {
+    this.sidebar = newState.sidebarVisible;
+  }
+
+  override connectedCallback() {
     super.connectedCallback();
     this.events.addListener(EventsController.HISTORY_POPSTATE, (event) => {
       const popstate = event as PopStateEvent;
@@ -204,17 +208,13 @@ export class FpDbView extends LitElement {
     });
   }
 
-  updated(changedProps: Map<string, any>) {
+  override updated(changedProps: Map<string, any>) {
     if (changedProps.has('database')) {
       this.updateModel();
     }
   }
 
-  stateChanged(newState: State, _oldState: State | null) {
-    this.sidebar = newState.sidebarVisible;
-  }
-
-  render() {
+  override render() {
     // Display filtered entries, or all entries from the model.
     const entries = !!this.filteredEntries
       ? this.filteredEntries

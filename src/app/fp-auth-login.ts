@@ -40,7 +40,18 @@ export class FpAuthLogin extends LitElement {
   @property({type: Boolean, reflect: true}) disabled = false;
   @property({type: String}) errorMessage = '';
 
-  render() {
+  override firstUpdated() {
+    if (!this.shadowRoot) return;
+    this.emailInput = this.shadowRoot.getElementById('email') as OxyInput;
+    this.passwordInput = this.shadowRoot.getElementById('password') as OxyInput;
+
+    setTimeout(() => {
+      if (!this.emailInput) return;
+      this.emailInput.focus();
+    }, 0);
+  }
+
+  override render() {
     return html`
       <div class="label">Login</div>
       <oxy-input
@@ -62,17 +73,6 @@ export class FpAuthLogin extends LitElement {
 
       <div id="error">${this.errorMessage}</div>
     `;
-  }
-
-  firstUpdated() {
-    if (!this.shadowRoot) return;
-    this.emailInput = this.shadowRoot.getElementById('email') as OxyInput;
-    this.passwordInput = this.shadowRoot.getElementById('password') as OxyInput;
-
-    setTimeout(() => {
-      if (!this.emailInput) return;
-      this.emailInput.focus();
-    }, 0);
   }
 
   focusPassword() {

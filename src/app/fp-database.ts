@@ -71,7 +71,12 @@ export class FpDatabase extends LitElement {
     this.dbState = sc.get().dbState;
   }
 
-  connectedCallback() {
+  stateChanged(newState: State) {
+    this.dbView = newState.dbView;
+    this.dbState = newState.dbState;
+  }
+
+  override connectedCallback() {
     super.connectedCallback();
     this.events.addListener(EventsController.DB_LOCK,
       this.onLockDb.bind(this) as EventListener);
@@ -81,17 +86,12 @@ export class FpDatabase extends LitElement {
     this.downloadDatabase();
   }
 
-  stateChanged(newState: State) {
-    this.dbView = newState.dbView;
-    this.dbState = newState.dbState;
-  }
-
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
     this.database.removeStateListener(this.dbStateListener);
   }
 
-  render() {
+  override render() {
     return html`
       <fp-app-toolbar></fp-app-toolbar>
       ${this.renderErrorOrDbView()}

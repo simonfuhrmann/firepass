@@ -37,7 +37,7 @@ export class FpDbChangeCrypto extends LitElement {
         margin-bottom: 16px;
       }
       table td {
-        padding: 2px 4px;
+        padding: 2px;
       }
       table td.value {
         text-align: right;
@@ -93,7 +93,7 @@ export class FpDbChangeCrypto extends LitElement {
   @state() private errorMessage: string = '';
   @state() private page = CryptoPage.VIEW_CHANGE;
 
-  render() {
+  override render() {
     return html`
       ${this.renderCryptoPage()}
       ${this.renderBackupPage()}

@@ -128,7 +128,15 @@ export class FpDbEntryIcons extends LitElement {
 
   @property({type: Boolean, reflect: true}) opened = false;
 
-  render() {
+  open() {
+    this.opened = true;
+  }
+
+  close() {
+    this.opened = false;
+  }
+
+  override render() {
     return html`
       <oxy-dialog
           backdrop
@@ -143,14 +151,6 @@ export class FpDbEntryIcons extends LitElement {
         </div>
       </oxy-dialog>
     `;
-  }
-
-  open() {
-    this.opened = true;
-  }
-
-  close() {
-    this.opened = false;
   }
 
   private renderIcon(icon: string) {

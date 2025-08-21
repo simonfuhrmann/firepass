@@ -164,7 +164,7 @@ export class FpDbEntry extends LitElement {
   @property({type: Boolean}) showPassword: boolean = false;
   @property({type: String}) entryIcon: string = '';
 
-  firstUpdated() {
+  override firstUpdated() {
     if (!this.shadowRoot) return;
     this.iconSelector =
       this.shadowRoot.getElementById('icon-selector') as FpDbEntryIcons;
@@ -175,7 +175,7 @@ export class FpDbEntry extends LitElement {
     this.toast = this.shadowRoot.getElementById('toast') as OxyToast;
   }
 
-  updated(changedProps: Map<string, any>) {
+  override updated(changedProps: Map<string, any>) {
     if (changedProps.has('entry')) {
       this.stopEditing();
       this.copyEntryToInputs();
@@ -185,7 +185,7 @@ export class FpDbEntry extends LitElement {
     }
   }
 
-  render() {
+  override render() {
     if (!this.entry) return nothing;
 
     return html`

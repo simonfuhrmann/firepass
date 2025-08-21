@@ -12,14 +12,14 @@ export class FpIdleTimeout extends LitElement {
   private events = new EventsController(this);
   private timeoutHandle = -1;
 
-  connectedCallback() {
+  override connectedCallback() {
     super.connectedCallback();
     window.addEventListener('click', this.clickListener);
     window.addEventListener('keydown', this.keydownListener);
     this.resetTimeout();
   }
 
-  disconnectedCallback() {
+  override disconnectedCallback() {
     super.disconnectedCallback();
     window.removeEventListener('click', this.clickListener);
     window.removeEventListener('keydown', this.keydownListener);

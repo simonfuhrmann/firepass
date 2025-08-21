@@ -62,25 +62,17 @@ export class FpAuthentication extends LitElement {
     new StateController(this, this.stateChanged.bind(this));
   }
 
-  connectedCallback() {
+  stateChanged(newState: State) {
+    this.authState = newState.authState;
+  }
+
+  override connectedCallback() {
     super.connectedCallback();
     this.events.addListener(EventsController.USER_SIGNOFF,
       this.onUserSignoff.bind(this) as EventListener);
   }
 
-  stateChanged(newState: State) {
-    this.authState = newState.authState;
-  }
-
-  render() {
-    return html`
-      ${this.authState === AuthState.PENDING ? this.renderLoading() : ''}
-      ${this.authState === AuthState.ERROR ? this.renderAuthError() : ''}
-      ${this.authState === AuthState.SIGNED_OFF ? this.renderSignon() : ''}
-    `;
-  }
-
-  firstUpdated() {
+  override firstUpdated() {
     // Get access to the auth module. If the Firebase API key is invalid,
     // or Firebase is not initialized, this will fail.
     try {
@@ -94,6 +86,14 @@ export class FpAuthentication extends LitElement {
     this.auth.onAuthStateChanged((user: any) => {
       Actions.setAuthState(!!user ? AuthState.SIGNED_ON : AuthState.SIGNED_OFF);
     });
+  }
+
+  override render() {
+    return html`
+      ${this.authState === AuthState.PENDING ? this.renderLoading() : ''}
+      ${this.authState === AuthState.ERROR ? this.renderAuthError() : ''}
+      ${this.authState === AuthState.SIGNED_OFF ? this.renderSignon() : ''}
+    `;
   }
 
   private renderAuthError() {

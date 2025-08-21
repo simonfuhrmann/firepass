@@ -47,7 +47,28 @@ export class FpDbUnlock extends LitElement {
   @property({type: String}) errorMessage = '';
   @property({type: Boolean, reflect: true}) disabled = false;
 
-  render() {
+  override connectedCallback() {
+    super.connectedCallback();
+    document.addEventListener('visibilitychange', this.visibilityChangedFn);
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    document.removeEventListener('visibilitychange', this.visibilityChangedFn);
+  }
+
+  override firstUpdated() {
+    if (!this.shadowRoot) return;
+    this.passInput = this.shadowRoot.getElementById('pass') as OxyInput;
+    this.repeatInput = this.shadowRoot.getElementById('repeat') as OxyInput;
+
+    setTimeout(() => {
+      if (!this.passInput) return;
+      this.passInput.focus();
+    }, 0);
+  }
+
+  override render() {
     return html`
       <div class="label">Unlock Password</div>
       <oxy-input
@@ -76,27 +97,6 @@ export class FpDbUnlock extends LitElement {
         ${this.errorMessage}
       </div>
     `;
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-    document.addEventListener('visibilitychange', this.visibilityChangedFn);
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    document.removeEventListener('visibilitychange', this.visibilityChangedFn);
-  }
-
-  firstUpdated() {
-    if (!this.shadowRoot) return;
-    this.passInput = this.shadowRoot.getElementById('pass') as OxyInput;
-    this.repeatInput = this.shadowRoot.getElementById('repeat') as OxyInput;
-
-    setTimeout(() => {
-      if (!this.passInput) return;
-      this.passInput.focus();
-    }, 0);
   }
 
   setErrorMessage(errorMessage: string) {

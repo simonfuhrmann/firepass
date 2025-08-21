@@ -86,7 +86,18 @@ export class FpPassGenerator extends LitElement {
   @property({type: Boolean}) showPassword: boolean = true;
   @property({type: Boolean}) selectable: boolean = false;
 
-  firstUpdated() {
+  open() {
+    if (!this.dialog) return;
+    this.dialog.open();
+    this.onRegenerate();
+  }
+
+  close() {
+    if (!this.dialog) return;
+    this.dialog.close();
+  }
+
+  override firstUpdated() {
     if (!this.shadowRoot) return;
     this.dialog = this.shadowRoot.getElementById('dialog') as OxyDialog;
     this.input = this.shadowRoot.getElementById('input') as OxyInput;
@@ -97,7 +108,7 @@ export class FpPassGenerator extends LitElement {
     this.special = this.shadowRoot.getElementById('special') as OxyCheckbox;
   }
 
-  render() {
+  override render() {
     return html`
       <oxy-dialog id="dialog" heading="Password generator" backdrop>
         <div class="layout horizontal">
@@ -201,17 +212,6 @@ export class FpPassGenerator extends LitElement {
 
       <oxy-toast id="toast"></oxy-toast>
     `;
-  }
-
-  open() {
-    if (!this.dialog) return;
-    this.dialog.open();
-    this.onRegenerate();
-  }
-
-  close() {
-    if (!this.dialog) return;
-    this.dialog.close();
   }
 
   private onShowPassword() {

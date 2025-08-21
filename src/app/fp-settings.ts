@@ -72,11 +72,19 @@ export class FpSettings extends LitElement {
     new StateController(this, this.stateChanged.bind(this));
   }
 
+  open() {
+    this.opened = true;
+  }
+
+  close() {
+    this.opened = false;
+  }
+
   stateChanged(newState: State) {
     this.upgradeDbSuggested = newState.upgradeDbSuggested;
   }
 
-  render() {
+  override render() {
     return html`
       <div id="backdrop" ?hidden=${!this.opened} @click=${this.close}>
       <div id="dialog" ?hidden=${!this.opened}>
@@ -99,14 +107,6 @@ export class FpSettings extends LitElement {
         </oxy-button>
       </div>
     `;
-  }
-
-  open() {
-    this.opened = true;
-  }
-
-  close() {
-    this.opened = false;
   }
 
   private onExport() {

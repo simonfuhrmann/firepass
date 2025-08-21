@@ -43,7 +43,7 @@ export class FpApp extends LitElement {
     this.showVersion = newState.dbState !== DbState.UNLOCKED;
   }
 
-  render() {
+  override render() {
     return html`
       <fp-authentication></fp-authentication>
       ${this.isAuthenticated ? this.renderDatabase() : ''}

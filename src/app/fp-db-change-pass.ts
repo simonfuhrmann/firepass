@@ -52,11 +52,11 @@ export class FpDbChangePass extends LitElement {
   @property({type: Boolean, reflect: true}) disabled: boolean = false;
   @state() private errorMessage: string = '';
 
-  firstUpdated() {
+  override firstUpdated() {
     this.resetFocus();
   }
 
-  render() {
+  override render() {
     return html`
       <div class="label">Old password</div>
       <oxy-input

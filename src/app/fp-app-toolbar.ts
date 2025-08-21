@@ -98,16 +98,6 @@ export class FpAppToolbar extends LitElement {
   @state() private idleTimeout = '';
   @state() private upgradeDbSuggested = false;
 
-  connectedCallback() {
-    super.connectedCallback();
-    this.resetIdleTimeoutInterval();
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this.clearIdleTimeoutInterval();
-  }
-
   stateChanged(newState: State, oldState: State | null) {
     this.dbUnlocked = newState.dbState === DbState.UNLOCKED;
     this.sidebar = newState.sidebarVisible;
@@ -120,7 +110,17 @@ export class FpAppToolbar extends LitElement {
     }
   }
 
-  render() {
+  override connectedCallback() {
+    super.connectedCallback();
+    this.resetIdleTimeoutInterval();
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this.clearIdleTimeoutInterval();
+  }
+
+  override render() {
     return html`
       <div id="toolbar">
         <!-- Logo. -->
