@@ -9,7 +9,7 @@ import {appConfig} from '../config/application';
 export class FpIdleTimeout extends LitElement {
   private readonly clickListener = this.resetTimeout.bind(this);
   private readonly keydownListener = this.onKeydown.bind(this);
-  private events = new EventsController(this);
+  private readonly eventsController = new EventsController(this);
   private timeoutHandle = -1;
 
   override connectedCallback() {
@@ -46,6 +46,6 @@ export class FpIdleTimeout extends LitElement {
   }
 
   private lockDatabase() {
-    this.events.dispatch(EventsController.DB_LOCK);
+    this.eventsController.dispatch(EventsController.DB_LOCK);
   }
 }

@@ -53,23 +53,17 @@ export class FpDatabase extends LitElement {
     `;
   }
 
+  private readonly stateController = new StateController(this);
+  private readonly eventsController = new EventsController(this);
   private readonly dbStateListener = this.onDbStateChanged.bind(this);
-  private events = new EventsController(this);
   private database: Database = new Database();
   private autoUnlockAttempted = false;
 
   @query('fp-db-unlock') unlockElem: FpDbUnlock | undefined;
-  @state() private dbView: DbView;
-  @state() private dbState: DbState;
+  @state() private dbView: DbView = this.stateController.state.dbView;
+  @state() private dbState: DbState = this.stateController.state.dbState;
   @state() private errorCode: string = '';
   @state() private errorMessage: string = '';
-
-  constructor() {
-    super();
-    const sc = new StateController(this, this.stateChanged.bind(this));
-    this.dbView = sc.get().dbView;
-    this.dbState = sc.get().dbState;
-  }
 
   stateChanged(newState: State) {
     this.dbView = newState.dbView;
@@ -78,9 +72,9 @@ export class FpDatabase extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    this.events.addListener(EventsController.DB_LOCK,
+    this.eventsController.addListener(EventsController.DB_LOCK,
       this.onLockDb.bind(this) as EventListener);
-    this.events.addListener(EventsController.DB_EXPORT,
+    this.eventsController.addListener(EventsController.DB_EXPORT,
       this.onExportDb.bind(this) as EventListener);
     this.database.addStateListener(this.dbStateListener);
     this.downloadDatabase();

@@ -62,14 +62,14 @@ export class FpSettings extends LitElement {
     `;
   }
 
-  private events = new EventsController(this);
+  private readonly eventsController = new EventsController(this);
 
   @property({type: Boolean}) opened = false;
   @state() private upgradeDbSuggested = false;
 
   constructor() {
     super();
-    new StateController(this, this.stateChanged.bind(this));
+    new StateController(this);
   }
 
   open() {
@@ -110,16 +110,16 @@ export class FpSettings extends LitElement {
   }
 
   private onExport() {
-    this.events.dispatch(EventsController.DB_EXPORT);
+    this.eventsController.dispatch(EventsController.DB_EXPORT);
   }
 
   private onChangePassword() {
-    this.events.dispatch(EventsController.DB_LOCK);
+    this.eventsController.dispatch(EventsController.DB_LOCK);
     Actions.setDbView(DbView.CHANGE_PASSWORD);
   }
 
   private onChangeCrypto() {
-    this.events.dispatch(EventsController.DB_LOCK);
+    this.eventsController.dispatch(EventsController.DB_LOCK);
     Actions.setDbView(DbView.CHANGE_CRYPTO);
   }
 }

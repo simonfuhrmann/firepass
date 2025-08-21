@@ -86,8 +86,8 @@ export class FpAppToolbar extends LitElement {
     `;
   }
 
-  private events = new EventsController(this);
-  private state = new StateController(this, this.stateChanged.bind(this));
+  private readonly eventsController = new EventsController(this);
+  private readonly stateController = new StateController(this);
   private idleTimeoutIntervalHandle: number = -1;
 
   @query('fp-pass-generator') generator: FpPassGenerator | undefined;
@@ -98,7 +98,7 @@ export class FpAppToolbar extends LitElement {
   @state() private idleTimeout = '';
   @state() private upgradeDbSuggested = false;
 
-  stateChanged(newState: State, oldState: State | null) {
+  stateChanged(newState: State, oldState?: State) {
     this.dbUnlocked = newState.dbState === DbState.UNLOCKED;
     this.sidebar = newState.sidebarVisible;
     this.upgradeDbSuggested = newState.upgradeDbSuggested;
@@ -183,11 +183,11 @@ export class FpAppToolbar extends LitElement {
   }
 
   private onLogout() {
-    this.events.dispatch(EventsController.USER_SIGNOFF);
+    this.eventsController.dispatch(EventsController.USER_SIGNOFF);
   }
 
   private onLock() {
-    this.events.dispatch(EventsController.DB_LOCK);
+    this.eventsController.dispatch(EventsController.DB_LOCK);
   }
 
   private resetIdleTimeoutInterval() {
@@ -209,7 +209,7 @@ export class FpAppToolbar extends LitElement {
       return;
     }
 
-    const elapsedMs = Date.now() - this.state.get().lastActivityMs;
+    const elapsedMs = Date.now() - this.stateController.state.lastActivityMs;
     const remainingMs = Math.max(0, appConfig.idleTimeoutMs - elapsedMs);
     const remainingSecs = Math.ceil(remainingMs / 1000);
     const remainingMins = Math.ceil(remainingSecs / 60);

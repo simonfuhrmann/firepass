@@ -59,7 +59,7 @@ export class FpAuthentication extends LitElement {
 
   constructor() {
     super();
-    new StateController(this, this.stateChanged.bind(this));
+    new StateController(this);
   }
 
   stateChanged(newState: State) {

@@ -1,8 +1,7 @@
 // Signature for a state change listener. Both, new and old state are provided.
 // The old state is `null` when the listener is called for the first time, i.e.,
 // directly after adding the listener to the manager.
-export type StateListener<State> =
-    (newState: State, oldState: State|null) => void;
+export type StateListener<State> = (newState: State, oldState?: State) => void;
 
 // A state action that transforms the current state into a new state. Similar
 // to Redux, actions must not directly modify the state, but make immutable
@@ -46,7 +45,7 @@ export class StateManager<State> {
   // with `newState` set to the current state, and `oldState` set to `null`.
   addListener(listener: StateListener<State>) {
     this.listeners.push(listener);
-    listener(this.state, null);
+    listener(this.state);
   }
 
   // Removes a listener from the manager.

@@ -1,17 +1,21 @@
 import {ReactiveController, ReactiveControllerHost} from 'lit';
 
-import {State, StateListener, stateManager} from '../modules/state-types';
+import {State, stateManager} from '../modules/state-types';
 
-// Controller to manage the application global state.
-// https://lit.dev/docs/composition/controllers/
+// The host must implement stateChanged() method.
+export interface StateAwareHost extends ReactiveControllerHost {
+  stateChanged(newState: State, oldState?: State): void;
+}
+
+// Lit controller that automatically calls the host's stateChanged() method
+// when the global state changes. https://lit.dev/docs/composition/controllers/
 export class StateController implements ReactiveController {
-  private host: ReactiveControllerHost;
-  private callback: StateListener;
+  private host: StateAwareHost;
+  private callback = this.onStateChanged.bind(this);
 
-  constructor(host: ReactiveControllerHost, callback: StateListener) {
+  constructor(host: StateAwareHost) {
     this.host = host;
     this.host.addController(this);
-    this.callback = callback;
   }
 
   hostConnected() {
@@ -22,8 +26,12 @@ export class StateController implements ReactiveController {
     stateManager.removeListener(this.callback);
   }
 
-  get() {
+  get state() {
     return stateManager.getState();
+  }
+
+  private onStateChanged(newState: State, oldState?: State) {
+    this.host.stateChanged(newState, oldState);
   }
 }
 

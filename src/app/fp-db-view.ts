@@ -177,7 +177,7 @@ export class FpDbView extends LitElement {
     `;
   }
 
-  private events = new EventsController(this);
+  private readonly eventsController = new EventsController(this);
 
   @query('#entry') private entryElement: FpDbEntry | undefined;
   @query('#filter') private filterInput: OxyInput | undefined;
@@ -193,19 +193,20 @@ export class FpDbView extends LitElement {
 
   constructor() {
     super();
-    new StateController(this, this.stateChanged.bind(this));
+    new StateController(this);
   }
 
-  stateChanged(newState: State, _oldState: State | null) {
+  stateChanged(newState: State) {
     this.sidebar = newState.sidebarVisible;
   }
 
   override connectedCallback() {
     super.connectedCallback();
-    this.events.addListener(EventsController.HISTORY_POPSTATE, (event) => {
-      const popstate = event as PopStateEvent;
-      Actions.setSidebarVisible(!popstate.state || !popstate.state.showEntry);
-    });
+    this.eventsController.addListener(EventsController.HISTORY_POPSTATE,
+      (event) => {
+        const popstate = event as PopStateEvent;
+        Actions.setSidebarVisible(!popstate.state || !popstate.state.showEntry);
+      });
   }
 
   override updated(changedProps: Map<string, any>) {
