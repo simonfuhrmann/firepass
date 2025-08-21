@@ -25,10 +25,16 @@ export class FpDatabase extends LitElement {
         flex-direction: column;
         min-height: 0;  /* To enable scrolling of items. */
       }
+      #error,
+      fp-db-unlock,
+      fp-db-change-pass {
+        margin: 64px 32px 0 32px;
+        width: 250px;
+        align-self: center;
+      }
       #error {
         align-self: center;
         text-align: center;
-        margin: 128px 32px;
       }
       #error .code {
         color: var(--error-text-color);
@@ -38,15 +44,7 @@ export class FpDatabase extends LitElement {
         font-size: 0.8em;
         margin: 8px;
       }
-      fp-db-unlock {
-        align-self: center;
-        margin: calc(128px - 49px) 32px 128px 32px;
-        width: 250px;
-      }
-      fp-db-view,
-      fp-db-unlock,
-      fp-db-change-pass,
-      #error  {
+      fp-db-view {
         flex-grow: 1;
       }
     `;
@@ -136,11 +134,10 @@ export class FpDatabase extends LitElement {
   }
 
   private renderChangePass() {
-    if (this.dbState === DbState.UNLOCKED) return nothing;
     if (!this.changePassword) return nothing;
+    if (this.dbState !== DbState.LOCKED) return nothing;
     return html`
-      <fp-db-change-pass
-          @finish=${this.onDbChangePassFinished}>
+      <fp-db-change-pass @finish=${this.onChangeDatabaseFinished}>
       </fp-db-change-pass>
     `;
   }
@@ -161,7 +158,7 @@ export class FpDatabase extends LitElement {
     }
   }
 
-  private onDbChangePassFinished() {
+  private onChangeDatabaseFinished() {
     this.database.reset();
     Actions.setChangePassword(false);
     Actions.setDbState(DbState.FETCHING);

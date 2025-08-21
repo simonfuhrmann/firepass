@@ -21,7 +21,7 @@ export class FpDbUnlock extends LitElement {
       }
       div.label {
         margin: 4px 2px;
-        color: var(--tertiary-text-color);
+        color: var(--secondary-text-color);
       }
       oxy-input {
         margin-bottom: 8px;

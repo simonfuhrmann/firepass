@@ -20,13 +20,6 @@ export class FpDbChangePass extends LitElement {
       :host([disabled]) {
         opacity: 0.5;
       }
-      #form {
-        display: flex;
-        flex-direction: column;
-        align-self: center;
-        margin: calc(128px - 49px) 32px 128px 32px;
-        width: 250px;
-      }
       #error {
         color: var(--error-text-color);
         font-size: 0.9em;
@@ -36,7 +29,6 @@ export class FpDbChangePass extends LitElement {
       #buttons {
         display: flex;
         flex-direction: row;
-        justify-content: flex-end;
       }
       oxy-button {
         background: rgba(255, 255, 255, 0.1);
@@ -46,7 +38,7 @@ export class FpDbChangePass extends LitElement {
       }
       div.label {
         margin: 4px 2px;
-        color: var(--tertiary-text-color);
+        color: var(--secondary-text-color);
       }
       div.flex {
         flex-grow: 1;
@@ -66,67 +58,59 @@ export class FpDbChangePass extends LitElement {
 
   render() {
     return html`
-      <div id="form">
-        <div class="label">Old Password</div>
-        <oxy-input
-            id="old-pass"
-            type="password"
-            ?disabled=${this.disabled}
-            @keydown=${this.onOldPassKeydown}>
-        </oxy-input>
+      <div class="label">Old password</div>
+      <oxy-input
+          id="old-pass"
+          type="password"
+          ?disabled=${this.disabled}
+          @keydown=${this.onOldPassKeydown}>
+      </oxy-input>
 
-        <div class="label">New Password</div>
-        <oxy-input
-            id="new-pass"
-            type="password"
-            ?disabled=${this.disabled}
-            @keydown=${this.onNewPassKeydown}>
-        </oxy-input>
+      <div class="label">New password</div>
+      <oxy-input
+          id="new-pass"
+          type="password"
+          ?disabled=${this.disabled}
+          @keydown=${this.onNewPassKeydown}>
+      </oxy-input>
 
-        <div class="label">Repeat new password</div>
-        <oxy-input
-            id="repeat-pass"
-            type="password"
-            ?disabled=${this.disabled}
-            @keydown=${this.onRepeatPassKeydown}>
-        </oxy-input>
+      <div class="label">Repeat new password</div>
+      <oxy-input
+          id="repeat-pass"
+          type="password"
+          ?disabled=${this.disabled}
+          @keydown=${this.onRepeatPassKeydown}>
+      </oxy-input>
 
-        <div id="error">${this.errorMessage}</div>
+      <div id="error">${this.errorMessage}</div>
 
-        <div id="buttons">
-          <oxy-button ?disabled=${this.disabled} @click=${this.onCancel}>
-            Cancel
-          </oxy-button>
-          <div class="flex"></div>
-          <oxy-button ?disabled=${this.disabled} @click=${this.onContinue}>
-            Continue
-          </oxy-button>
-        </div>
+      <div id="buttons">
+        <oxy-button ?disabled=${this.disabled} @click=${this.onCancel}>
+          Cancel
+        </oxy-button>
+        <div class="flex"></div>
+        <oxy-button ?disabled=${this.disabled} @click=${this.onContinue}>
+          Continue
+        </oxy-button>
       </div>
     `;
   }
 
   private resetFocus() {
     setTimeout(() => {
-      const oldPassElem = this.oldPassElem;
-      if (!oldPassElem) return;
-      oldPassElem.focus();
-      oldPassElem.select();
+      this.oldPassElem?.focus();
+      this.oldPassElem?.select();
     }, 0);
   }
 
   private onOldPassKeydown(event: KeyboardEvent) {
     if (event.key != 'Enter') return;
-    const newPassElem = this.newPassElem;
-    if (!newPassElem) return;
-    newPassElem.focus();
+    this.newPassElem?.focus();
   }
 
   private onNewPassKeydown(event: KeyboardEvent) {
     if (event.key != 'Enter') return;
-    const repeatPassElem = this.repeatPassElem;
-    if (!repeatPassElem) return;
-    repeatPassElem.focus();
+    this.repeatPassElem?.focus();
   }
 
   private onRepeatPassKeydown(event: KeyboardEvent) {
@@ -169,14 +153,13 @@ export class FpDbChangePass extends LitElement {
       return;
     }
 
-    this.changePassword(oldPass, newPass).then(() => {
-      this.disabled = false;
-      this.dispatchEvent(new CustomEvent('finish'));
-    }).catch((error: DatabaseError) => {
-      this.disabled = false;
-      this.errorMessage = error.message || error.code || error.toString();
-      this.resetFocus();
-    });
+    this.changePassword(oldPass, newPass)
+      .catch((error: DatabaseError) => {
+        this.errorMessage = error.message || error.code || error.toString();
+        this.resetFocus();
+      }).finally(() => {
+        this.disabled = false;
+      });
   }
 
   private async changePassword(oldPass: string, newPass: string): Promise<void> {
@@ -188,5 +171,6 @@ export class FpDbChangePass extends LitElement {
     console.log('Uploading database...');
     await database.upload();
     console.log('Database password changed.');
+    this.dispatchEvent(new CustomEvent('finish'));
   }
 }

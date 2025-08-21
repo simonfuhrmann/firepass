@@ -21,10 +21,13 @@ export class FpAuthentication extends LitElement {
         display: flex;
         flex-direction: column;
       }
-      #error, #loader {
+      #error, #loader, #login {
         align-self: center;
+        margin: calc(64px + 48px) 32px 0 32px;
+        width: 250px;
+      }
+      #error {
         text-align: center;
-        margin: 128px 32px;
       }
       #error .code {
         color: var(--error-text-color);
@@ -36,12 +39,8 @@ export class FpAuthentication extends LitElement {
       }
       #loader {
         color: var(--tertiary-text-color);
+        text-align: center;
         animation: fadein 10s;
-      }
-      #login {
-        align-self: center;
-        margin: 128px 32px;
-        width: 250px;
       }
       @keyframes fadein {
         from { opacity: 0; }
