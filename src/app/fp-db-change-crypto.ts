@@ -84,7 +84,7 @@ export class FpDbChangeCrypto extends LitElement {
     `;
   }
 
-  private events = new EventsController(this);
+  private readonly eventsController = new EventsController(this);
 
   @query('#password') passwordElem: OxyInput | undefined;
   @property({type: Boolean, reflect: true}) disabled: boolean = false;
@@ -125,7 +125,7 @@ export class FpDbChangeCrypto extends LitElement {
   private renderBackupPage() {
     if (this.page !== CryptoPage.MAKE_BACKUP) return nothing;
     const onBackup = () => {
-      this.events.dispatch(EventsController.DB_EXPORT);
+      this.eventsController.dispatch(EventsController.DB_EXPORT);
     };
     return html`
       <div class="underlined label">Download a backup</div>

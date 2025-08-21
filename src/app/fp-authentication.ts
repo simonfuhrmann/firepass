@@ -49,7 +49,7 @@ export class FpAuthentication extends LitElement {
     `;
   }
 
-  private events = new EventsController(this);
+  private readonly eventsController = new EventsController(this);
   private auth: Auth.Auth | null = null;
 
   @query('#login') loginElement: FpAuthLogin | undefined;
@@ -68,7 +68,7 @@ export class FpAuthentication extends LitElement {
 
   override connectedCallback() {
     super.connectedCallback();
-    this.events.addListener(EventsController.USER_SIGNOFF,
+    this.eventsController.addListener(EventsController.USER_SIGNOFF,
       this.onUserSignoff.bind(this) as EventListener);
   }
 

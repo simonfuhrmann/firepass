@@ -29,7 +29,7 @@ export class EventsController implements ReactiveController {
   // when the element disconnects from the DOM. Example:
   // this.events.addListener(EventsController.DB_LOCK, this.onLock.bind(this));
   addListener(name: string, callback: EventListenerOrEventListenerObject,
-      options?: AddEventListenerOptions|undefined) {
+      options?: AddEventListenerOptions) {
     window.addEventListener(name, callback, options);
     this.listeners.push({name, callback, options});
   }
