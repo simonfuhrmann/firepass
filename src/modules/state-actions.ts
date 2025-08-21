@@ -1,4 +1,4 @@
-import {State, AuthState, stateManager} from './state-types';
+import {AuthState, DbView, State, stateManager} from './state-types';
 import {DbState} from '../database/database';
 
 // Sets the user authentication state.
@@ -6,6 +6,15 @@ export function setAuthState(authState: AuthState) {
   const action = (state: State) => {
     if (state.authState === authState) return state;
     return {...state, authState};
+  };
+  stateManager.processAction(action);
+}
+
+// Sets the database view.
+export function setDbView(dbView: DbView) {
+  const action = (state: State) => {
+    if (state.dbView === dbView) return state;
+    return {...state, dbView};
   };
   stateManager.processAction(action);
 }
@@ -33,15 +42,6 @@ export function setSidebarVisible(sidebarVisible: boolean) {
   const action = (state: State) => {
     if (state.sidebarVisible === sidebarVisible) return state;
     return {...state, sidebarVisible};
-  };
-  stateManager.processAction(action);
-}
-
-// Shows the change password form when database is locked.
-export function setChangePassword(changePassword: boolean) {
-  const action = (state: State) => {
-    if (state.changePassword === changePassword) return state;
-    return {...state, changePassword};
   };
   stateManager.processAction(action);
 }

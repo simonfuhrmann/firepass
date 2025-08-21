@@ -5,6 +5,7 @@ import 'oxygen-mdc/oxy-button';
 
 import {EventsController} from '../controllers/events-controller';
 import * as Actions from '../modules/state-actions';
+import {DbView} from '../modules/state-types';
 import {sharedStyles} from './fp-styles'
 
 @customElement('fp-settings')
@@ -67,6 +68,10 @@ export class FpSettings extends LitElement {
           <div class="primary">Change password</div>
           <div class="secondary">Change the database password</div>
         </oxy-button>
+        <oxy-button @click=${this.onChangeCrypto}>
+          <div class="primary">Upgrade database</div>
+          <div class="secondary">Use safer cryptographic settings</div>
+        </oxy-button>
       </div>
     `;
   }
@@ -85,6 +90,11 @@ export class FpSettings extends LitElement {
 
   private onChangePassword() {
     this.events.dispatch(EventsController.DB_LOCK);
-    Actions.setChangePassword(true);
+    Actions.setDbView(DbView.CHANGE_PASSWORD);
+  }
+
+  private onChangeCrypto() {
+    this.events.dispatch(EventsController.DB_LOCK);
+    Actions.setDbView(DbView.CHANGE_CRYPTO);
   }
 }

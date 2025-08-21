@@ -59,6 +59,10 @@ export class Database {
     return this.dbData.getDocument();
   }
 
+  getCryptoParams(): CryptoParams {
+    return this.dbData.getCryptoParams();
+  }
+
   // Attempts to download the database. Transitions to the FETCHING state
   // if requested. Returns a promise.
   async download(): Promise<void> {

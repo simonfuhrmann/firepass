@@ -7,7 +7,7 @@ import {firebaseApp} from '../config/firebase';
 import {EventsController} from '../controllers/events-controller';
 import {StateController} from '../controllers/state-controller';
 import * as Actions from '../modules/state-actions';
-import {AuthState, State} from '../modules/state-types';
+import {AuthState, State, DbView} from '../modules/state-types';
 import {FpAuthLogin} from './fp-auth-login';
 import {sharedStyles} from './fp-styles'
 import './fp-auth-login';
@@ -119,9 +119,9 @@ export class FpAuthentication extends LitElement {
     if (!this.auth) return;
     this.auth.signOut();
     Actions.setAuthState(AuthState.SIGNED_OFF);
+    Actions.setDbView(DbView.DATABASE_STATE);
     Actions.setDbState(DbState.INITIAL);
     Actions.setSidebarVisible(true);
-    Actions.setChangePassword(false);
   }
 
   private onUserSignon(event: CustomEvent) {

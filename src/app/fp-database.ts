@@ -4,6 +4,7 @@ import {customElement, query, state} from 'lit/decorators.js';
 import {EventsController} from '../controllers/events-controller';
 import {StateController, State} from '../controllers/state-controller';
 import * as Actions from '../modules/state-actions';
+import {DbView} from '../modules/state-types';
 import {Database, DbState, DatabaseError} from '../database/database';
 import {FpDbUnlock} from './fp-db-unlock';
 import {devConfig} from '../config/development';
@@ -11,6 +12,7 @@ import {downloadText} from '../modules/download';
 import {sharedStyles} from './fp-styles'
 import './fp-app-toolbar';
 import './fp-idle-timeout';
+import './fp-db-change-crypto';
 import './fp-db-change-pass';
 import './fp-db-unlock';
 import './fp-db-view';
@@ -27,7 +29,8 @@ export class FpDatabase extends LitElement {
       }
       #error,
       fp-db-unlock,
-      fp-db-change-pass {
+      fp-db-change-pass,
+      fp-db-change-crypto {
         margin: 64px 32px 0 32px;
         width: 250px;
         align-self: center;
@@ -56,14 +59,16 @@ export class FpDatabase extends LitElement {
   private autoUnlockAttempted = false;
 
   @query('fp-db-unlock') unlockElem: FpDbUnlock | undefined;
-  @state() private dbState: DbState = DbState.INITIAL;
-  @state() private changePassword: boolean = false;
+  @state() private dbView: DbView;
+  @state() private dbState: DbState;
   @state() private errorCode: string = '';
   @state() private errorMessage: string = '';
 
   constructor() {
     super();
-    new StateController(this, this.stateChanged.bind(this));
+    const sc = new StateController(this, this.stateChanged.bind(this));
+    this.dbView = sc.get().dbView;
+    this.dbState = sc.get().dbState;
   }
 
   connectedCallback() {
@@ -77,8 +82,8 @@ export class FpDatabase extends LitElement {
   }
 
   stateChanged(newState: State) {
+    this.dbView = newState.dbView;
     this.dbState = newState.dbState;
-    this.changePassword = newState.changePassword;
   }
 
   disconnectedCallback() {
@@ -87,19 +92,26 @@ export class FpDatabase extends LitElement {
   }
 
   render() {
-    const hasError = !!this.errorCode || !!this.errorMessage;
     return html`
       <fp-app-toolbar></fp-app-toolbar>
-      ${hasError ? this.renderDbError() : this.renderDbState()}
+      ${this.renderErrorOrDbView()}
     `;
   }
 
-  private renderDbState() {
-    return html`
-      ${this.renderDbUnlock()}
-      ${this.renderChangePass()}
-      ${this.renderDbView()}
-    `;
+  private renderErrorOrDbView() {
+    if (!!this.errorCode || !!this.errorMessage) {
+      return this.renderDbError();
+    }
+    if (this.dbView === DbView.DATABASE_STATE) {
+      return this.renderDbState();
+    }
+    if (this.dbView === DbView.CHANGE_PASSWORD) {
+      return this.renderChangePass();
+    }
+    if (this.dbView === DbView.CHANGE_CRYPTO) {
+      return this.renderChangeCrypto();
+    }
+    return nothing;
   }
 
   private renderDbError() {
@@ -111,9 +123,13 @@ export class FpDatabase extends LitElement {
     `;
   }
 
-  private renderDbUnlock() {
-    if (this.dbState === DbState.UNLOCKED) return nothing;
-    if (this.changePassword) return nothing;
+  private renderDbState() {
+    if (this.dbState === DbState.UNLOCKED) {
+      return html`
+        <fp-idle-timeout></fp-idle-timeout>
+        <fp-db-view .database=${this.database}></fp-db-view>
+      `;
+    }
     return html`
       <fp-db-unlock
           ?isFetching=${this.dbState === DbState.FETCHING}
@@ -125,20 +141,21 @@ export class FpDatabase extends LitElement {
     `;
   }
 
-  private renderDbView() {
-    if (this.dbState !== DbState.UNLOCKED) return nothing;
-    return html`
-      <fp-idle-timeout></fp-idle-timeout>
-      <fp-db-view .database=${this.database}></fp-db-view>
-    `;
-  }
-
   private renderChangePass() {
-    if (!this.changePassword) return nothing;
     if (this.dbState !== DbState.LOCKED) return nothing;
     return html`
       <fp-db-change-pass @finish=${this.onChangeDatabaseFinished}>
       </fp-db-change-pass>
+    `;
+  }
+
+  private renderChangeCrypto() {
+    if (this.dbState !== DbState.LOCKED) return nothing;
+    return html`
+      <fp-db-change-crypto
+          .cryptoParams=${this.database.getCryptoParams()}
+          @finish=${this.onChangeDatabaseFinished}>
+      </fp-db-change-crypto>
     `;
   }
 
@@ -160,7 +177,7 @@ export class FpDatabase extends LitElement {
 
   private onChangeDatabaseFinished() {
     this.database.reset();
-    Actions.setChangePassword(false);
+    Actions.setDbView(DbView.DATABASE_STATE);
     Actions.setDbState(DbState.FETCHING);
     Actions.setSidebarVisible(true);
     this.downloadDatabase();
