@@ -64,6 +64,9 @@ export class Database {
   }
 
   isUpgradeSuggested(): boolean {
+    const isLocked = this.dbState === DbState.LOCKED;
+    const isUnlocked = this.dbState === DbState.UNLOCKED;
+    if (!isLocked && !isUnlocked) return false;
     return !equalCryptoParams(this.getCryptoParams(), getDefaultCryptoParams());
   }
 
