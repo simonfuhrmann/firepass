@@ -63,7 +63,7 @@ AES key and all decrypted data are cleared from the client.
 ## Installation
 
 * Run `npm install` from the Firepass root to install all dependencies.
-* RUn `npm bundle` to create the final app in the `static/` directory.
+* Run `npm run bundle` to create the final app in the `static/` directory.
 * Setup a Google Firebase project (see "Firebase Setup" below for details).
 * Enter your Google Firebase config in `src/config/firebase.ts`.
 * Optional: Run `npm run watch` to run a local development server.
