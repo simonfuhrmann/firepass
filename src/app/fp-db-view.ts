@@ -212,7 +212,7 @@ export class FpDbView extends LitElement {
     // database was unlocked/reloaded while the history stack was out of sync.
     // Roll back the history stack to align with the sidebar view.
     if (window.history.state?.showEntry === true) {
-      window.history.back();
+      window.history.replaceState({showEntry: false}, /*unused=*/'');
     }
   }
 
