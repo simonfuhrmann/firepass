@@ -207,6 +207,13 @@ export class FpDbView extends LitElement {
         const popstate = event as PopStateEvent;
         Actions.setSidebarVisible(!popstate.state || !popstate.state.showEntry);
       });
+
+    // On load, if the history state indicates an entry is shown, it means the
+    // database was unlocked/reloaded while the history stack was out of sync.
+    // Roll back the history stack to align with the sidebar view.
+    if (window.history.state?.showEntry === true) {
+      window.history.back();
+    }
   }
 
   override updated(changedProps: Map<string, any>) {
